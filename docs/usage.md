@@ -73,7 +73,7 @@ See [`profiles.md`](profiles.md) for a worked example of each.
 ```python
 from adflux import convert
 from adflux.errors import (
-    DocconvError,
+    AdfluxError,
     InvalidADFError,
     UnsupportedFormatError,
     UnrepresentableNodeError,
