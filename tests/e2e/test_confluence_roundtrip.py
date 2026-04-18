@@ -17,8 +17,6 @@ from __future__ import annotations
 
 import json
 import os
-import time
-import uuid
 from pathlib import Path
 
 import pytest
@@ -232,16 +230,12 @@ EXPECTATIONS: dict[str, dict[str, object]] = {
 # tenant cannot ingest them without the corresponding installed app.
 
 
-@pytest.fixture(scope="session")
-def run_id() -> str:
-    return f"{int(time.time())}-{uuid.uuid4().hex[:6]}"
-
-
 @pytest.mark.parametrize("fixture_path", FIXTURES, ids=lambda p: p.name)
 def test_markdown_roundtrip_via_confluence(
     fixture_path: Path,
     confluence: ConfluenceClient,
     created_pages: list[str],
+    e2e_parent_page_id: str,
     run_id: str,
 ) -> None:
     fixture_name = fixture_path.name
@@ -264,9 +258,13 @@ def test_markdown_roundtrip_via_confluence(
         f"got {sorted(uploaded_types)}"
     )
 
-    # 3. POST to Confluence.
+    # 3. POST to Confluence (nested under the per-run parent page).
     title = f"adflux E2E [{run_id}] {fixture_path.stem}"
-    page = confluence.create_page(title=title, adf_value=uploaded_adf_str)
+    page = confluence.create_page(
+        title=title,
+        adf_value=uploaded_adf_str,
+        parent_id=e2e_parent_page_id,
+    )
     page_id = str(page["id"])
     created_pages.append(page_id)
 

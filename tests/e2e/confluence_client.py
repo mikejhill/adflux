@@ -98,6 +98,39 @@ class ConfluenceClient:
             raise ConfluenceError(f"get_page failed {r.status_code}: {r.text}")
         return r.json()
 
+    def find_page_by_title(
+        self,
+        *,
+        title: str,
+        space_id: str | None = None,
+    ) -> dict[str, Any] | None:
+        """Return the first page matching ``title`` in the space, or ``None``."""
+        space = space_id or self._require_space()
+        r = self._http.get(
+            "/wiki/api/v2/pages",
+            params={"title": title, "space-id": space, "limit": 5},
+        )
+        if r.status_code >= 400:
+            raise ConfluenceError(f"find_page_by_title failed {r.status_code}: {r.text}")
+        for result in r.json().get("results", []):
+            if result.get("title") == title:
+                return dict(result)
+        return None
+
+    def ensure_parent_page(
+        self,
+        *,
+        title: str,
+        adf_value: str,
+        space_id: str | None = None,
+    ) -> str:
+        """Return the page id for ``title``, creating it if it does not exist."""
+        existing = self.find_page_by_title(title=title, space_id=space_id)
+        if existing is not None:
+            return str(existing["id"])
+        page = self.create_page(title=title, adf_value=adf_value, space_id=space_id)
+        return str(page["id"])
+
     def delete_page(self, page_id: str) -> None:
         r = self._http.delete(f"/wiki/api/v2/pages/{page_id}")
         if r.status_code >= 400 and r.status_code != 404:

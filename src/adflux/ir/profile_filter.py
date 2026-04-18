@@ -35,6 +35,8 @@ def apply_profile(doc: pf.Doc, profile: Profile) -> pf.Doc:
     def _walk(elem: pf.Element, _doc: pf.Doc) -> pf.Element | list[pf.Element] | None:
         if not is_envelope(elem):
             return None
+        if not isinstance(elem, (pf.Div, pf.Span)):
+            return None
         env = unpack_envelope(elem)
         if profile.fail_on_unrepresentable:
             raise UnrepresentableNodeError(env.node_type, "lossy-target")

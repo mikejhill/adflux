@@ -16,10 +16,8 @@ from adflux import convert
 
 
 def main() -> int:
-    if len(sys.argv) > 1:
-        text = Path(sys.argv[1]).read_text(encoding="utf-8")
-    else:
-        text = sys.stdin.read()
+    """Read Markdown from argv[1] (or stdin) and print ADF JSON to stdout."""
+    text = Path(sys.argv[1]).read_text(encoding="utf-8") if len(sys.argv) > 1 else sys.stdin.read()
 
     adf_json = convert(text, src="md", dst="adf")
     # Pretty-print the result.

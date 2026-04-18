@@ -17,7 +17,7 @@ from __future__ import annotations
 import base64
 import json
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, overload
 
 if TYPE_CHECKING:
     import panflute as pf
@@ -55,6 +55,28 @@ def _decode_blob(blob: str) -> dict[str, Any]:
     if not isinstance(data, dict):
         raise ValueError("envelope JSON blob must decode to an object")
     return data
+
+
+@overload
+def pack_envelope(
+    node_type: str,
+    *,
+    kind: Literal["block"],
+    attrs: dict[str, Any] | None = None,
+    children: list[Any] | None = None,
+    raw_payload: dict[str, Any] | None = None,
+) -> pf.Div: ...
+
+
+@overload
+def pack_envelope(
+    node_type: str,
+    *,
+    kind: Literal["inline"],
+    attrs: dict[str, Any] | None = None,
+    children: list[Any] | None = None,
+    raw_payload: dict[str, Any] | None = None,
+) -> pf.Span: ...
 
 
 def pack_envelope(

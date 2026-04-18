@@ -18,6 +18,7 @@ PROFILES = ["strict-adf", "pretty-md", "fail-loud"]
 
 
 def main() -> int:
+    """Convert a sample ADF JSON file (or argv[1]) to Markdown on stdout."""
     src = Path(sys.argv[1]) if len(sys.argv) > 1 else Path(__file__).with_name("sample.adf.json")
     adf = src.read_text(encoding="utf-8")
 

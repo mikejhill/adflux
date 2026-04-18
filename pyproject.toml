@@ -56,13 +56,13 @@ dependencies = [
     "structlog>=24.1",
 ]
 
-[project.optional-dependencies]
+[dependency-groups]
 dev = [
     "pytest>=8.0",
     "pytest-cov>=5.0",
     "hypothesis>=6.100",
     "ruff>=0.5",
-    "mypy>=1.10",
+    "ty>=0.0.1a8",
     "types-PyYAML",
     "types-jsonschema",
     "httpx>=0.27",
@@ -152,31 +152,32 @@ ignore = [
 [tool.ruff.lint.pydocstyle]
 convention = "google"
 
-[tool.mypy]
-python_version = "3.11"
-strict = true
-warn_return_any = true
-warn_unused_configs = true
-disallow_untyped_defs = true
-disallow_incomplete_defs = true
-check_untyped_defs = true
-no_implicit_optional = true
-warn_redundant_casts = true
-warn_unused_ignores = true
-warn_no_return = true
-packages = ["adflux"]
-mypy_path = "src"
+[tool.ty]
+# Astral type checker — replaces mypy.
+# See https://github.com/astral-sh/ty for configuration reference.
 
-[[tool.mypy.overrides]]
-module = ["panflute.*", "markdown_it.*", "mdit_py_plugins.*"]
-ignore_missing_imports = true
+[tool.ty.src]
+include = ["src"]
+
+[tool.ty.environment]
+python-version = "3.11"
+root = ["src"]
+
+[tool.ty.rules]
+# Strictness — promote categories to errors.
+unresolved-import = "error"
+unresolved-attribute = "error"
+invalid-return-type = "error"
+invalid-argument-type = "error"
+invalid-assignment = "error"
+possibly-missing-attribute = "error"
 
 [tool.poe.tasks]
 _format       = "ruff format src tests"
 _format_check = "ruff format --check src tests"
 _lint         = "ruff check src tests"
 _lint_fix     = "ruff check --fix src tests"
-_typecheck    = "mypy"
+_typecheck    = "ty check src"
 
 format       = ["_format", "_lint_fix"]
 lint         = ["_format_check", "_lint"]
