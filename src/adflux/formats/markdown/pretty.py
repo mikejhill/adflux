@@ -743,10 +743,12 @@ def _strip_mention_echo(doc: pf.Doc) -> None:
 
     from adflux.ir.envelope import ENVELOPE_CLASS_PREFIX
 
-    _echo_classes = frozenset({
-        f"{ENVELOPE_CLASS_PREFIX}mention",
-        f"{ENVELOPE_CLASS_PREFIX}emoji",
-    })
+    _echo_classes = frozenset(
+        {
+            f"{ENVELOPE_CLASS_PREFIX}mention",
+            f"{ENVELOPE_CLASS_PREFIX}emoji",
+        }
+    )
 
     def _process_inlines(elems: Any) -> None:
         if not isinstance(elems, pf.ListContainer):
