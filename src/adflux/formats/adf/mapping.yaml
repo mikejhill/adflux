@@ -1,0 +1,233 @@
+# ADF node-mapping table.
+#
+# One entry per ADF node type. Reader/writer consult this table to decide
+# how non-structural nodes (panels, macros, mentions, status, media, ...) are
+# represented in the internal IR (Pandoc AST via panflute).
+#
+# Structural nodes (paragraph, heading, lists, table, codeBlock, blockquote,
+# rule, hardBreak, text + marks) are handled directly by the reader/writer and
+# don't need entries here — listing them would be misleading since the table
+# cannot configure their behavior.
+
+version: 1
+
+nodes:
+  # --- Panels and callouts ---
+  panel:
+    pandoc: Div
+    kind: block
+    envelope_class: adf-panel
+    attrs:
+      panelType: string  # info | note | warning | success | error
+    asciidoc_native: admonition
+
+  # --- Inline Atlassian-specific nodes ---
+  mention:
+    pandoc: Span
+    kind: inline
+    envelope_class: adf-mention
+    content_kind: none
+    attrs:
+      id: string
+      text: string
+      accessLevel: string
+
+  emoji:
+    pandoc: Span
+    kind: inline
+    envelope_class: adf-emoji
+    content_kind: none
+    attrs:
+      id: string
+      shortName: string
+      text: string
+
+  status:
+    pandoc: Span
+    kind: inline
+    envelope_class: adf-status
+    content_kind: none
+    attrs:
+      text: string
+      color: string
+      localId: string
+
+  date:
+    pandoc: Span
+    kind: inline
+    envelope_class: adf-date
+    content_kind: none
+    attrs:
+      timestamp: string
+
+  placeholder:
+    pandoc: Span
+    kind: inline
+    envelope_class: adf-placeholder
+    content_kind: none
+    attrs:
+      text: string
+
+  inlineCard:
+    pandoc: Span
+    kind: inline
+    envelope_class: adf-inlineCard
+    content_kind: none
+    attrs:
+      url: string
+
+  blockCard:
+    pandoc: Div
+    kind: block
+    envelope_class: adf-blockCard
+    content_kind: none
+    attrs:
+      url: string
+
+  embedCard:
+    pandoc: Div
+    kind: block
+    envelope_class: adf-embedCard
+    content_kind: none
+    attrs:
+      url: string
+      layout: string
+      width: string
+      originalHeight: string
+      originalWidth: string
+
+  # --- Media ---
+  # Note: `media` is a block-context child of mediaSingle/mediaGroup in ADF.
+  media:
+    pandoc: Div
+    kind: block
+    envelope_class: adf-media
+    content_kind: none
+    attrs:
+      type: string
+      id: string
+      collection: string
+      alt: string
+      width: string
+      height: string
+
+  mediaInline:
+    pandoc: Span
+    kind: inline
+    envelope_class: adf-mediaInline
+    content_kind: none
+    attrs:
+      type: string
+      id: string
+      collection: string
+      width: string
+      height: string
+
+  mediaSingle:
+    pandoc: Div
+    kind: block
+    envelope_class: adf-mediaSingle
+    attrs:
+      layout: string
+      width: string
+    children: [media]
+
+  mediaGroup:
+    pandoc: Div
+    kind: block
+    envelope_class: adf-mediaGroup
+    children: [media]
+
+  # --- Task and decision lists ---
+  taskList:
+    pandoc: Div
+    kind: block
+    envelope_class: adf-taskList
+    attrs:
+      localId: string
+    children: [taskItem]
+
+  taskItem:
+    pandoc: Div
+    kind: block
+    envelope_class: adf-taskItem
+    content_kind: inline
+    attrs:
+      state: string        # TODO | DONE
+      localId: string
+
+  decisionList:
+    pandoc: Div
+    kind: block
+    envelope_class: adf-decisionList
+    attrs:
+      localId: string
+    children: [decisionItem]
+
+  decisionItem:
+    pandoc: Div
+    kind: block
+    envelope_class: adf-decisionItem
+    content_kind: inline
+    attrs:
+      state: string        # DECIDED
+      localId: string
+
+  # --- Layouts (multi-column pages) ---
+  layoutSection:
+    pandoc: Div
+    kind: block
+    envelope_class: adf-layoutSection
+    children: [layoutColumn]
+
+  layoutColumn:
+    pandoc: Div
+    kind: block
+    envelope_class: adf-layoutColumn
+    attrs:
+      width: string
+
+  # --- Expand sections ---
+  expand:
+    pandoc: Div
+    kind: block
+    envelope_class: adf-expand
+    attrs:
+      title: string
+
+  nestedExpand:
+    pandoc: Div
+    kind: block
+    envelope_class: adf-nestedExpand
+    attrs:
+      title: string
+
+  # --- Confluence macros (opaque extensions) ---
+  extension:
+    pandoc: Div
+    kind: block
+    envelope_class: adf-extension
+    content_kind: none
+    attrs:
+      extensionKey: string
+      extensionType: string
+      parameters: string   # complex -> JSON blob
+
+  bodiedExtension:
+    pandoc: Div
+    kind: block
+    envelope_class: adf-bodiedExtension
+    attrs:
+      extensionKey: string
+      extensionType: string
+      parameters: string
+
+  inlineExtension:
+    pandoc: Span
+    kind: inline
+    envelope_class: adf-inlineExtension
+    content_kind: none
+    attrs:
+      extensionKey: string
+      extensionType: string
+      parameters: string

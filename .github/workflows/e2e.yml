@@ -1,0 +1,58 @@
+name: E2E (Confluence)
+
+# Live API tests against a real Confluence Cloud tenant.  Run on main-branch
+# pushes, manual dispatch, and weekly to catch upstream API changes early.
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+  schedule:
+    - cron: "0 6 * * 1"
+
+permissions:
+  contents: read
+  checks: write
+
+concurrency:
+  group: e2e-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  e2e:
+    name: E2E
+    runs-on: ubuntu-latest
+    environment: e2e
+    env:
+      CONFLUENCE_SITE: ${{ secrets.CONFLUENCE_SITE }}
+      CONFLUENCE_EMAIL: ${{ secrets.CONFLUENCE_EMAIL }}
+      CONFLUENCE_API_TOKEN: ${{ secrets.CONFLUENCE_API_TOKEN }}
+      CONFLUENCE_SPACE_KEY: ${{ secrets.CONFLUENCE_SPACE_KEY }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: astral-sh/setup-uv@v8.1.0
+        with:
+          enable-cache: true
+      - run: uv python install 3.12
+      - run: uv sync --all-extras --python 3.12
+
+      - name: Run E2E tests
+        run: uv run pytest tests/e2e -v --junitxml=junit-e2e.xml
+
+      - name: Publish test report
+        if: always()
+        uses: mikepenz/action-junit-report@v6
+        with:
+          report_paths: junit-e2e.xml
+          check_name: E2E tests
+          include_passed: true
+          detailed_summary: true
+          require_tests: true
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: e2e-results
+          path: junit-e2e.xml
+          if-no-files-found: ignore

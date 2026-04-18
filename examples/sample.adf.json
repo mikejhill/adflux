@@ -1,0 +1,88 @@
+{
+  "version": 1,
+  "type": "doc",
+  "content": [
+    {
+      "type": "heading",
+      "attrs": { "level": 1 },
+      "content": [{ "type": "text", "text": "Quarterly review" }]
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        { "type": "text", "text": "Owner: " },
+        {
+          "type": "status",
+          "attrs": { "text": "ON TRACK", "color": "green", "localId": "s1" }
+        },
+        { "type": "text", "text": " — see the " },
+        {
+          "type": "text",
+          "text": "spec",
+          "marks": [{ "type": "link", "attrs": { "href": "https://example.com/spec" } }]
+        },
+        { "type": "text", "text": " for details." }
+      ]
+    },
+    {
+      "type": "panel",
+      "attrs": { "panelType": "info" },
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            { "type": "text", "text": "Action items live in the " },
+            {
+              "type": "text",
+              "text": "task list",
+              "marks": [{ "type": "strong" }]
+            },
+            { "type": "text", "text": " below." }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "taskList",
+      "attrs": { "localId": "tl1" },
+      "content": [
+        {
+          "type": "taskItem",
+          "attrs": { "state": "DONE", "localId": "ti1" },
+          "content": [{ "type": "text", "text": "Publish RFC" }]
+        },
+        {
+          "type": "taskItem",
+          "attrs": { "state": "TODO", "localId": "ti2" },
+          "content": [{ "type": "text", "text": "Schedule walkthrough" }]
+        }
+      ]
+    },
+    {
+      "type": "codeBlock",
+      "attrs": { "language": "python" },
+      "content": [{ "type": "text", "text": "from adflux import convert\nprint(convert(src, src='md', dst='adf'))" }]
+    },
+    {
+      "type": "table",
+      "content": [
+        {
+          "type": "tableRow",
+          "content": [
+            { "type": "tableHeader", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "Metric" }] }] },
+            { "type": "tableHeader", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "Q3" }] }] },
+            { "type": "tableHeader", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "Q4" }] }] }
+          ]
+        },
+        {
+          "type": "tableRow",
+          "content": [
+            { "type": "tableCell", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "Throughput" }] }] },
+            { "type": "tableCell", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "120" }] }] },
+            { "type": "tableCell", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "145" }] }] }
+          ]
+        }
+      ]
+    }
+  ]
+}
