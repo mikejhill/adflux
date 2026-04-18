@@ -255,11 +255,16 @@ def _inline_replacement(node_type: str, attrs: dict[str, str]) -> Any | None:
     if node_type == "emoji":
         text = attrs.get("text") or attrs.get("shortName") or ""
         if text:
-            return pf.Str(text)
+            marker_attrs = _attrs_to_marker(attrs)
+            marker = pf.RawInline(f"<!--adf:emoji{marker_attrs}/-->", format="html")
+            return pf.Span(pf.Str(text), marker)
 
     if node_type == "mention":
         text = attrs.get("text") or attrs.get("displayName") or attrs.get("id", "")
-        return pf.Str(f"@{text}" if not str(text).startswith("@") else str(text))
+        display = f"@{text}" if not str(text).startswith("@") else str(text)
+        marker_attrs = _attrs_to_marker(attrs)
+        marker = pf.RawInline(f"<!--adf:mention{marker_attrs}/-->", format="html")
+        return pf.Span(pf.Str(display), marker)
 
     # Fallback: self-closing inline HTML comment marker.
     marker_attrs = _attrs_to_marker(attrs)
@@ -726,6 +731,47 @@ def _bulletlist_to_tasklist(blist: pf.BulletList) -> pf.Div:
     return pack_envelope("taskList", kind="block", attrs={}, children=items)
 
 
+def _strip_mention_echo(doc: pf.Doc) -> None:
+    """Remove display-text Str nodes that precede a reconstructed envelope.
+
+    When prettify emits ``@Alice<!--adf:mention .../-->`` or ``🎉<!--adf:emoji .../-->``,
+    the round-trip parser produces ``[Str("@Alice"), Span(classes=["adf-mention"], ...)]``.
+    The Str is redundant once the envelope is restored — strip it so it isn't
+    duplicated in the final ADF output.
+    """
+    import panflute as pf
+
+    from adflux.ir.envelope import ENVELOPE_CLASS_PREFIX
+
+    _echo_classes = frozenset({
+        f"{ENVELOPE_CLASS_PREFIX}mention",
+        f"{ENVELOPE_CLASS_PREFIX}emoji",
+    })
+
+    def _process_inlines(elems: Any) -> None:
+        if not isinstance(elems, pf.ListContainer):
+            return
+        indices_to_remove: list[int] = []
+        for i in range(1, len(elems)):
+            cur = elems[i]
+            if not isinstance(cur, pf.Span):
+                continue
+            if not any(c in _echo_classes for c in cur.classes):
+                continue
+            prev = elems[i - 1]
+            if isinstance(prev, pf.Str):
+                indices_to_remove.append(i - 1)
+        for idx in reversed(indices_to_remove):
+            del elems[idx]
+
+    def _walk(elem: Any, doc: pf.Doc) -> Any:
+        if hasattr(elem, "content") and isinstance(elem.content, pf.ListContainer):
+            _process_inlines(elem.content)
+        return None
+
+    doc.walk(_walk)
+
+
 def _splice_inline_lists(doc: pf.Doc) -> None:
     """Inline pass: self-closing comment markers + autolinks -> envelope spans."""
     import panflute as pf
@@ -752,3 +798,6 @@ def _splice_inline_lists(doc: pf.Doc) -> None:
         return None
 
     doc.walk(_walk)
+
+    # Post-walk: strip redundant @text that precedes a mention envelope.
+    _strip_mention_echo(doc)

@@ -10,6 +10,14 @@ Releases are produced automatically from
 
 ## [Unreleased]
 
+### Fixed
+
+- ADF `mention` nodes now survive Markdown round-trips losslessly.
+  Prettified output uses an HTML comment marker (`<!--adf:mention .../-->`)
+  that the reader reconstructs on import.
+- ADF `emoji` nodes now preserve `shortName` and `id` attributes through
+  Markdown round-trips using the same comment-marker technique.
+
 ## [0.3.0] — 2026-04-18
 
 ### Added
