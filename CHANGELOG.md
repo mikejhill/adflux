@@ -10,12 +10,15 @@ Releases are produced automatically from
 
 ## [Unreleased]
 
+## [0.3.0] — 2026-04-18
+
 ### Added
 
 - `validate` API and CLI now accept `--option` / `options=` for applying
-  options such as `jira-strict=true` during validation.
+  options during validation (e.g. `jira-strict=true`).
+- Full `CHANGELOG.md` covering all releases.
 
-## [0.3.0] — 2026-04-18
+## [0.2.0] — 2026-04-17
 
 ### Added
 
@@ -23,7 +26,7 @@ Releases are produced automatically from
   dataclass (`envelopes=keep|drop|keep-strict`, `jira-strict=true|false`).
 - `adflux list-options` CLI subcommand for self-documenting option
   definitions.
-- `--option key=value` (`-O`) repeatable flag on `convert` and `validate`.
+- `--option key=value` (`-O`) repeatable flag on `convert`.
 - **Panflute JSON** registered as a first-class input/output format
   (aliases: `panflute`, `pf`).
 - `jira-strict` validation gate in the ADF writer rejects node types
@@ -46,28 +49,6 @@ Releases are produced automatically from
 ### Fixed
 
 - Mermaid parse error in `docs/e2e-testing.md` (curly braces in URL).
-
-## [0.2.0] — 2026-04-17
-
-### Added
-
-- Options system with `envelopes` and `jira-strict` core option
-  definitions.
-- Panflute format reader/writer registered under `panflute` and `pf`
-  aliases.
-- `adflux list-options` CLI subcommand.
-- Jira-strict ADF validation gate.
-
-### Removed
-
-- **BREAKING:** `--profile` / `profile=` API removed in favour of
-  `--option key=value` / `options={}`.
-- `profiles.py` deleted.
-- All AsciiDoc and stale Pandoc references cleaned up.
-
-### Fixed
-
-- Mermaid diagram parse error in `e2e-testing.md`.
 - Losslessness claims corrected in `design.md`.
 
 ## [0.1.1] — 2026-04-17
