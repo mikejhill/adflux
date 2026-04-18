@@ -22,12 +22,21 @@ pytestmark = pytest.mark.e2e
 
 FIXTURES_DIR = Path(__file__).parent / "fixtures"
 
-# A focused subset that Jira's description field can cleanly ingest.
-# Some Confluence-specific structures (panels, layouts, smart cards,
-# inline-card with extension attrs) require the Confluence ADF schema
-# extensions and are not portable to Jira's stricter ADF profile.
+# Jira's description ADF profile is stricter than Confluence's. The
+# fixtures below are the subset that Jira accepts; the others are excluded
+# because:
+#   * `layouts.md` uses `layoutSection`/`layoutColumn`, which are
+#     Confluence-page-only.
+#   * `task-decision-lists.md` uses `taskList`/`decisionList`, which Jira
+#     descriptions do not accept.
+# These exclusions are validated empirically by the probe in
+# `docs/e2e-testing.md` and re-checked whenever a fixture is added.
 JIRA_FIXTURES: list[str] = [
     "basic.md",
+    "panels.md",
+    "mixed.md",
+    "inline-macros.md",
+    "smart-cards.md",
 ]
 
 

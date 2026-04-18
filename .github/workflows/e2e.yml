@@ -24,12 +24,12 @@ jobs:
     runs-on: ubuntu-latest
     environment: e2e
     env:
-      CONFLUENCE_SITE: ${{ secrets.CONFLUENCE_SITE }}
-      CONFLUENCE_EMAIL: ${{ secrets.CONFLUENCE_EMAIL }}
-      CONFLUENCE_API_TOKEN: ${{ secrets.CONFLUENCE_API_TOKEN }}
-      CONFLUENCE_SPACE_KEY: ${{ secrets.CONFLUENCE_SPACE_KEY }}
-      CONFLUENCE_PARENT_PAGE_ID: ${{ secrets.CONFLUENCE_PARENT_PAGE_ID }}
-      JIRA_PROJECT_KEY: ${{ secrets.JIRA_PROJECT_KEY }}
+      ADFLUX_E2E_ATLASSIAN_SITE: ${{ secrets.ADFLUX_E2E_ATLASSIAN_SITE }}
+      ADFLUX_E2E_ATLASSIAN_EMAIL: ${{ secrets.ADFLUX_E2E_ATLASSIAN_EMAIL }}
+      ADFLUX_E2E_ATLASSIAN_API_TOKEN: ${{ secrets.ADFLUX_E2E_ATLASSIAN_API_TOKEN }}
+      ADFLUX_E2E_CONFLUENCE_SPACE_KEY: ${{ secrets.ADFLUX_E2E_CONFLUENCE_SPACE_KEY }}
+      ADFLUX_E2E_CONFLUENCE_PARENT_PAGE_ID: ${{ secrets.ADFLUX_E2E_CONFLUENCE_PARENT_PAGE_ID }}
+      ADFLUX_E2E_JIRA_PROJECT_KEY: ${{ secrets.ADFLUX_E2E_JIRA_PROJECT_KEY }}
     steps:
       - uses: actions/checkout@v6
       - uses: astral-sh/setup-uv@v8.1.0

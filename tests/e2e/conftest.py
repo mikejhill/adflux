@@ -9,13 +9,18 @@ Provides:
   `ADFLUX_E2E_KEEP_PAGES=true`.
 * `created_pages` — pytest auto-deletes children at session end (when not
   keeping pages); the parent itself is also deleted afterwards.
-* `jira` — authenticated `JiraClient` (skipped if `JIRA_PROJECT_KEY` is
-  missing). Jira issues are *closed*, never deleted.
+* `jira` — authenticated `JiraClient` (skipped if
+  `ADFLUX_E2E_JIRA_PROJECT_KEY` is missing). Jira issues are *closed*,
+  never deleted.
 * `created_issues` — list of Jira issue keys that get transitioned to
   Done/Closed at session teardown.
 
 If credentials are absent or do not authenticate, every test in this
 package is skipped with a helpful message.
+
+All environment variables consumed here use the `ADFLUX_E2E_` prefix so
+they cannot collide with unrelated tooling that also reaches into the
+shell environment for Atlassian credentials.
 """
 
 from __future__ import annotations
@@ -56,13 +61,13 @@ def _load_settings() -> E2ESettings | None:
     if ENV_FILE.exists():
         load_dotenv(ENV_FILE, override=False)
 
-    site = os.environ.get("CONFLUENCE_SITE", "").strip()
-    email = os.environ.get("CONFLUENCE_EMAIL", "").strip()
-    token = os.environ.get("CONFLUENCE_API_TOKEN", "").strip()
-    space_key = os.environ.get("CONFLUENCE_SPACE_KEY", "").strip() or None
-    space_id = os.environ.get("CONFLUENCE_SPACE_ID", "").strip() or None
-    parent_id = os.environ.get("CONFLUENCE_PARENT_PAGE_ID", "").strip() or None
-    jira_project = os.environ.get("JIRA_PROJECT_KEY", "").strip() or None
+    site = os.environ.get("ADFLUX_E2E_ATLASSIAN_SITE", "").strip()
+    email = os.environ.get("ADFLUX_E2E_ATLASSIAN_EMAIL", "").strip()
+    token = os.environ.get("ADFLUX_E2E_ATLASSIAN_API_TOKEN", "").strip()
+    space_key = os.environ.get("ADFLUX_E2E_CONFLUENCE_SPACE_KEY", "").strip() or None
+    space_id = os.environ.get("ADFLUX_E2E_CONFLUENCE_SPACE_ID", "").strip() or None
+    parent_id = os.environ.get("ADFLUX_E2E_CONFLUENCE_PARENT_PAGE_ID", "").strip() or None
+    jira_project = os.environ.get("ADFLUX_E2E_JIRA_PROJECT_KEY", "").strip() or None
     keep = os.environ.get("ADFLUX_E2E_KEEP_PAGES", "").strip().lower() in {
         "1",
         "true",
@@ -89,10 +94,11 @@ def e2e_settings() -> E2ESettings:
     if settings is None:
         pytest.skip(
             "E2E settings missing — copy .env.example to .env at the project "
-            "root and fill in CONFLUENCE_SITE, CONFLUENCE_EMAIL, "
-            "CONFLUENCE_API_TOKEN, and CONFLUENCE_SPACE_KEY (or _ID). "
-            "Alternatively, set the same variables in the process environment "
-            "(e.g. via GitHub Actions secrets in CI).",
+            "root and fill in ADFLUX_E2E_ATLASSIAN_SITE, "
+            "ADFLUX_E2E_ATLASSIAN_EMAIL, ADFLUX_E2E_ATLASSIAN_API_TOKEN, and "
+            "ADFLUX_E2E_CONFLUENCE_SPACE_KEY (or _SPACE_ID). Alternatively, "
+            "set the same variables in the process environment (e.g. via "
+            "GitHub Actions secrets in CI).",
             allow_module_level=False,
         )
     return settings
@@ -159,9 +165,10 @@ def e2e_parent_page_id(
 ) -> Iterator[str]:
     """Yield a Confluence page id used as the parent of every created page.
 
-    If ``CONFLUENCE_PARENT_PAGE_ID`` is set, that page is reused as the parent
-    and never deleted. Otherwise a per-run parent page is created and (unless
-    ``ADFLUX_E2E_KEEP_PAGES=true``) deleted at session end.
+    If ``ADFLUX_E2E_CONFLUENCE_PARENT_PAGE_ID`` is set, that page is reused
+    as the parent and never deleted. Otherwise a per-run parent page is
+    created and (unless ``ADFLUX_E2E_KEEP_PAGES=true``) deleted at session
+    end.
     """
     if e2e_settings.parent_page_id:
         yield e2e_settings.parent_page_id
@@ -199,7 +206,8 @@ def created_pages(confluence: ConfluenceClient, e2e_settings: E2ESettings) -> It
 def jira(e2e_settings: E2ESettings) -> Iterator[JiraClient]:
     if not e2e_settings.jira_project_key:
         pytest.skip(
-            "Jira tests skipped — set JIRA_PROJECT_KEY in .env (or as a workflow secret) to enable."
+            "Jira tests skipped — set ADFLUX_E2E_JIRA_PROJECT_KEY in .env "
+            "(or as a workflow secret on the e2e environment) to enable."
         )
     client = JiraClient(
         site=e2e_settings.site,
