@@ -11,7 +11,7 @@ from __future__ import annotations
 import json
 from typing import TYPE_CHECKING, Any
 
-from adflux.errors import UnrepresentableNodeError
+from adflux.errors import InvalidADFError, UnrepresentableNodeError
 from adflux.formats.adf.mapping import MappingTable, load_default_mapping
 from adflux.formats.adf.schema import validate_adf
 from adflux.ir.envelope import ENVELOPE_CLASS_PREFIX, is_envelope, unpack_envelope
@@ -19,39 +19,58 @@ from adflux.ir.envelope import ENVELOPE_CLASS_PREFIX, is_envelope, unpack_envelo
 if TYPE_CHECKING:
     import panflute as pf
 
-    from adflux.profiles import Profile
+    from adflux.options import Options
+
+# ADF node types NOT supported in Jira's description field.
+_JIRA_REJECTED_TYPES: frozenset[str] = frozenset(
+    {
+        "layoutSection",
+        "layoutColumn",
+        "extension",
+        "bodiedExtension",
+        "inlineExtension",
+        "nestedExpand",
+        "embedCard",
+        "mediaGroup",
+        "mediaSingle",
+        "media",
+        "mediaInline",
+    }
+)
 
 
-def write_adf(doc: pf.Doc, profile: Profile, options: dict[str, Any]) -> str:
+def write_adf(doc: pf.Doc, options: Options) -> str:
     """Serialize a panflute ``Doc`` to an ADF JSON string."""
-    _ = options
     mapping = load_default_mapping()
-    blocks = [_emit_block(b, mapping, profile) for b in doc.content]
+    envelopes = options["envelopes"]
+    blocks = [_emit_block(b, mapping, envelopes) for b in doc.content]
     adf_doc = {
         "version": 1,
         "type": "doc",
         "content": [b for b in blocks if b is not None],
     }
     validate_adf(adf_doc)
+    if options["jira-strict"] == "true":
+        _check_jira_strict(adf_doc)
     return json.dumps(adf_doc, indent=2)
 
 
 def _emit_block(
     block: pf.Block,
     mapping: MappingTable,
-    profile: Profile,
+    envelopes: str,
 ) -> dict[str, Any] | None:
     import panflute as pf
 
     if isinstance(block, pf.Para):
-        return {"type": "paragraph", "content": _emit_inlines(block.content, mapping, profile)}
+        return {"type": "paragraph", "content": _emit_inlines(block.content, mapping, envelopes)}
     if isinstance(block, pf.Plain):
-        return {"type": "paragraph", "content": _emit_inlines(block.content, mapping, profile)}
+        return {"type": "paragraph", "content": _emit_inlines(block.content, mapping, envelopes)}
     if isinstance(block, pf.Header):
         return {
             "type": "heading",
             "attrs": {"level": block.level},
-            "content": _emit_inlines(block.content, mapping, profile),
+            "content": _emit_inlines(block.content, mapping, envelopes),
         }
     if isinstance(block, pf.CodeBlock):
         language = block.classes[0] if block.classes else ""
@@ -64,12 +83,12 @@ def _emit_block(
     if isinstance(block, pf.BlockQuote):
         return {
             "type": "blockquote",
-            "content": [_emit_block(b, mapping, profile) for b in block.content],
+            "content": [_emit_block(b, mapping, envelopes) for b in block.content],
         }
     if isinstance(block, pf.BulletList):
         return {
             "type": "bulletList",
-            "content": [_emit_list_item(item, mapping, profile) for item in block.content],
+            "content": [_emit_list_item(item, mapping, envelopes) for item in block.content],
         }
     if isinstance(block, pf.OrderedList):
         attrs: dict[str, Any] = {}
@@ -78,18 +97,18 @@ def _emit_block(
         return {
             "type": "orderedList",
             **({"attrs": attrs} if attrs else {}),
-            "content": [_emit_list_item(item, mapping, profile) for item in block.content],
+            "content": [_emit_list_item(item, mapping, envelopes) for item in block.content],
         }
     if isinstance(block, pf.HorizontalRule):
         return {"type": "rule"}
     if isinstance(block, pf.Table):
-        return _emit_table(block, mapping, profile)
+        return _emit_table(block, mapping, envelopes)
     if isinstance(block, pf.Div) and is_envelope(block):
-        return _emit_envelope_block(block, mapping, profile)
-    # Unrepresentable top-level block: behavior depends on profile.
-    if profile.fail_on_unrepresentable:
+        return _emit_envelope_block(block, mapping, envelopes)
+    # Unrepresentable top-level block: behavior depends on envelopes option.
+    if envelopes == "keep-strict":
         raise UnrepresentableNodeError(type(block).__name__, "adf")
-    if profile.drop_unrepresentable:
+    if envelopes == "drop":
         return None
     # Fall back to wrapping the contents as a paragraph if possible.
     text = pf_stringify(block)
@@ -99,7 +118,7 @@ def _emit_block(
 def _emit_list_item(
     item: list[pf.Block] | Any,
     mapping: MappingTable,
-    profile: Profile,
+    envelopes: str,
 ) -> dict[str, Any]:
     import panflute as pf
 
@@ -107,14 +126,16 @@ def _emit_list_item(
     blocks = list(item.content) if isinstance(item, pf.ListItem) else list(item)
     return {
         "type": "listItem",
-        "content": [b for b in (_emit_block(b, mapping, profile) for b in blocks) if b is not None],
+        "content": [
+            b for b in (_emit_block(b, mapping, envelopes) for b in blocks) if b is not None
+        ],
     }
 
 
 def _emit_table(
     table: pf.Table,
     mapping: MappingTable,
-    profile: Profile,
+    envelopes: str,
 ) -> dict[str, Any]:
 
     rows: list[dict[str, Any]] = []
@@ -132,7 +153,9 @@ def _emit_table(
             "type": cell_type,
             **({"attrs": attrs} if attrs else {}),
             "content": [
-                b for b in (_emit_block(b, mapping, profile) for b in cell.content) if b is not None
+                b
+                for b in (_emit_block(b, mapping, envelopes) for b in cell.content)
+                if b is not None
             ],
         }
 
@@ -154,7 +177,7 @@ def _emit_table(
 def _emit_envelope_block(
     div: pf.Div,
     mapping: MappingTable,
-    profile: Profile,
+    envelopes: str,
 ) -> dict[str, Any]:
     import panflute as pf
 
@@ -178,14 +201,14 @@ def _emit_envelope_block(
                 inlines_src.extend(child.content)
             else:
                 inlines_src.append(child)
-        emitted = _emit_inlines(inlines_src, mapping, profile)
+        emitted = _emit_inlines(inlines_src, mapping, envelopes)
         if emitted:
             node["content"] = emitted
         return node
 
     if div.content:
         node["content"] = [
-            b for b in (_emit_block(b, mapping, profile) for b in div.content) if b is not None
+            b for b in (_emit_block(b, mapping, envelopes) for b in div.content) if b is not None
         ]
     return node
 
@@ -193,7 +216,7 @@ def _emit_envelope_block(
 def _emit_inlines(
     inlines: Any,
     mapping: MappingTable,
-    profile: Profile,
+    envelopes: str,
     marks: list[dict[str, Any]] | None = None,
 ) -> list[dict[str, Any]]:
     import panflute as pf
@@ -226,20 +249,20 @@ def _emit_inlines(
         elif isinstance(inline, pf.Strong):
             _flush()
             out.extend(
-                _emit_inlines(inline.content, mapping, profile, [*marks, {"type": "strong"}])
+                _emit_inlines(inline.content, mapping, envelopes, [*marks, {"type": "strong"}])
             )
         elif isinstance(inline, pf.Emph):
             _flush()
-            out.extend(_emit_inlines(inline.content, mapping, profile, [*marks, {"type": "em"}]))
+            out.extend(_emit_inlines(inline.content, mapping, envelopes, [*marks, {"type": "em"}]))
         elif isinstance(inline, pf.Strikeout):
             _flush()
             out.extend(
-                _emit_inlines(inline.content, mapping, profile, [*marks, {"type": "strike"}])
+                _emit_inlines(inline.content, mapping, envelopes, [*marks, {"type": "strike"}])
             )
         elif isinstance(inline, pf.Underline):
             _flush()
             out.extend(
-                _emit_inlines(inline.content, mapping, profile, [*marks, {"type": "underline"}])
+                _emit_inlines(inline.content, mapping, envelopes, [*marks, {"type": "underline"}])
             )
         elif isinstance(inline, pf.Subscript):
             _flush()
@@ -247,7 +270,7 @@ def _emit_inlines(
                 _emit_inlines(
                     inline.content,
                     mapping,
-                    profile,
+                    envelopes,
                     [*marks, {"type": "subsup", "attrs": {"type": "sub"}}],
                 )
             )
@@ -257,7 +280,7 @@ def _emit_inlines(
                 _emit_inlines(
                     inline.content,
                     mapping,
-                    profile,
+                    envelopes,
                     [*marks, {"type": "subsup", "attrs": {"type": "sup"}}],
                 )
             )
@@ -270,10 +293,10 @@ def _emit_inlines(
             if inline.title:
                 link_attrs["title"] = inline.title
             link_mark = {"type": "link", "attrs": link_attrs}
-            out.extend(_emit_inlines(inline.content, mapping, profile, [*marks, link_mark]))
+            out.extend(_emit_inlines(inline.content, mapping, envelopes, [*marks, link_mark]))
         elif isinstance(inline, pf.Span) and is_envelope(inline):
             _flush()
-            out.append(_emit_envelope_inline(inline, mapping, profile))
+            out.append(_emit_envelope_inline(inline, mapping, envelopes))
         else:
             # Anything unrecognized: stringify into the current text buffer.
             buffer.append(pf_stringify(inline))
@@ -284,14 +307,14 @@ def _emit_inlines(
 def _emit_envelope_inline(
     span: pf.Span,
     mapping: MappingTable,
-    profile: Profile,
+    envelopes: str,
 ) -> dict[str, Any]:
     env = unpack_envelope(span)
     # Marks represented as inline envelopes (mark-*) are reconstructed at text level.
     if env.node_type.startswith("mark-"):
         # Best-effort: emit the child inlines as plain text with the mark name.
         mark_type = env.node_type.removeprefix("mark-")
-        children = _emit_inlines(span.content, mapping, profile, [{"type": mark_type}])
+        children = _emit_inlines(span.content, mapping, envelopes, [{"type": mark_type}])
         if children:
             return (
                 children[0]
@@ -306,7 +329,7 @@ def _emit_envelope_inline(
     if env.attrs:
         node["attrs"] = dict(env.attrs)
     if span.content:
-        node["content"] = _emit_inlines(span.content, mapping, profile)
+        node["content"] = _emit_inlines(span.content, mapping, envelopes)
     return node
 
 
@@ -319,6 +342,22 @@ def pf_stringify(elem: Any) -> str:
     except Exception:
         return ""
     return result
+
+
+def _check_jira_strict(adf_doc: dict[str, Any]) -> None:
+    """Walk the ADF tree and raise if any Jira-rejected node types are found."""
+
+    def _walk(node: dict[str, Any]) -> None:
+        node_type = node.get("type", "")
+        if node_type in _JIRA_REJECTED_TYPES:
+            raise InvalidADFError(
+                f"Node type {node_type!r} is not supported in Jira's ADF profile (jira-strict=true)"
+            )
+        for child in node.get("content", []):
+            if isinstance(child, dict):
+                _walk(child)
+
+    _walk(adf_doc)
 
 
 # Allow callers to identify envelope class prefix without extra imports.

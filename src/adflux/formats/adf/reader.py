@@ -20,7 +20,7 @@ from adflux.ir.envelope import pack_envelope
 if TYPE_CHECKING:
     import panflute as pf
 
-    from adflux.profiles import Profile
+    from adflux.options import Options
 
 
 _MARK_HANDLERS: dict[str, str] = {
@@ -35,9 +35,9 @@ _MARK_HANDLERS: dict[str, str] = {
 }
 
 
-def read_adf(source: str | bytes, profile: Profile, options: dict[str, Any]) -> pf.Doc:
+def read_adf(source: str | bytes, options: Options) -> pf.Doc:
     """Parse an ADF JSON document into a panflute ``Doc``."""
-    _ = profile, options
+    _ = options
     import panflute as pf
 
     if isinstance(source, bytes):

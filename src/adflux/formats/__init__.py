@@ -8,17 +8,17 @@ built-in formats.
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from adflux.errors import UnsupportedFormatError
 
 if TYPE_CHECKING:
     import panflute as pf
 
-    from adflux.profiles import Profile
+    from adflux.options import Options
 
-Reader = Callable[[str | bytes, "Profile", dict[str, Any]], "pf.Doc"]
-Writer = Callable[["pf.Doc", "Profile", dict[str, Any]], str]
+Reader = Callable[[str | bytes, "Options"], "pf.Doc"]
+Writer = Callable[["pf.Doc", "Options"], str]
 
 _READERS: dict[str, Reader] = {}
 _WRITERS: dict[str, Writer] = {}
@@ -35,15 +35,15 @@ def register_writer(fmt: str, writer: Writer) -> None:
 
 
 def _wrap_reader(fn: Reader) -> Callable[..., pf.Doc]:
-    def _call(source: str | bytes, *, profile: Profile, options: dict[str, Any]) -> pf.Doc:
-        return fn(source, profile, options)
+    def _call(source: str | bytes, *, options: Options) -> pf.Doc:
+        return fn(source, options)
 
     return _call
 
 
 def _wrap_writer(fn: Writer) -> Callable[..., str]:
-    def _call(doc: pf.Doc, *, profile: Profile, options: dict[str, Any]) -> str:
-        return fn(doc, profile, options)
+    def _call(doc: pf.Doc, *, options: Options) -> str:
+        return fn(doc, options)
 
     return _call
 
@@ -72,3 +72,4 @@ def registered_formats() -> set[str]:
 # Auto-register built-in formats. Keep imports at bottom to avoid cycles.
 from adflux.formats import adf as _adf  # noqa: E402,F401
 from adflux.formats import markdown as _markdown  # noqa: E402,F401
+from adflux.formats import panflute_fmt as _panflute_fmt  # noqa: E402,F401

@@ -3,7 +3,7 @@
 Each fixture under `tests/e2e/fixtures/*.md` is:
 
 1. Loaded as Markdown.
-2. Converted MD → ADF via adflux (strict-adf profile).
+2. Converted MD → ADF via adflux (``envelopes=keep``).
 3. POSTed as a new Confluence page using `atlas_doc_format`.
 4. Re-fetched from Confluence.
 5. Compared structurally (node-type sequence + key text) to the upload.

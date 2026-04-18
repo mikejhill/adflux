@@ -7,9 +7,9 @@ from typing import Any
 
 from adflux.formats.adf.reader import read_adf
 from adflux.formats.adf.writer import write_adf
-from adflux.profiles import resolve_profile
+from adflux.options import Options
 
-PROFILE = resolve_profile("strict-adf")
+OPTIONS = Options({"envelopes": "keep", "jira-strict": "false"})
 
 
 def _para(text: str) -> dict[str, Any]:
@@ -28,8 +28,8 @@ def _doc(*blocks: dict[str, Any]) -> dict[str, Any]:
 
 
 def _roundtrip(adf: dict[str, Any]) -> dict[str, Any]:
-    doc = read_adf(json.dumps(adf), PROFILE, {})
-    return json.loads(write_adf(doc, PROFILE, {}))
+    doc = read_adf(json.dumps(adf), OPTIONS)
+    return json.loads(write_adf(doc, OPTIONS))
 
 
 def test_table_with_header_and_body_roundtrips_all_rows() -> None:

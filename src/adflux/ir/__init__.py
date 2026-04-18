@@ -1,9 +1,9 @@
 """Internal intermediate representation (IR).
 
-adflux uses Pandoc's AST (via :mod:`panflute`) as its IR. This package
-re-exports the types we touch most often and provides helpers for the
-ADF-envelope convention that guarantees lossless round-tripping of
-ADF-specific constructs (panels, macros, mentions, etc.) through the IR.
+adflux uses the panflute AST as its IR. This package re-exports the types
+we touch most often and provides helpers for the ADF-envelope convention
+that guarantees lossless round-tripping of ADF-specific constructs
+(panels, macros, mentions, etc.) through the IR.
 """
 
 from __future__ import annotations

@@ -1,48 +1,58 @@
-"""Tests for fidelity-profile resolution."""
+"""Tests for the options system."""
 
 from __future__ import annotations
 
 import pytest
 
-from adflux.profiles import Profile, all_profile_names, resolve_profile
+from adflux.options import OptionDef, OptionRegistry, Options, get_registry
 
 
-def test_all_profile_names_nonempty():
-    names = all_profile_names()
-    assert "strict-adf" in names
-    assert "pretty-md" in names
-    assert "fail-loud" in names
+def test_registry_has_core_options():
+    reg = get_registry()
+    names = [d.name for d in reg.all()]
+    assert "envelopes" in names
+    assert "jira-strict" in names
 
 
-@pytest.mark.parametrize("name", ["strict-adf", "pretty-md", "fail-loud"])
-def test_resolve_profile_by_name(name):
-    profile = resolve_profile(name)
-    assert isinstance(profile, Profile)
-    assert profile.name == name
+def test_resolve_defaults():
+    reg = get_registry()
+    opts = reg.resolve()
+    assert opts["envelopes"] == "keep"
+    assert opts["jira-strict"] == "false"
 
 
-def test_resolve_profile_passthrough_instance():
-    p = resolve_profile("strict-adf")
-    assert resolve_profile(p) is p
+def test_resolve_with_overrides():
+    reg = get_registry()
+    opts = reg.resolve({"envelopes": "drop", "jira-strict": "true"})
+    assert opts["envelopes"] == "drop"
+    assert opts["jira-strict"] == "true"
 
 
-def test_resolve_profile_unknown():
-    with pytest.raises(ValueError, match="Unknown profile"):
-        resolve_profile("nope")
+def test_resolve_rejects_invalid_choice():
+    reg = get_registry()
+    with pytest.raises(ValueError, match="envelopes"):
+        reg.resolve({"envelopes": "nope"})
 
 
-def test_strict_adf_preserves_envelopes():
-    p = resolve_profile("strict-adf")
-    assert p.preserve_envelopes is True
-    assert p.drop_unrepresentable is False
-    assert p.fail_on_unrepresentable is False
+def test_options_immutable():
+    opts = Options({"envelopes": "keep"})
+    with pytest.raises(TypeError):
+        opts["envelopes"] = "drop"  # type: ignore[index]
 
 
-def test_fail_loud_fails():
-    assert resolve_profile("fail-loud").fail_on_unrepresentable is True
+def test_options_getitem_fallback_to_empty():
+    opts = Options({})
+    assert opts["unknown-key"] == ""
 
 
-def test_pretty_md_drops():
-    p = resolve_profile("pretty-md")
-    assert p.drop_unrepresentable is True
-    assert p.preserve_envelopes is False
+def test_options_iter_and_len():
+    opts = Options({"a": "1", "b": "2"})
+    assert len(opts) == 2
+    assert set(opts) == {"a", "b"}
+
+
+def test_custom_registry():
+    reg = OptionRegistry()
+    reg.register(OptionDef(name="foo", description="A foo", choices=("x", "y"), default="x"))
+    opts = reg.resolve({"foo": "y"})
+    assert opts["foo"] == "y"

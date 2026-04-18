@@ -17,7 +17,7 @@ from adflux import convert, validate, inspect_ast, list_formats
 adf_json = convert(open("notes.md").read(), src="md", dst="adf")
 
 # ADF JSON → Markdown, dropping ADF-only constructs
-md = convert(adf_json, src="adf", dst="md", profile="pretty-md")
+md = convert(adf_json, src="adf", dst="md", options={"envelopes": "drop"})
 
 # Validate ADF input
 validate(adf_json, fmt="adf")        # raises InvalidADFError on failure
@@ -26,30 +26,31 @@ validate(adf_json, fmt="adf")        # raises InvalidADFError on failure
 print(inspect_ast(md, src="md"))
 
 # Discover available formats
-print(list_formats())                # ['adf', 'markdown']
+print(list_formats())                # ['adf', 'markdown', 'panflute', 'pf']
 ```
 
 `convert()` keyword arguments:
 
-| Arg       | Type                  | Default       | Notes                                       |
-| --------- | --------------------- | ------------- | ------------------------------------------- |
-| `source`  | `str \| bytes`        | required      | Document text or JSON.                      |
-| `src`     | `str`                 | required      | One of `list_formats()`.                    |
-| `dst`     | `str`                 | required      | One of `list_formats()`.                    |
-| `profile` | `str \| Profile`      | `"strict-adf"`| See [`profiles.md`](profiles.md).           |
-| `options` | `dict[str, Any]`      | `{}`          | Reserved for per-format tuning.             |
+| Arg       | Type                          | Default   | Notes                                          |
+| --------- | ----------------------------- | --------- | ---------------------------------------------- |
+| `source`  | `str \| bytes`                | required  | Document text or JSON.                         |
+| `src`     | `str`                         | required  | One of `list_formats()`.                       |
+| `dst`     | `str`                         | required  | One of `list_formats()`.                       |
+| `options` | `dict[str, str] \| Options`   | `None`    | See [`options.md`](options.md).                |
 
 ## CLI
 
-The wheel installs a `adflux` script.
+The wheel installs an `adflux` script.
 
 ```bash
 adflux --help
 adflux convert  --from md  --to adf      README.md > readme.adf.json
-adflux convert  --from adf --to md       input.json --profile pretty-md
+adflux convert  --from adf --to md       input.json
+adflux convert  --from adf --to md       --option envelopes=drop  input.json
 adflux validate input.adf.json
 adflux inspect-ast --from md README.md | jq .
 adflux list-formats
+adflux list-options
 ```
 
 Reading from stdin and writing to stdout:
@@ -58,15 +59,14 @@ Reading from stdin and writing to stdout:
 cat doc.md | adflux convert --from md --to adf > doc.adf.json
 ```
 
-## Profiles in one screen
+## Conversion options
 
-| Profile        | Envelopes  | adf-panel       | On loss                |
-| -------------- | ---------- | --------------- | ---------------------- |
-| `strict-adf`   | Preserved  | GitHub alert    | —                      |
-| `pretty-md`    | Dropped    | Body kept       | Silent                 |
-| `fail-loud`    | Preserved  | Preserved       | `UnrepresentableNodeError` |
+| Option         | Choices                        | Default  | Behavior                                             |
+| -------------- | ------------------------------ | -------- | ---------------------------------------------------- |
+| `envelopes`    | `keep`, `drop`, `keep-strict`  | `keep`   | How ADF envelope nodes are handled on lossy targets. |
+| `jira-strict`  | `true`, `false`                | `false`  | Reject non-Jira ADF nodes during serialization.      |
 
-See [`profiles.md`](profiles.md) for a worked example of each.
+See [`options.md`](options.md) for a worked example of each.
 
 ## Errors
 
@@ -109,7 +109,7 @@ See [`extending.md`](extending.md) for adding entirely new formats.
 Runnable examples are in [`examples/`](../examples):
 
 - [`md_to_adf.py`](../examples/md_to_adf.py) — minimal library use.
-- [`adf_to_markdown.py`](../examples/adf_to_markdown.py) — profile selection.
+- [`adf_to_markdown.py`](../examples/adf_to_markdown.py) — option selection.
 - [`confluence_roundtrip.py`](../examples/confluence_roundtrip.py) — verify
   that a Confluence ADF document survives a round-trip through the internal IR.
 - [`sample.adf.json`](../examples/sample.adf.json) — a representative ADF

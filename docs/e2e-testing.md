@@ -20,7 +20,7 @@ The flow per Confluence fixture is:
 flowchart LR
   MD[Markdown fixture] -->|adflux MD->ADF| ADF1[ADF JSON]
   ADF1 -->|POST /wiki/api/v2/pages| Conf{{Confluence}}
-  Conf -->|GET /wiki/api/v2/pages/{id}| ADF2[ADF JSON downloaded]
+  Conf -->|"GET /wiki/api/v2/pages/{id}"| ADF2["ADF JSON downloaded"]
   ADF2 -->|adflux ADF->MD| MD2[Markdown round-trip]
   ADF1 -. structural compare .-> ADF2
   MD -. word-bag compare .-> MD2

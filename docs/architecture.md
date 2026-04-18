@@ -14,7 +14,7 @@ tree structure without reinventing an EBNF grammar or bespoke tree.
 Each format registers a reader (`bytes|str -> pf.Doc`) and a writer
 (`pf.Doc -> str`) into the module-level registry in `adflux.formats`. The
 public `convert()` function looks up both and pipes them through an optional
-profile filter.
+options filter.
 
 ## ADF bridge
 
@@ -47,18 +47,17 @@ A universal `adf-raw` fallback envelope captures any node type not present in
 `mapping.yaml`, guaranteeing zero data loss even for future ADF extensions.
 
 Because `Div`/`Span` + attrs round-trip through the Markdown reader and writer,
-envelopes survive a Markdown hop when the profile asks for it.
+envelopes survive a Markdown hop when the options ask for it.
 
-## Fidelity profiles
+## Conversion options
 
-| Profile        | Behavior on lossy targets                                    |
-| -------------- | ------------------------------------------------------------ |
-| `strict-adf`   | Preserve every envelope (default). Round-trips losslessly.   |
-| `pretty-md`    | Drop ADF-only envelopes silently; keep their visible content.|
-| `fail-loud`    | Raise `UnrepresentableNodeError` on the first envelope.      |
+| Option         | Choices                       | Default  | Description                                          |
+| -------------- | ----------------------------- | -------- | ---------------------------------------------------- |
+| `envelopes`    | `keep`, `drop`, `keep-strict` | `keep`   | How ADF envelope nodes are handled on lossy targets. |
+| `jira-strict`  | `true`, `false`               | `false`  | Reject non-Jira ADF nodes during serialization.      |
 
-Profiles are applied by `adflux.ir.profile_filter.apply_profile`, which runs
-over the IR before it is handed to the Markdown writer.
+Options are applied by `adflux.ir.profile_filter.apply_options`, which runs
+over the IR before it is handed to the target writer.
 
 ## Extending
 

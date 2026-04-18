@@ -15,9 +15,11 @@ status badges, mentions, task lists, expand sections, and macros.
 flowchart LR
   MD[Markdown] -->|markdown-it-py| IR((Internal IR + adf-* envelopes))
   ADF[ADF JSON] -->|mapping.yaml| IR
-  IR -->|profile filter| W{writer}
+  PF[Panflute JSON] -->|pf.load| IR
+  IR -->|options filter| W{writer}
   W -->|CommonMark serializer| MD2[Markdown]
   W -->|mapping.yaml| ADF2[ADF JSON]
+  W -->|pf.dump| PF2[Panflute JSON]
 ```
 
 ## Why adflux
@@ -33,7 +35,7 @@ Markdown without losing information. `adflux` fills that gap:
 - **Idiomatic Markdown output.** Panels become GitHub alert blockquotes,
   expand sections become `<details>`, smart cards become autolinks. The
   output looks correct in GitHub, VS Code, and any standard viewer.
-- **Fidelity profiles** make lossy / lossless behavior explicit and
+- **Conversion options** make lossy / lossless behavior explicit and
   selectable per call.
 
 ## Install
@@ -53,26 +55,27 @@ from adflux import convert
 adf = convert(open("README.md").read(), src="md", dst="adf")
 
 # ADF JSON → Markdown, dropping ADF-only constructs to plain content
-md = convert(adf, src="adf", dst="md", profile="pretty-md")
+md = convert(adf, src="adf", dst="md", options={"envelopes": "drop"})
 ```
 
 ```bash
 adflux convert --from md  --to adf README.md > readme.adf.json
 adflux convert --from adf --to md page.json
+adflux convert --from adf --to md --option envelopes=drop page.json
 adflux validate page.adf.json
+adflux list-options
 ```
 
 Full API and CLI reference: [`docs/usage.md`](docs/usage.md).
 
-## Fidelity profiles
+## Conversion options
 
-| Profile      | Behavior on lossy targets                                       |
-| ------------ | --------------------------------------------------------------- |
-| `strict-adf` | Preserve every ADF construct (default). Round-trips losslessly. |
-| `pretty-md`  | Drop ADF-only envelopes silently; keep their visible content.   |
-| `fail-loud`  | Raise `UnrepresentableNodeError` on the first envelope.         |
+| Option         | Choices                        | Default  | Description                                          |
+| -------------- | ------------------------------ | -------- | ---------------------------------------------------- |
+| `envelopes`    | `keep`, `drop`, `keep-strict`  | `keep`   | How ADF envelope nodes are handled on lossy targets. |
+| `jira-strict`  | `true`, `false`                | `false`  | Reject non-Jira ADF nodes during serialization.      |
 
-Worked examples: [`docs/profiles.md`](docs/profiles.md).
+Worked examples: [`docs/options.md`](docs/options.md).
 
 ## Markdown rendering of ADF constructs
 
@@ -87,6 +90,14 @@ Worked examples: [`docs/profiles.md`](docs/profiles.md).
 
 The reader recognises every form on its way back, so `MD → ADF → MD` is
 stable.
+
+## Supported formats
+
+| Format     | Aliases     | Description                                          |
+| ---------- | ----------- | ---------------------------------------------------- |
+| Markdown   | `md`, `markdown` | CommonMark + GFM via markdown-it-py             |
+| ADF        | `adf`       | Atlassian Document Format JSON                       |
+| Panflute   | `panflute`, `pf` | Pandoc JSON AST for integration with panflute tools |
 
 ## How it works
 
@@ -104,7 +115,7 @@ stable.
 Deeper dives:
 [`docs/design.md`](docs/design.md) ·
 [`docs/architecture.md`](docs/architecture.md) ·
-[`docs/profiles.md`](docs/profiles.md) ·
+[`docs/options.md`](docs/options.md) ·
 [`docs/fidelity-matrix.md`](docs/fidelity-matrix.md) ·
 [`docs/extending.md`](docs/extending.md) ·
 [`docs/e2e-testing.md`](docs/e2e-testing.md).

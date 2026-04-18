@@ -45,7 +45,10 @@ class MappingError(AdfluxError):
 
 
 class UnrepresentableNodeError(AdfluxError):
-    """Raised (in ``fail-loud`` profile) when a node cannot be represented in the target."""
+    """Raised when a node cannot be represented in the target format.
+
+    Triggered by ``envelopes=keep-strict`` or ``jira-strict=true``.
+    """
 
     def __init__(self, node_type: str, target_format: str) -> None:
         super().__init__(

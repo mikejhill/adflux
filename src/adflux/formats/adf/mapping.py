@@ -18,8 +18,8 @@ The mapping is a simple declarative registry:
         attrs: { text: string, color: string, localId: string }
 
 The reader/writer don't interpret every field — several are advisory
-(``asciidoc_native``, ``attrs`` schema) and reserved for future post-
-processors and validators.
+(``attrs`` schema) and reserved for future post-processors and
+validators.
 """
 
 from __future__ import annotations
@@ -41,12 +41,11 @@ class MappingEntry:
 
     node_type: str
     pandoc: str
-    """Pandoc element name, e.g. ``"Div"``, ``"Span"``, ``"Image"``."""
+    """Panflute element name, e.g. ``"Div"``, ``"Span"``, ``"Image"``."""
     kind: Literal["block", "inline"]
     envelope_class: str | None = None
     attrs: dict[str, str] = field(default_factory=dict)
     children: list[str] = field(default_factory=list)
-    asciidoc_native: str | None = None
     content_kind: Literal["block", "inline", "none"] = "block"
     """Shape of the node's ``content`` array in ADF JSON.
 
@@ -130,7 +129,6 @@ def _parse_mapping(raw: Any) -> MappingTable:
             envelope_class=spec.get("envelope_class"),
             attrs={str(k): str(v) for k, v in attrs.items()},
             children=[str(c) for c in children],
-            asciidoc_native=spec.get("asciidoc_native"),
             content_kind=content_kind,
         )
 

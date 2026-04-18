@@ -1,9 +1,8 @@
 """Markdown-friendly rendering of ADF envelopes.
 
-The default ADF→Markdown path emits Pandoc fenced divs and pandoc-attribute
-spans for every preserved envelope (``::: {.adf-panel panelType=info}``).
-That syntax is robust for round-trips but renders as **literal text** in
-standard Markdown viewers (GitHub, VS Code preview, etc.).
+The default ADF→Markdown path emits panflute Divs and Spans for every
+preserved envelope. That syntax is robust for round-trips but renders as
+**literal text** in standard Markdown viewers (GitHub, VS Code preview, etc.).
 
 This module rewrites the panflute AST so ADF envelopes come out as either:
 
@@ -26,8 +25,6 @@ This module rewrites the panflute AST so ADF envelopes come out as either:
 
 Markers are invisible in standard renderers but uniquely identify the ADF
 node, so :func:`unprettify` rebuilds the original envelope on the read path.
-The legacy ``::: {.adf-…}`` fence syntax is still understood by the reader,
-keeping every existing fixture and round-trip test passing.
 """
 
 from __future__ import annotations
@@ -165,7 +162,7 @@ def prettify(doc: pf.Doc) -> pf.Doc:
 def _tighten_lists(doc: pf.Doc) -> None:
     """Convert single-Para `ListItem`s to single-Plain.
 
-    Pandoc emits items wrapping a single ``Para`` as **loose** lists (with
+    Panflute emits items wrapping a single ``Para`` as **loose** lists (with
     blank lines between items); items wrapping ``Plain`` come out **tight**.
     Loose-list output looks noisy and unlike typical hand-authored sources,
     so we tighten them on the way out.
@@ -328,9 +325,9 @@ def unprettify(doc: pf.Doc) -> pf.Doc:
     from adflux.ir.envelope import pack_envelope
 
     def _walk(elem: Any, doc: pf.Doc) -> Any:
-        # Pandoc's commonmark_x reader natively converts GitHub alert
-        # blockquotes into Div(classes=["note"|"tip"|...]) containing a
-        # title Div + body blocks. Map those back to panel envelopes.
+        # markdown-it-py natively converts GitHub alert blockquotes into
+        # Div(classes=["note"|"tip"|...]) containing a title Div + body
+        # blocks. Map those back to panel envelopes.
         if isinstance(elem, pf.Div):
             panel = _try_parse_pandoc_alert(elem)
             if panel is not None:

@@ -22,7 +22,7 @@ pytestmark = pytest.mark.e2e
 
 FIXTURES_DIR = Path(__file__).parent / "fixtures"
 
-# Jira's description ADF profile is stricter than Confluence's. The
+# Jira's description ADF schema is stricter than Confluence's. The
 # fixtures below are the subset that Jira accepts; the others are excluded
 # because:
 #   * `layouts.md` uses `layoutSection`/`layoutColumn`, which are

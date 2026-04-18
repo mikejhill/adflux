@@ -14,7 +14,9 @@ from hypothesis import strategies as st
 
 from adflux.formats.adf.reader import read_adf
 from adflux.formats.adf.writer import write_adf
-from adflux.profiles import resolve_profile
+from adflux.options import Options
+
+OPTIONS = Options({"envelopes": "keep", "jira-strict": "false"})
 
 
 def _text(s: str) -> dict:
@@ -52,9 +54,8 @@ _DOC = st.builds(
 @settings(max_examples=30, deadline=None)
 @given(_DOC)
 def test_adf_roundtrip_property(doc: dict) -> None:
-    profile = resolve_profile("strict-adf")
-    ir = read_adf(json.dumps(doc), profile=profile, options={})
-    out_text = write_adf(ir, profile=profile, options={})
+    ir = read_adf(json.dumps(doc), OPTIONS)
+    out_text = write_adf(ir, OPTIONS)
     out = json.loads(out_text)
     assert out["type"] == "doc"
     # Content length matches the input top-level block count.

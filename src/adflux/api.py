@@ -6,11 +6,11 @@ to the reader/writer registry populated in :mod:`adflux.formats`.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from adflux.errors import UnsupportedFormatError
 from adflux.formats import get_reader, get_writer, registered_formats
-from adflux.profiles import Profile, resolve_profile
+from adflux.options import Options, get_registry
 
 if TYPE_CHECKING:
     import panflute as pf
@@ -21,8 +21,7 @@ def convert(
     *,
     src: str,
     dst: str,
-    profile: str | Profile = "strict-adf",
-    options: dict[str, Any] | None = None,
+    options: dict[str, str] | Options | None = None,
 ) -> str:
     """Convert ``source`` from format ``src`` to format ``dst``.
 
@@ -30,8 +29,8 @@ def convert(
         source: Input document (text for Markdown, JSON text for ADF).
         src: Source-format identifier (``"md"`` / ``"markdown"`` or ``"adf"``).
         dst: Target-format identifier.
-        profile: Fidelity profile name or :class:`Profile` instance.
-        options: Optional per-format options, forwarded to reader/writer.
+        options: Conversion options as a ``dict[str, str]``, an
+            :class:`Options` instance, or ``None`` for defaults.
 
     Returns:
         Converted document as a string.
@@ -39,14 +38,14 @@ def convert(
     Raises:
         UnsupportedFormatError: If ``src`` or ``dst`` is not registered.
         InvalidADFError: If ADF input fails schema validation.
-        UnrepresentableNodeError: When ``fail-loud`` profile cannot represent a node.
+        UnrepresentableNodeError: When ``envelopes=keep-strict`` cannot
+            represent a node.
     """
-    opts = options or {}
-    resolved = resolve_profile(profile)
+    resolved = get_registry().resolve(options)
     reader = get_reader(src)
     writer = get_writer(dst)
-    doc: pf.Doc = reader(source, profile=resolved, options=opts)
-    return writer(doc, profile=resolved, options=opts)
+    doc: pf.Doc = reader(source, options=resolved)
+    return writer(doc, options=resolved)
 
 
 def validate(source: str | bytes, *, fmt: str) -> None:
@@ -71,7 +70,7 @@ def inspect_ast(source: str | bytes, *, src: str) -> str:
     import panflute as pf
 
     reader = get_reader(src)
-    doc = reader(source, profile=resolve_profile("strict-adf"), options={})
+    doc = reader(source, options=get_registry().resolve())
     buffer = io.StringIO()
     pf.dump(doc, buffer)
     return _json.dumps(_json.loads(buffer.getvalue()), indent=2)

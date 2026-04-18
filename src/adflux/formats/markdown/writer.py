@@ -1,9 +1,8 @@
 """Pure-Python CommonMark + GFM serializer for the panflute IR.
 
-This module replaces pandoc as the Markdown writer. It walks a panflute
-``Doc`` and emits CommonMark text plus the GFM extensions that adflux
-relies on: tables, strikethrough, task-list-style brackets, fenced code,
-GitHub-alert blockquotes, and raw HTML for ADF-envelope markers.
+Walks a panflute ``Doc`` and emits CommonMark text plus the GFM extensions
+that adflux relies on: tables, strikethrough, task-list-style brackets,
+fenced code, GitHub-alert blockquotes, and raw HTML for ADF-envelope markers.
 
 The serializer targets the subset of constructs produced by
 :mod:`adflux.formats.markdown.pretty.prettify`. It is **not** a general-purpose

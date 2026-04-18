@@ -19,7 +19,6 @@ nodes:
     envelope_class: adf-panel
     attrs:
       panelType: string  # info | note | warning | success | error
-    asciidoc_native: admonition
 
   # --- Inline Atlassian-specific nodes ---
   mention:

@@ -8,11 +8,13 @@ usage see [`usage.md`](usage.md).
 
 1. **Convert losslessly** between Markdown and Atlassian Document Format (ADF),
    including ADF-only constructs (panels, status, mentions, task lists,
-   Confluence macros).
+   Confluence macros). Under `envelopes=keep` (the default), both MD→ADF→MD
+   and ADF→MD→ADF round-trips preserve all structural content; the only
+   differences are non-semantic whitespace changes (e.g. trailing newlines).
 2. **Be grammar/config-driven**, not code-driven. Adding an ADF node type
    should not require Python changes — only YAML.
 3. **Reuse community tooling** instead of writing yet another Markdown parser.
-4. **Be predictable**: explicit fidelity profiles describe exactly how lossy
+4. **Be predictable**: explicit conversion options describe exactly how lossy
    conversions behave.
 
 ## Why pure Python
@@ -110,26 +112,25 @@ entire original JSON object. This gives us **provable zero data loss** for
 round-trips, even across Confluence schema upgrades that introduce node types
 the library has never heard of.
 
-## Fidelity profiles
+## Conversion options
 
 Different consumers want different behavior when ADF-only constructs hit a
-lossy target like plain Markdown. Profiles encode that as a small immutable
-record:
+lossy target like plain Markdown. Options encode that as key=value pairs:
 
 ```mermaid
 flowchart TD
-  A[Internal IR with envelopes] --> P{profile}
-  P -->|strict-adf| K["Keep envelopes<br>(rendered idiomatically by writer)"]
-  P -->|pretty-md| D["Drop envelopes,<br>keep visible content"]
-  P -->|fail-loud| F[Raise UnrepresentableNodeError]
+  A[Internal IR with envelopes] --> O{envelopes option}
+  O -->|keep| K["Keep envelopes<br>(rendered idiomatically by writer)"]
+  O -->|drop| D["Drop envelopes,<br>keep visible content"]
+  O -->|keep-strict| F[Raise UnrepresentableNodeError]
   K --> W[Markdown writer]
   D --> W
   F -.-> X[abort]
 ```
 
-Profiles are interpreted by `adflux.ir.profile_filter.apply_profile`, which
+Options are interpreted by `adflux.ir.profile_filter.apply_options`, which
 walks the AST before it is handed to the writer. The writer code itself stays
-profile-agnostic.
+options-agnostic.
 
 ## Pipeline
 
@@ -138,13 +139,13 @@ sequenceDiagram
   participant U as Caller
   participant API as adflux.convert
   participant R as Reader (src)
-  participant F as profile_filter
+  participant F as apply_options
   participant W as Writer (dst)
 
   U->>API: convert(source, src="adf", dst="markdown")
   API->>R: read(source)
   R-->>API: pf.Doc (with envelopes)
-  API->>F: apply_profile(doc, profile)
+  API->>F: apply_options(doc, options)
   F-->>API: pf.Doc (filtered)
   API->>W: write(doc)
   W-->>API: text
@@ -165,7 +166,7 @@ Every recoverable failure raises a typed exception from
 | `UnsupportedFormatError`   | `src` or `dst` is not in the registry.            |
 | `InvalidADFError`          | ADF JSON fails schema validation.                 |
 | `MappingError`             | `mapping.yaml` is malformed or self-inconsistent. |
-| `UnrepresentableNodeError` | `fail-loud` profile encountered an envelope.      |
+| `UnrepresentableNodeError` | `envelopes=keep-strict` or `jira-strict=true` encountered an issue. |
 
 All four inherit from `AdfluxError` so callers can catch the whole
 library's errors with a single `except` clause.
@@ -174,6 +175,6 @@ library's errors with a single `except` clause.
 
 - **Editing ADF semantics.** `adflux` faithfully translates; it does not
   rewrite content (e.g., it will not auto-correct an invalid panel type).
-- **Round-tripping non-ADF formats losslessly through ADF.** A Markdown ↔ ADF
-  ↔ Markdown trip is best-effort; only ADF ↔ IR ↔ ADF is guaranteed
-  lossless.
+- **Non-semantic whitespace preservation.** Round-trips preserve all
+  structural content and attributes, but non-semantic whitespace (trailing
+  newlines, blank line counts between blocks) may differ.

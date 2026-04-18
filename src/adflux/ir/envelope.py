@@ -1,11 +1,11 @@
 """ADF envelope convention.
 
-An *envelope* is a Pandoc ``Div`` (block context) or ``Span`` (inline context)
+An *envelope* is a panflute ``Div`` (block context) or ``Span`` (inline context)
 whose class list starts with a marker like ``adf-panel`` or ``adf-status``, and
 whose key-value attributes carry the ADF node's parameters. Opaque or complex
 payloads are stored as a base64-encoded JSON blob under the ``data-adf-json`` key
-so that the envelope remains round-trip stable across Pandoc's MD/AsciiDoc
-writers (which preserve Div/Span attrs).
+so that the envelope remains round-trip stable across format serializers (which
+preserve Div/Span attrs).
 
 The ``adf-raw`` envelope is the universal fallback for ADF node types that
 have no explicit entry in the mapping table - it stores the entire original
@@ -98,8 +98,8 @@ def pack_envelope(
     identifier = ""
     for key, value in attrs.items():
         if key == "id" and isinstance(value, (str, int, float)):
-            # Pandoc promotes `id="..."` on Span/Div to the element identifier
-            # slot. Set it directly so md round-trips don't lose it.
+            # panflute promotes `id="..."` on Span/Div to the element identifier
+            # slot. Set it directly so MD round-trips don't lose it.
             identifier = str(value)
             continue
         if isinstance(value, bool):
@@ -115,7 +115,7 @@ def pack_envelope(
     elif complex_payload:
         simple_kv.append((_JSON_ATTR, _encode_blob(complex_payload)))
 
-    # Pandoc-side limitation: `id` in Span/Div kv attrs is promoted to the
+    # panflute limitation: `id` in Span/Div kv attrs is promoted to the
     # element identifier, so we set it explicitly to keep ADF round-trips.
     if kind == "block":
         return pf.Div(
@@ -133,7 +133,7 @@ def pack_envelope(
 
 
 def is_envelope(elem: Any) -> bool:
-    """Return True if elem is a Pandoc Div/Span carrying an ADF envelope marker."""
+    """Return True if elem is a panflute Div/Span carrying an ADF envelope marker."""
     import panflute as pf
 
     if not isinstance(elem, (pf.Div, pf.Span)):
@@ -160,7 +160,7 @@ def unpack_envelope(elem: pf.Div | pf.Span) -> Envelope:
     blob = raw_attrs.pop(_JSON_ATTR, None)
 
     attrs: dict[str, Any] = dict(raw_attrs)
-    # Pandoc promotes `id="..."` in Span/Div attributes to the element's
+    # panflute promotes `id="..."` in Span/Div attributes to the element's
     # identifier slot rather than keeping it as a regular kv pair. Restore
     # it so envelopes whose ADF schema includes an `id` attr survive.
     elem_id = getattr(elem, "identifier", "") or ""

@@ -32,22 +32,22 @@ content under a block envelope.
 
 If you need to support a custom format (not Markdown or ADF):
 
-1. Implement a reader: `(source: str | bytes, *, profile, options) -> pf.Doc`.
-2. Implement a writer: `(doc: pf.Doc, *, profile, options) -> str`.
+1. Implement a reader: `(source: str | bytes, options: Options) -> pf.Doc`.
+2. Implement a writer: `(doc: pf.Doc, options: Options) -> str`.
 3. Register both with `register_reader` / `register_writer`.
 
 The IR (`panflute.Doc`) is the only contract. The ADF bridge itself is a
-worked example of this approach — read it first.
+worked example of this approach — read it first. The panflute format
+(`src/adflux/formats/panflute_fmt/`) is the simplest example.
 
-## Adding a fidelity profile
+## Adding a conversion option
 
-Profiles are immutable dataclass records in `src/adflux/profiles.py`. To
-add a new one:
+Options are registered in `src/adflux/options.py` using `OptionDef`:
 
-1. Append a `Profile(...)` instance to the `_PROFILES` dict.
-2. Pick semantics from the four boolean fields. If the existing fields are
-   not enough, add a new field and consume it in
-   `adflux.ir.profile_filter`.
+1. Create an `OptionDef(name=..., description=..., choices=..., default=...)`.
+2. Call `_REGISTRY.register(defn)`.
+3. Consume the option in the relevant reader, writer, or filter via
+   `options["your-option"]`.
 
 ## Releasing
 

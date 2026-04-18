@@ -1,4 +1,4 @@
-"""Convert an ADF document to Markdown using each fidelity profile.
+"""Convert an ADF document to Markdown using each envelope option.
 
 Usage:
     python examples/adf_to_markdown.py [path/to/input.adf.json]
@@ -14,7 +14,11 @@ from pathlib import Path
 from adflux import convert
 from adflux.errors import UnrepresentableNodeError
 
-PROFILES = ["strict-adf", "pretty-md", "fail-loud"]
+OPTIONS = [
+    {"envelopes": "keep"},
+    {"envelopes": "drop"},
+    {"envelopes": "keep-strict"},
+]
 
 
 def main() -> int:
@@ -22,12 +26,13 @@ def main() -> int:
     src = Path(sys.argv[1]) if len(sys.argv) > 1 else Path(__file__).with_name("sample.adf.json")
     adf = src.read_text(encoding="utf-8")
 
-    for profile in PROFILES:
-        print(f"\n===== profile: {profile} =====\n")
+    for opts in OPTIONS:
+        label = ", ".join(f"{k}={v}" for k, v in opts.items())
+        print(f"\n===== options: {label} =====\n")
         try:
-            print(convert(adf, src="adf", dst="markdown", profile=profile))
+            print(convert(adf, src="adf", dst="markdown", options=opts))
         except UnrepresentableNodeError as exc:
-            print(f"[fail-loud raised] {exc}")
+            print(f"[keep-strict raised] {exc}")
     return 0
 
 

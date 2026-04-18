@@ -8,13 +8,13 @@ import panflute as pf
 
 from adflux.formats.adf.reader import read_adf
 from adflux.ir.envelope import is_envelope, unpack_envelope
-from adflux.profiles import resolve_profile
+from adflux.options import Options
 
-PROFILE = resolve_profile("strict-adf")
+OPTIONS = Options({"envelopes": "keep", "jira-strict": "false"})
 
 
 def _read(adf: dict) -> pf.Doc:
-    return read_adf(json.dumps(adf), PROFILE, {})
+    return read_adf(json.dumps(adf), OPTIONS)
 
 
 def test_empty_doc():

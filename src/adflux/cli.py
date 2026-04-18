@@ -5,7 +5,8 @@ Subcommands:
 * ``adflux convert`` — convert between formats.
 * ``adflux validate`` — validate a document (currently only ADF).
 * ``adflux inspect-ast`` — dump the internal IR as JSON.
-* ``adflux list-formats`` — list registered formats and profiles.
+* ``adflux list-formats`` — list registered formats.
+* ``adflux list-options`` — list available conversion options.
 """
 
 from __future__ import annotations
@@ -22,7 +23,7 @@ from adflux.api import list_formats as api_list_formats
 from adflux.api import validate as api_validate
 from adflux.errors import AdfluxError
 from adflux.logging import configure_logging
-from adflux.profiles import all_profile_names
+from adflux.options import get_registry
 
 app = typer.Typer(
     name="adflux",
@@ -47,6 +48,19 @@ def _write_output(text: str, output_path: Path | None) -> None:
         output_path.write_text(text, encoding="utf-8")
 
 
+def _parse_options(raw: list[str] | None) -> dict[str, str]:
+    """Parse ``--option key=value`` pairs into a dict."""
+    if not raw:
+        return {}
+    result: dict[str, str] = {}
+    for item in raw:
+        if "=" not in item:
+            raise typer.BadParameter(f"Option must be key=value, got: {item!r}")
+        key, value = item.split("=", 1)
+        result[key.strip()] = value.strip()
+    return result
+
+
 @app.command("convert")
 def convert_cmd(
     input_path: Annotated[
@@ -55,14 +69,14 @@ def convert_cmd(
     ] = None,
     src: Annotated[str, typer.Option("--from", "-f", help="Source format.")] = "md",
     dst: Annotated[str, typer.Option("--to", "-t", help="Target format.")] = "adf",
-    profile: Annotated[
-        str,
+    option: Annotated[
+        list[str] | None,
         typer.Option(
-            "--profile",
-            "-p",
-            help=f"Fidelity profile: {', '.join(all_profile_names())}.",
+            "--option",
+            "-O",
+            help="Conversion option as key=value (repeatable).",
         ),
-    ] = "strict-adf",
+    ] = None,
     output: Annotated[
         Path | None, typer.Option("--output", "-o", help="Output file (or stdout).")
     ] = None,
@@ -72,7 +86,8 @@ def convert_cmd(
     configure_logging(level=10 if verbose else 20)
     try:
         source = _read_input(input_path)
-        result = api_convert(source, src=src, dst=dst, profile=profile)
+        opts = _parse_options(option)
+        result = api_convert(source, src=src, dst=dst, options=opts)
         _write_output(result, output)
     except AdfluxError as exc:
         typer.secho(f"error: {exc}", fg=typer.colors.RED, err=True)
@@ -116,13 +131,23 @@ def inspect_ast_cmd(
 
 @app.command("list-formats")
 def list_formats_cmd() -> None:
-    """List registered formats and fidelity profiles."""
+    """List registered format identifiers."""
     typer.echo("formats:")
     for fmt in api_list_formats():
         typer.echo(f"  - {fmt}")
-    typer.echo("profiles:")
-    for name in all_profile_names():
-        typer.echo(f"  - {name}")
+
+
+@app.command("list-options")
+def list_options_cmd() -> None:
+    """List available conversion options with descriptions and defaults."""
+    registry = get_registry()
+    for defn in registry.all():
+        choices = ", ".join(defn.choices) if defn.choices else "free-form"
+        typer.echo(f"{defn.name}")
+        typer.echo(f"  choices:  {choices}")
+        typer.echo(f"  default:  {defn.default}")
+        typer.echo(f"  {defn.description}")
+        typer.echo()
 
 
 if __name__ == "__main__":

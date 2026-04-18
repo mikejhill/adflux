@@ -1,13 +1,8 @@
 """Pure-Python Markdown reader: ``markdown-it-py`` tokens → panflute Doc.
 
-Replaces pandoc as the Markdown parser. Uses ``markdown-it-py`` configured
-for CommonMark + the GFM extensions adflux needs (tables, strikethrough,
-GFM alerts via blockquote convention, hard line breaks, autolinks).
-
-The output is a panflute :class:`pf.Doc` whose shape matches what pandoc's
-``commonmark_x-fenced_divs-bracketed_spans`` reader produced, so the
-existing :mod:`adflux.formats.markdown.pretty` ``unprettify`` pass continues to
-work unchanged.
+Uses ``markdown-it-py`` configured for CommonMark + the GFM extensions
+adflux needs (tables, strikethrough, GFM alerts via blockquote convention,
+hard line breaks, autolinks).
 """
 
 from __future__ import annotations

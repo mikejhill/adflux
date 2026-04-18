@@ -5,7 +5,7 @@ Runnable scripts demonstrating `adflux` from the library API.
 | Script                        | What it shows                                                |
 | ----------------------------- | ------------------------------------------------------------ |
 | `md_to_adf.py`                | Convert a Markdown file (or stdin) to ADF JSON.              |
-| `adf_to_markdown.py`          | Render `sample.adf.json` to Markdown under each profile.     |
+| `adf_to_markdown.py`          | Render `sample.adf.json` to Markdown under each envelope option. |
 | `confluence_roundtrip.py`     | Verify lossless ADF → IR → ADF round-tripping.               |
 
 Run them from the repo root after installing the package:

@@ -8,13 +8,13 @@ import panflute as pf
 
 from adflux.formats.adf.writer import write_adf
 from adflux.ir.envelope import pack_envelope
-from adflux.profiles import resolve_profile
+from adflux.options import Options
 
-PROFILE = resolve_profile("strict-adf")
+OPTIONS = Options({"envelopes": "keep", "jira-strict": "false"})
 
 
 def _write(doc: pf.Doc) -> dict:
-    return json.loads(write_adf(doc, PROFILE, {}))
+    return json.loads(write_adf(doc, OPTIONS))
 
 
 def test_empty_doc_shape():

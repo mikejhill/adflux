@@ -15,7 +15,7 @@ from pathlib import Path
 
 from adflux.formats.adf.reader import read_adf
 from adflux.formats.adf.writer import write_adf
-from adflux.profiles import resolve_profile
+from adflux.options import Options
 
 
 def main() -> int:
@@ -23,9 +23,9 @@ def main() -> int:
     src = Path(sys.argv[1]) if len(sys.argv) > 1 else Path(__file__).with_name("sample.adf.json")
     original = json.loads(src.read_text(encoding="utf-8"))
 
-    profile = resolve_profile("strict-adf")
-    ir = read_adf(json.dumps(original), profile=profile, options={})
-    out = json.loads(write_adf(ir, profile=profile, options={}))
+    options = Options({"envelopes": "keep", "jira-strict": "false"})
+    ir = read_adf(json.dumps(original), options)
+    out = json.loads(write_adf(ir, options))
 
     if original == out:
         print("PASS: lossless ADF round-trip")
