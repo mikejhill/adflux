@@ -22,6 +22,9 @@ md = convert(adf_json, src="adf", dst="md", options={"envelopes": "drop"})
 # Validate ADF input
 validate(adf_json, fmt="adf")        # raises InvalidADFError on failure
 
+# Validate for Jira compatibility
+validate(adf_json, fmt="adf", options={"jira-strict": "true"})
+
 # Inspect the IR
 print(inspect_ast(md, src="md"))
 
@@ -48,6 +51,7 @@ adflux convert  --from md  --to adf      README.md > readme.adf.json
 adflux convert  --from adf --to md       input.json
 adflux convert  --from adf --to md       --option envelopes=drop  input.json
 adflux validate input.adf.json
+adflux validate input.adf.json --option jira-strict=true
 adflux inspect-ast --from md README.md | jq .
 adflux list-formats
 adflux list-options

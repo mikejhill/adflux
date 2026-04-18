@@ -6,6 +6,7 @@ import json
 
 import pytest
 
+from adflux.api import validate
 from adflux.errors import InvalidADFError
 from adflux.formats.adf.schema import validate_adf
 
@@ -51,3 +52,43 @@ def test_reports_pointer_on_failure():
         assert "content" in exc.pointer
     else:
         pytest.fail("expected InvalidADFError")
+
+
+# --- validate() API with options ---
+
+
+def test_validate_api_passes_without_options():
+    """validate() succeeds for valid ADF with default options."""
+    doc = json.dumps({"type": "doc", "version": 1, "content": []})
+    validate(doc, fmt="adf")
+
+
+def test_validate_api_jira_strict_rejects_extension():
+    """validate() with jira-strict=true rejects bodiedExtension nodes."""
+    doc = json.dumps(
+        {
+            "type": "doc",
+            "version": 1,
+            "content": [
+                {
+                    "type": "bodiedExtension",
+                    "attrs": {"extensionType": "com.atlassian.macro", "extensionKey": "expand"},
+                    "content": [{"type": "paragraph", "content": [{"type": "text", "text": "x"}]}],
+                }
+            ],
+        }
+    )
+    with pytest.raises(InvalidADFError, match="jira-strict"):
+        validate(doc, fmt="adf", options={"jira-strict": "true"})
+
+
+def test_validate_api_jira_strict_passes_clean_doc():
+    """validate() with jira-strict=true passes a Jira-safe document."""
+    doc = json.dumps(
+        {
+            "type": "doc",
+            "version": 1,
+            "content": [{"type": "paragraph", "content": [{"type": "text", "text": "ok"}]}],
+        }
+    )
+    validate(doc, fmt="adf", options={"jira-strict": "true"})

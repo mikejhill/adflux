@@ -101,11 +101,20 @@ def validate_cmd(
         typer.Argument(exists=True, dir_okay=False, readable=True, help="Input file (or stdin)."),
     ] = None,
     fmt: Annotated[str, typer.Option("--format", "-f", help="Format to validate.")] = "adf",
+    option: Annotated[
+        list[str] | None,
+        typer.Option(
+            "--option",
+            "-O",
+            help="Validation option as key=value (repeatable).",
+        ),
+    ] = None,
 ) -> None:
     """Validate a document (currently only meaningful for ADF)."""
     try:
         source = _read_input(input_path)
-        api_validate(source, fmt=fmt)
+        opts = _parse_options(option)
+        api_validate(source, fmt=fmt, options=opts)
         typer.secho("ok", fg=typer.colors.GREEN)
     except AdfluxError as exc:
         typer.secho(f"invalid: {exc}", fg=typer.colors.RED, err=True)

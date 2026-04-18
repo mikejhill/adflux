@@ -48,18 +48,36 @@ def convert(
     return writer(doc, options=resolved)
 
 
-def validate(source: str | bytes, *, fmt: str) -> None:
+def validate(
+    source: str | bytes,
+    *,
+    fmt: str,
+    options: dict[str, str] | Options | None = None,
+) -> None:
     """Validate ``source`` as format ``fmt``. Raises on failure.
 
-    Currently meaningful for ``fmt="adf"`` (JSON-schema validation). Other
-    formats are accepted unconditionally.
+    For ``fmt="adf"`` this runs JSON-schema validation. When
+    ``jira-strict=true`` is set in *options*, it additionally rejects ADF
+    node types not accepted by Jira's description field.
+
+    Other formats are accepted unconditionally.
+
+    Args:
+        source: Raw document text/bytes.
+        fmt: Format identifier (e.g. ``"adf"``).
+        options: Conversion options as a ``dict[str, str]``, an
+            :class:`Options` instance, or ``None`` for defaults.
     """
     if fmt not in registered_formats():
         raise UnsupportedFormatError(fmt)
+    resolved = get_registry().resolve(options)
     if fmt == "adf":
         from adflux.formats.adf.schema import validate_adf
+        from adflux.formats.adf.writer import check_jira_strict
 
         validate_adf(source)
+        if resolved["jira-strict"] == "true":
+            check_jira_strict(source)
 
 
 def inspect_ast(source: str | bytes, *, src: str) -> str:

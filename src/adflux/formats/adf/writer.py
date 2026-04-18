@@ -51,7 +51,7 @@ def write_adf(doc: pf.Doc, options: Options) -> str:
     }
     validate_adf(adf_doc)
     if options["jira-strict"] == "true":
-        _check_jira_strict(adf_doc)
+        check_jira_strict(adf_doc)
     return json.dumps(adf_doc, indent=2)
 
 
@@ -344,8 +344,19 @@ def pf_stringify(elem: Any) -> str:
     return result
 
 
-def _check_jira_strict(adf_doc: dict[str, Any]) -> None:
-    """Walk the ADF tree and raise if any Jira-rejected node types are found."""
+def check_jira_strict(source: str | bytes | dict[str, Any]) -> None:
+    """Validate that *source* contains no ADF node types rejected by Jira.
+
+    Args:
+        source: ADF document as a JSON string, bytes, or already-parsed dict.
+
+    Raises:
+        InvalidADFError: If a Jira-rejected node type is found.
+    """
+    if isinstance(source, (str, bytes)):
+        adf_doc: dict[str, Any] = json.loads(source)
+    else:
+        adf_doc = source
 
     def _walk(node: dict[str, Any]) -> None:
         node_type = node.get("type", "")
@@ -361,4 +372,4 @@ def _check_jira_strict(adf_doc: dict[str, Any]) -> None:
 
 
 # Allow callers to identify envelope class prefix without extra imports.
-__all__ = ["ENVELOPE_CLASS_PREFIX", "write_adf"]
+__all__ = ["ENVELOPE_CLASS_PREFIX", "check_jira_strict", "write_adf"]
