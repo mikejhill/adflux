@@ -33,10 +33,10 @@ print(list_formats())                # ['adf', 'markdown']
 
 | Arg       | Type                  | Default       | Notes                                       |
 | --------- | --------------------- | ------------- | ------------------------------------------- |
-| `source`  | `str | bytes`         | required      | Document text or JSON.                      |
+| `source`  | `str \| bytes`        | required      | Document text or JSON.                      |
 | `src`     | `str`                 | required      | One of `list_formats()`.                    |
 | `dst`     | `str`                 | required      | One of `list_formats()`.                    |
-| `profile` | `str | Profile`       | `"strict-adf"`| See [`profiles.md`](profiles.md).           |
+| `profile` | `str \| Profile`      | `"strict-adf"`| See [`profiles.md`](profiles.md).           |
 | `options` | `dict[str, Any]`      | `{}`          | Reserved for per-format tuning.             |
 
 ## CLI

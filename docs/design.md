@@ -97,11 +97,11 @@ preserved verbatim.
 
 ```mermaid
 flowchart LR
-  src[ADF JSON node\ntype: panel\nattrs: panelType=info]
-  -->|reader| div[Internal IR\nDiv with class adf-panel\nattrs: panelType=info]
-  -->|MD writer| md["```\n::: {.adf-panel panelType=info}\n  body\n:::\n```"]
-  -->|MD reader| div
-  -->|writer| out[ADF JSON node\ntype: panel\nattrs: panelType=info]
+  src["ADF JSON node<br>type: panel<br>attrs: panelType=info"]
+  -->|reader| div["IR Div<br>class=adf-panel<br>panelType=info"]
+  -->|MD writer| md["GitHub alert blockquote<br>&gt; [!NOTE]<br>&gt; body"]
+  -->|MD reader| div2["IR Div<br>class=adf-panel<br>panelType=info"]
+  -->|writer| out["ADF JSON node<br>type: panel<br>attrs: panelType=info"]
 ```
 
 The `adf-raw` envelope handles the long tail: any ADF node type that does not
@@ -119,8 +119,8 @@ record:
 ```mermaid
 flowchart TD
   A[Internal IR with envelopes] --> P{profile}
-  P -->|strict-adf| K["Keep envelopes\n(rendered idiomatically by writer)"]
-  P -->|pretty-md| D[Drop envelopes,\nkeep visible content]
+  P -->|strict-adf| K["Keep envelopes<br>(rendered idiomatically by writer)"]
+  P -->|pretty-md| D["Drop envelopes,<br>keep visible content"]
   P -->|fail-loud| F[Raise UnrepresentableNodeError]
   K --> W[Markdown writer]
   D --> W
@@ -167,8 +167,8 @@ Every recoverable failure raises a typed exception from
 | `MappingError`             | `mapping.yaml` is malformed or self-inconsistent. |
 | `UnrepresentableNodeError` | `fail-loud` profile encountered an envelope.      |
 
-All five inherit from `DocconvError` (the historical base name, kept stable
-for catch-all `except` blocks).
+All four inherit from `AdfluxError` so callers can catch the whole
+library's errors with a single `except` clause.
 
 ## Non-goals
 
