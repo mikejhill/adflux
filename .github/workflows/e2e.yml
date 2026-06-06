@@ -32,7 +32,7 @@ jobs:
       ADFLUX_E2E_JIRA_PROJECT_KEY: ${{ secrets.ADFLUX_E2E_JIRA_PROJECT_KEY }}
     steps:
       - uses: actions/checkout@v6
-      - uses: astral-sh/setup-uv@v8.1.0
+      - uses: astral-sh/setup-uv@v8.2.0
         with:
           enable-cache: true
       - run: uv python install 3.12
