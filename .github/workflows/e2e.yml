@@ -31,7 +31,7 @@ jobs:
       ADFLUX_E2E_CONFLUENCE_PARENT_PAGE_ID: ${{ secrets.ADFLUX_E2E_CONFLUENCE_PARENT_PAGE_ID }}
       ADFLUX_E2E_JIRA_PROJECT_KEY: ${{ secrets.ADFLUX_E2E_JIRA_PROJECT_KEY }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: astral-sh/setup-uv@v8.1.0
         with:
           enable-cache: true
