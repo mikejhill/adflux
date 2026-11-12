@@ -18,6 +18,10 @@ Releases are produced automatically from
 - ADF `emoji` nodes now preserve `shortName` and `id` attributes through
   Markdown round-trips using the same comment-marker technique.
 
+### Security
+
+- Refreshed `uv.lock` to patched anyio, certifi and idna releases.
+
 ## [0.3.0] — 2026-04-18
 
 ### Added

@@ -165,8 +165,8 @@ root = ["src"]
 
 [tool.ty.rules]
 # Strictness — promote categories to errors.
-unresolved-import = "error"
-unresolved-attribute = "error"
+import-not-found = "error"
+missing-attribute = "error"
 invalid-return-type = "error"
 invalid-argument-type = "error"
 invalid-assignment = "error"
