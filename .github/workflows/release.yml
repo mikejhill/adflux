@@ -47,9 +47,6 @@ jobs:
     needs: version
     if: needs.version.outputs.created == 'true'
     uses: ./.github/workflows/ci.yml # zizmor: ignore[self-repository] -- portable local reuse
-    with:
-      # Test the tag that build publishes, not the commit that triggered this run.
-      ref: ${{ needs.version.outputs.tag }}
     permissions:
       contents: read
   build:
@@ -63,6 +60,11 @@ jobs:
       - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
         with:
           enable-cache: false
+      # CI above tested this run's commit; publish only if the tag points at that commit.
+      - name: Require the tag to be the tested commit
+        run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA" || {
+            echo "::error::tag $(git rev-parse HEAD) is not the tested commit $GITHUB_SHA"; exit 1; }
       - run: uv sync --locked
       - run: uv build
       - run: uv run twine check --strict dist/*

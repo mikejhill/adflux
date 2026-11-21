@@ -7,17 +7,12 @@ on:
     branches: [main]
   workflow_dispatch:
   workflow_call:
-    inputs:
-      ref:
-        description: Commit to test (the release tag); defaults to the triggering commit.
-        type: string
-        default: ''
 permissions:
   contents: read
 concurrency:
-  # Release-tag CI (workflow_call) runs under main's ref; key it by the tag so a later push
-  # to main cannot replace it while it is pending.
-  group: ci-${{ inputs.ref || github.event.pull_request.number || github.ref }}
+  # github.workflow is the caller's name under workflow_call, so release CI ("Release-…")
+  # never shares a group with, or gets replaced by, ordinary CI on main ("CI-…").
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
   title:
@@ -44,7 +39,6 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-          ref: ${{ inputs.ref }}
       - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
         with:
           python-version: ${{ matrix.python }}

@@ -24,7 +24,8 @@ from [Conventional Commits](https://www.conventionalcommits.org/) on `main` by
    branch itself. A `RELEASE_PLEASE_TOKEN` secret is optional.
 3. Merging the release pull request tags `vX.Y.Z` and creates the GitHub release. The
    same workflow then:
-   - runs the full CI suite against the release commit,
+   - runs the full CI suite against the release commit and refuses to publish a tag that
+     points anywhere else,
    - builds the sdist and wheel once and checks that their versions match the tag,
    - creates build-provenance attestations,
    - publishes to PyPI with trusted publishing (no API tokens),
