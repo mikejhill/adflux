@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "adflux"
-version = "0.3.1"
+version = "0.4.0"
 description = "Lossless Markdown <-> Atlassian Document Format (ADF) conversion with Jira and Confluence profiles, macros and emoji"
 readme = "README.md"
 requires-python = ">=3.11"
