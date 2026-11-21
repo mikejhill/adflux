@@ -6,169 +6,91 @@
 [![Python](https://img.shields.io/pypi/pyversions/adflux.svg)](https://pypi.org/project/adflux/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-A pure-Python converter between Markdown (CommonMark + GFM) and Atlassian
-Document Format (ADF) — the JSON document model used by Confluence and
-Jira. Round-trips losslessly, including ADF-only constructs like panels,
-status badges, mentions, task lists, expand sections, and macros.
-
-```mermaid
-flowchart LR
-  MD[Markdown] -->|markdown-it-py| IR((Internal IR + adf-* envelopes))
-  ADF[ADF JSON] -->|mapping.yaml| IR
-  PF[Panflute JSON] -->|pf.load| IR
-  IR -->|options filter| W{writer}
-  W -->|CommonMark serializer| MD2[Markdown]
-  W -->|mapping.yaml| ADF2[ADF JSON]
-  W -->|pf.dump| PF2[Panflute JSON]
-```
-
-## Why adflux
-
-ADF is JSON, but no mature pure-Python tool converts it to and from
-Markdown without losing information. `adflux` fills that gap:
-
-- **No system dependencies.** `pip install adflux` — no Pandoc binary,
-  no Node, no Ruby.
-- **Lossless ADF round-trips.** A declarative `mapping.yaml` plus a small
-  envelope convention round-trips every ADF construct, including ones
-  the library has never seen.
-- **Idiomatic Markdown output.** Panels become GitHub alert blockquotes,
-  expand sections become `<details>`, smart cards become autolinks. The
-  output looks correct in GitHub, VS Code, and any standard viewer.
-- **Conversion options** make lossy / lossless behavior explicit and
-  selectable per call.
-
-## Install
+Lossless conversion between Markdown and Atlassian Document Format (ADF), the JSON
+document model of Jira and Confluence. Built so people and AI agents can read and write
+Jira issues and Confluence pages as Markdown without losing panels, macros, emoji,
+mentions, layouts or anything else.
 
 ```bash
-pip install adflux
+uvx adflux to-adf page.md -p confluence > page.json
+uvx adflux to-md issue.json -p jira
+uvx adflux syntax            # the Markdown dialect, for people and agents
+uvx adflux macros toc        # a Confluence macro's parameters and Markdown form
 ```
-
-Requires Python ≥ 3.11. Linux, macOS, and Windows are CI-tested.
-
-## Quick start
 
 ```python
-from adflux import convert
+from adflux import to_adf, to_markdown
 
-# Markdown → ADF JSON
-adf = convert(open("README.md").read(), src="md", dst="adf")
-
-# ADF JSON → Markdown, dropping ADF-only constructs to plain content
-md = convert(adf, src="adf", dst="md", options={"envelopes": "drop"})
+doc = to_adf("> [!WARNING]\n> Deploy freeze :status[ACTIVE]{color=red}", "jira")
+markdown = to_markdown(doc, "jira")
 ```
 
-```bash
-adflux convert --from md  --to adf README.md > readme.adf.json
-adflux convert --from adf --to md page.json
-adflux convert --from adf --to md --option envelopes=drop page.json
-adflux validate page.adf.json
-adflux list-options
+## What it does
+
+| | |
+|---|---|
+| **Lossless** | Every schema-valid ADF document converts to Markdown and back to the same ADF (up to server-generated ids). Property tests generate random documents to hold this. |
+| **Idiomatic** | Plain Markdown wherever it fits: `**bold**`, lists, GFM tables, `- [ ]` tasks, `> [!NOTE]` alerts, `<https://…>` smart links, `:smile:`. Directives (`:::expand{title=…}`, `:status[DONE]{color=green}`) cover the rest. |
+| **Complete** | The ADF spec is generated from Atlassian's official JSON Schema, so every node, mark and attribute is known. Any node can be written as a directive named after it; raw ADF (```` ```adf ````) is the last resort. |
+| **Product aware** | Profiles for Jira and Confluence: product emoji shortcuts, the Confluence macro catalog (111 macros with their parameters), native macro mapping (`:::info` → panel, `:::code` → code block), and warnings when Jira will not render something. |
+| **Validated** | Output is checked against the spec; `adflux validate` adds the full official JSON Schema pass with readable paths. |
+
+## Markdown at a glance
+
+```markdown
+# Release 2.4 :rocket:
+
+Owner :mention[@Ada]{id=557058:…}, due :date[2026-12-31], state :status[AT RISK]{color=yellow}.
+
+> [!INFO]
+> Feature flags ship off by default.
+
+- [x] Draft notes
+- [ ] Sign-off
+
+:::expand{title="Rollout plan"}
+| Stage | Users |
+|:------|------:|
+| Canary | 1% |
+| GA | 100% |
+:::
+
+::toc{maxLevel=2}
 ```
 
-Full API and CLI reference: [`docs/usage.md`](docs/usage.md).
+The full reference is [`src/adflux/syntax.md`](src/adflux/syntax.md) (also `adflux syntax`).
+Design notes: [`docs/design.md`](docs/design.md).
 
-## Conversion options
+## API
 
-| Option         | Choices                        | Default  | Description                                          |
-| -------------- | ------------------------------ | -------- | ---------------------------------------------------- |
-| `envelopes`    | `keep`, `drop`, `keep-strict`  | `keep`   | How ADF envelope nodes are handled on lossy targets. |
-| `jira-strict`  | `true`, `false`                | `false`  | Reject non-Jira ADF nodes during serialization.      |
-
-Worked examples: [`docs/options.md`](docs/options.md).
-
-## Markdown rendering of ADF constructs
-
-| ADF construct                            | Rendered as                                          |
-| ---------------------------------------- | ---------------------------------------------------- |
-| `panel` (info/note/warning/…)            | GitHub alert blockquote (`> [!NOTE]`, `> [!TIP]`, …) |
-| `expand`                                 | `<details><summary>title</summary>…</details>`       |
-| `inlineCard` / `blockCard` / `embedCard` | Autolink (`<https://…>`)                             |
-| `taskList` / `taskItem`                  | GFM task list (`- [ ]`, `- [x]`)                     |
-| `emoji`, `mention`                       | Plain text (`🚀`, `@alice`)                          |
-| Everything else                          | HTML-comment marker (`<!--adf:status …-->`)          |
-
-The reader recognises every form on its way back, so `MD → ADF → MD` is
-stable.
-
-## Supported formats
-
-| Format     | Aliases     | Description                                          |
-| ---------- | ----------- | ---------------------------------------------------- |
-| Markdown   | `md`, `markdown` | CommonMark + GFM via markdown-it-py             |
-| ADF        | `adf`       | Atlassian Document Format JSON                       |
-| Panflute   | `panflute`, `pf` | Pandoc JSON AST for integration with panflute tools |
-
-## How it works
-
-- **IR**: an in-memory document tree built on
-  [panflute](https://github.com/sergiocorreia/panflute) AST classes
-  (used purely as Python data structures — no Pandoc binary involved),
-  with `Div` / `Span` envelopes for ADF-only constructs.
-- **Envelopes**: class prefix `adf-<nodeType>` plus a base64-JSON blob
-  for complex attributes. A universal `adf-raw` fallback guarantees zero
-  data loss.
-- **Mapping**: every ADF node type is described in
-  [`src/adflux/formats/adf/mapping.yaml`](src/adflux/formats/adf/mapping.yaml).
-  Adding a new node type is a YAML edit.
-
-Deeper dives:
-[`docs/design.md`](docs/design.md) ·
-[`docs/architecture.md`](docs/architecture.md) ·
-[`docs/options.md`](docs/options.md) ·
-[`docs/fidelity-matrix.md`](docs/fidelity-matrix.md) ·
-[`docs/extending.md`](docs/extending.md) ·
-[`docs/e2e-testing.md`](docs/e2e-testing.md).
-
-## Examples
-
-Runnable scripts in [`examples/`](examples):
-
-```bash
-python examples/md_to_adf.py README.md
-python examples/adf_to_markdown.py
-python examples/confluence_roundtrip.py
-```
+| Function | |
+|---|---|
+| `to_adf(markdown, profile="generic", strict=False, check=True)` | Markdown → ADF `dict`. `strict` turns warnings into errors. |
+| `to_markdown(adf, profile="generic", keep_metadata=False)` | ADF (dict, JSON text, a Confluence `{"representation","value"}` body, or a `Node`) → Markdown. |
+| `convert(source, src, dst, profile)` | Either direction by name (`"markdown"`, `"adf"`). |
+| `validate(adf)` / `validation_issues(adf)` | Spec + JSON Schema validation. |
+| `canonical(adf)` | Comparison form without server noise (`localId`, macro metadata, defaults). |
+| `get_profile("jira" \| "confluence" \| "generic")` | Profiles; `profile.with_mentions(resolver)` resolves `@Name` mentions. |
 
 ## Development
 
 ```bash
-git clone https://github.com/mikejhill/adflux
-cd adflux
 uv sync --all-groups
-uv run poe check
+uv run poe check                       # lint + typecheck + tests
+HYPOTHESIS_PROFILE=thorough uv run pytest tests/roundtrip   # 2000 random documents
+uv run python scripts/generate_spec.py # after updating src/adflux/adf/schema/full.json
+uv run python scripts/build_profile_data.py
 ```
 
-Common tasks via [poethepoet](https://poethepoet.natn.io/):
-
-```bash
-poe test         # unit + integration + round-trip + property tests
-poe test-e2e     # live Confluence + Jira round-trip suite (requires .env)
-poe lint         # ruff format --check + ruff check
-poe typecheck    # ty check src
-poe cov          # pytest with coverage report
-poe check        # lint + typecheck + test (run before opening a PR)
-poe build        # sdist + wheel into ./dist
-```
-
-CI runs the full matrix on Linux, macOS, and Windows for Python 3.11–3.13.
+`tests/fixtures/live` holds ADF captured from live Jira and Confluence sites (every node
+type as stored by each product, every Confluence macro, Jira wiki conversions). The e2e
+suite (`poe test-e2e`, needs `.env`) creates real pages and issues and requires the
+products to store adflux output unchanged.
 
 ## Releasing
 
-Releases are automated. Land changes on `main` using
-[Conventional Commits](https://www.conventionalcommits.org/), then run
-the **Release** workflow from the GitHub Actions tab. `go-semantic-release`
-computes the next version, builds the sdist + wheel, creates a tagged
-GitHub Release, and publishes to PyPI via OIDC trusted publishing.
-
-## Contributing
-
-Issues and pull requests are welcome. Before opening a PR:
-
-1. `poe check` must pass (lint + typecheck + tests).
-2. Use a Conventional Commit message (`feat:`, `fix:`, `docs:`, …).
-3. New ADF node types need a fixture in
-   `tests/roundtrip/test_node_coverage.py`.
+Land Conventional Commits on `main`, then run the **Release** workflow:
+`go-semantic-release` picks the version, builds, tags, and publishes to PyPI.
 
 ## License
 

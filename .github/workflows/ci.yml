@@ -85,7 +85,7 @@ jobs:
         run: |
           python -m venv /tmp/smoketest
           /tmp/smoketest/bin/pip install dist/*.whl
-          /tmp/smoketest/bin/adflux list-formats
+          /tmp/smoketest/bin/adflux --version && echo "# t" | /tmp/smoketest/bin/adflux to-adf --compact
       - uses: actions/upload-artifact@v7
         with:
           name: dist

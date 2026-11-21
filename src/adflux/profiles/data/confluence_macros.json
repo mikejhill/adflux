@@ -1,0 +1,4205 @@
+{
+ "align": {
+  "title": "Align",
+  "body": "RICH_TEXT",
+  "output": "BLOCK",
+  "node": "bodiedExtension",
+  "hidden": false,
+  "aliases": [],
+  "params": [
+   {
+    "name": "align",
+    "type": "enum",
+    "required": true,
+    "enum": [
+     "justify",
+     "left",
+     "right",
+     "center"
+    ]
+   },
+   {
+    "name": "class",
+    "type": "string"
+   }
+  ]
+ },
+ "anchor": {
+  "title": "Anchor",
+  "body": "NONE",
+  "output": "INLINE",
+  "node": "inlineExtension",
+  "hidden": false,
+  "aliases": [],
+  "params": [
+   {
+    "name": "",
+    "type": "string",
+    "required": true
+   }
+  ],
+  "docs": "https://support.atlassian.com/confluence-cloud/docs/insert-links-and-anchors"
+ },
+ "attachments": {
+  "title": "Attachments",
+  "body": "NONE",
+  "output": "BLOCK",
+  "node": "extension",
+  "hidden": false,
+  "aliases": [],
+  "params": [
+   {
+    "name": "patterns",
+    "type": "string"
+   },
+   {
+    "name": "labels",
+    "type": "string"
+   },
+   {
+    "name": "old",
+    "type": "boolean",
+    "default": "true"
+   },
+   {
+    "name": "preview",
+    "type": "boolean",
+    "default": "false"
+   },
+   {
+    "name": "sortBy",
+    "type": "enum",
+    "default": "date",
+    "enum": [
+     "date",
+     "createddate",
+     "size",
+     "name"
+    ]
+   },
+   {
+    "name": "sortOrder",
+    "type": "enum",
+    "default": "ascending",
+    "enum": [
+     "ascending",
+     "descending"
+    ]
+   },
+   {
+    "name": "upload",
+    "type": "boolean",
+    "default": "true"
+   },
+   {
+    "name": "page",
+    "type": "confluence-content"
+   },
+   {
+    "name": "pageSize",
+    "type": "string"
+   }
+  ],
+  "docs": "https://support.atlassian.com/confluence-cloud/docs/insert-the-attachments-macro"
+ },
+ "bgcolor": {
+  "title": "Background Color",
+  "body": "RICH_TEXT",
+  "output": "BLOCK",
+  "node": "panel",
+  "hidden": false,
+  "aliases": [],
+  "params": [
+   {
+    "name": "id",
+    "type": "string"
+   },
+   {
+    "name": "color",
+    "type": "string",
+    "required": true,
+    "default": "green",
+    "aliases": [
+     "",
+     "colour"
+    ]
+   },
+   {
+    "name": "class",
+    "type": "string"
+   }
+  ]
+ },
+ "blog-posts": {
+  "title": "Blog posts",
+  "body": "NONE",
+  "output": "BLOCK",
+  "node": "extension",
+  "hidden": false,
+  "aliases": [
+   "news",
+   "blogs",
+   "blogposts",
+   "blogpost",
+   "blog",
+   "blog-post"
+  ],
+  "params": [
+   {
+    "name": "content",
+    "type": "enum",
+    "required": true,
+    "default": "entire",
+    "enum": [
+     "titles",
+     "excerpts",
+     "entire"
+    ]
+   },
+   {
+    "name": "time",
+    "type": "relativedate"
+   },
+   {
+    "name": "labels",
+    "type": "string",
+    "aliases": [
+     "label"
+    ]
+   },
+   {
+    "name": "author",
+    "type": "username",
+    "multiple": true
+   },
+   {
+    "name": "spaces",
+    "type": "spacekey",
+    "aliases": [
+     "space"
+    ]
+   },
+   {
+    "name": "max",
+    "type": "int",
+    "default": "100",
+    "aliases": [
+     "maxResults"
+    ]
+   },
+   {
+    "name": "sort",
+    "type": "enum",
+    "enum": [
+     "title",
+     "creation",
+     "modified"
+    ]
+   },
+   {
+    "name": "reverse",
+    "type": "boolean",
+    "default": "false"
+   }
+  ],
+  "docs": "https://confluence.atlassian.com/display/ConfCloud/Blog+Posts+Macro"
+ },
+ "card": {
+  "title": "card",
+  "body": "RICH_TEXT",
+  "output": "BLOCK",
+  "node": "bodiedExtension",
+  "hidden": true,
+  "aliases": [],
+  "params": [
+   {
+    "name": "title",
+    "type": "string",
+    "default": "Click here to expand..."
+   }
+  ],
+  "docs": "http://confluence.atlassian.com/display/DOC/Expand+Macro"
+ },
+ "center": {
+  "title": "Center",
+  "body": "RICH_TEXT",
+  "output": "BLOCK",
+  "node": "bodiedExtension",
+  "hidden": false,
+  "aliases": [],
+  "params": [
+   {
+    "name": "class",
+    "type": "string"
+   }
+  ]
+ },
+ "change-history": {
+  "title": "Change history",
+  "body": "NONE",
+  "output": "BLOCK",
+  "node": "extension",
+  "hidden": false,
+  "aliases": [],
+  "params": [],
+  "docs": "https://confluence.atlassian.com/display/ConfCloud/Change-History+Macro"
+ },
+ "chart": {
+  "title": "Chart (Deprecated)",
+  "body": "RICH_TEXT",
+  "output": "BLOCK",
+  "node": "bodiedExtension",
+  "hidden": true,
+  "aliases": [],
+  "params": [
+   {
+    "name": "type",
+    "type": "enum",
+    "default": "pie",
+    "enum": [
+     "pie",
+     "bar",
+     "line",
+     "area",
+     "xyArea",
+     "xyBar",
+     "xyLine",
+     "xyStep",
+     "xyStepArea",
+     "scatter",
+     "timeSeries",
+     "gantt",
+     "radar"
+    ]
+   },
+   {
+    "name": "orientation",
+    "type": "enum",
+    "enum": [
+     "vertical",
+     "horizontal"
+    ]
+   },
+   {
+    "name": "3D",
+    "type": "boolean",
+    "default": "false"
+   },
+   {
+    "name": "stacked",
+    "type": "boolean",
+    "default": "false"
+   },
+   {
+    "name": "showShapes",
+    "type": "boolean",
+    "default": "true"
+   },
+   {
+    "name": "opacity",
+    "type": "int"
+   },
+   {
+    "name": "width",
+    "type": "int"
+   },
+   {
+    "name": "height",
+    "type": "int"
+   },
+   {
+    "name": "dataDisplay",
+    "type": "enum",
+    "enum": [
+     "before",
+     "after"
+    ]
+   },
+   {
+    "name": "imageFormat",
+    "type": "enum",
+    "enum": [
+     "png",
+     "jpg"
+    ]
+   },
+   {
+    "name": "title",
+    "type": "string"
+   },
+   {
+    "name": "subTitle",
+    "type": "string"
+   },
+   {
+    "name": "xLabel",
+    "type": "string"
+   },
+   {
+    "name": "yLabel",
+    "type": "string"
+   },
+   {
+    "name": "legend",
+    "type": "boolean",
+    "default": "true"
+   },
+   {
+    "name": "tables",
+    "type": "string"
+   },
+   {
+    "name": "columns",
+    "type": "string"
+   },
+   {
+    "name": "dataOrientation",
+    "type": "enum",
+    "enum": [
+     "horizontal",
+     "vertical"
+    ]
+   },
+   {
+    "name": "timeSeries",
+    "type": "boolean",
+    "default": "false"
+   },
+   {
+    "name": "dateFormat",
+    "type": "string"
+   },
+   {
+    "name": "timePeriod",
+    "type": "enum",
+    "enum": [
+     "Millisecond",
+     "Second",
+     "Minute",
+     "Hour",
+     "Day",
+     "Week",
+     "Month",
+     "Quarter",
+     "Year"
+    ]
+   },
+   {
+    "name": "language",
+    "type": "string"
+   },
+   {
+    "name": "country",
+    "type": "string"
+   },
+   {
+    "name": "forgive",
+    "type": "boolean",
+    "default": "true"
+   },
+   {
+    "name": "bgColor",
+    "type": "color"
+   },
+   {
+    "name": "borderColor",
+    "type": "color"
+   },
+   {
+    "name": "colors",
+    "type": "color",
+    "multiple": true
+   },
+   {
+    "name": "rangeAxisLowerBound",
+    "type": "int"
+   },
+   {
+    "name": "rangeAxisUpperBound",
+    "type": "int"
+   },
+   {
+    "name": "rangeAxisTickUnit",
+    "type": "int"
+   },
+   {
+    "name": "rangeAxisLabelAngle",
+    "type": "int"
+   },
+   {
+    "name": "domainAxisLowerBound",
+    "type": "int"
+   },
+   {
+    "name": "domainAxisUpperBound",
+    "type": "int"
+   },
+   {
+    "name": "domainAxisTickUnit",
+    "type": "int"
+   },
+   {
+    "name": "domainAxisLabelAngle",
+    "type": "string"
+   },
+   {
+    "name": "categoryLabelPosition",
+    "type": "string"
+   },
+   {
+    "name": "dateTickMarkPosition",
+    "type": "string"
+   },
+   {
+    "name": "pieSectionLabel",
+    "type": "string"
+   },
+   {
+    "name": "pieSectionExplode",
+    "type": "string"
+   },
+   {
+    "name": "attachment",
+    "type": "string"
+   },
+   {
+    "name": "attachmentVersion",
+    "type": "enum",
+    "enum": [
+     "new",
+     "replace",
+     "keep"
+    ]
+   },
+   {
+    "name": "attachmentComment",
+    "type": "string"
+   },
+   {
+    "name": "thumbnail",
+    "type": "boolean",
+    "default": "false"
+   }
+  ]
+ },
+ "cheese": {
+  "title": "Cheese",
+  "body": "NONE",
+  "output": "BLOCK",
+  "node": "inlineExtension",
+  "hidden": false,
+  "aliases": [],
+  "params": [],
+  "docs": "https://confluence.atlassian.com/display/ConfCloud/Cheese+Macro"
+ },
+ "children": {
+  "title": "Child pages",
+  "body": "NONE",
+  "output": "BLOCK",
+  "node": "extension",
+  "hidden": false,
+  "aliases": [],
+  "params": [
+   {
+    "name": "all",
+    "type": "boolean",
+    "default": "false"
+   },
+   {
+    "name": "page",
+    "type": "confluence-content"
+   },
+   {
+    "name": "first",
+    "type": "int"
+   },
+   {
+    "name": "depth",
+    "type": "int"
+   },
+   {
+    "name": "style",
+    "type": "enum",
+    "enum": [
+     "h1",
+     "h2",
+     "h3",
+     "h4",
+     "h5",
+     "h6"
+    ]
+   },
+   {
+    "name": "excerptType",
+    "type": "enum",
+    "default": "none",
+    "enum": [
+     "none",
+     "simple",
+     "rich content"
+    ]
+   },
+   {
+    "name": "sort",
+    "type": "enum",
+    "enum": [
+     "creation",
+     "title",
+     "modified"
+    ]
+   },
+   {
+    "name": "reverse",
+    "type": "boolean",
+    "default": "false"
+   }
+  ],
+  "docs": "https://confluence.atlassian.com/display/ConfCloud/Children+Display+Macro"
+ },
+ "clickable": {
+  "title": "Clickable",
+  "body": "RICH_TEXT",
+  "output": "BLOCK",
+  "node": "bodiedExtension",
+  "hidden": true,
+  "aliases": [],
+  "params": [
+   {
+    "name": "link",
+    "type": "string",
+    "required": true
+   }
+  ]
+ },
+ "code": {
+  "title": "Code Block",
+  "body": "PLAIN_TEXT",
+  "output": "BLOCK",
+  "node": "codeBlock",
+  "hidden": false,
+  "aliases": [],
+  "params": [
+   {
+    "name": "language",
+    "type": "string"
+   },
+   {
+    "name": "title",
+    "type": "string"
+   },
+   {
+    "name": "collapse",
+    "type": "boolean",
+    "default": "false"
+   },
+   {
+    "name": "linenumbers",
+    "type": "boolean",
+    "default": "false"
+   },
+   {
+    "name": "firstline",
+    "type": "string"
+   },
+   {
+    "name": "theme",
+    "type": "enum",
+    "default": "Default",
+    "enum": [
+     "Default",
+     "DJango",
+     "Emacs",
+     "FadeToGrey",
+     "Midnight",
+     "RDark",
+     "Eclipse",
+     "Confluence"
+    ]
+   }
+  ]
+ },
+ "colgroup": {
+  "title": "Colgroup Macro",
+  "body": "RICH_TEXT",
+  "output": "BLOCK",
+  "node": "bodiedExtension",
+  "hidden": true,
+  "aliases": [],
+  "params": [
+   {
+    "name": "id",
+    "type": "string"
+   },
+   {
+    "name": "class",
+    "type": "string"
+   },
+   {
+    "name": "span",
+    "type": "int"
+   },
+   {
+    "name": "width",
+    "type": "string"
+   }
+  ]
+ },
+ "column": {
+  "title": "Column",
+  "body": "RICH_TEXT",
+  "output": "BLOCK",
+  "node": "paragraph",
+  "hidden": false,
+  "aliases": [],
+  "params": [
+   {
+    "name": "width",
+    "type": "string"
+   }
+  ],
+  "docs": "https://confluence.atlassian.com/display/ConfCloud/Page+Layouts%2C+Columns+and+Sections"
+ },
+ "content-by-user": {
+  "title": "Content by User",
+  "body": "NONE",
+  "output": "BLOCK",
+  "node": "extension",
+  "hidden": false,
+  "aliases": [],
+  "params": [
+   {
+    "name": "author",
+    "type": "username",
+    "required": true
+   },
+   {
+    "name": "spaces",
+    "type": "spacekey",
+    "multiple": true,
+    "default": "@all",
+    "aliases": [
+     "space"
+    ]
+   },
+   {
+    "name": "max",
+    "type": "int",
+    "default": "15",
+    "aliases": [
+     "maxResults"
+    ]
+   }
+  ],
+  "docs": "https://confluence.atlassian.com/display/ConfCloud/Content+by+User+Macro"
+ },
+ "content-report-table": {
+  "title": "Content report table",
+  "body": "NONE",
+  "output": "BLOCK",
+  "node": "extension",
+  "hidden": false,
+  "aliases": [],
+  "params": [
+   {
+    "name": "labels",
+    "type": "string",
+    "required": true
+   },
+   {
+    "name": "spaces",
+    "type": "spacekey",
+    "multiple": true
+   },
+   {
+    "name": "sort",
+    "type": "enum",
+    "default": "Page modified",
+    "enum": [
+     "Page modified",
+     "Page created",
+     "Page title"
+    ]
+   },
+   {
+    "name": "reverse",
+    "type": "boolean",
+    "default": "true"
+   },
+   {
+    "name": "showCommentsCount",
+    "type": "boolean",
+    "default": "false"
+   },
+   {
+    "name": "showLikesCount",
+    "type": "boolean",
+    "default": "false"
+   },
+   {
+    "name": "maxResults",
+    "type": "int",
+    "default": "20"
+   },
+   {
+    "name": "blankTitle",
+    "type": "string",
+    "hidden": true
+   },
+   {
+    "name": "blankDescription",
+    "type": "string",
+    "hidden": true
+   },
+   {
+    "name": "contentBlueprintId",
+    "type": "string",
+    "hidden": true
+   },
+   {
+    "name": "blueprintModuleCompleteKey",
+    "type": "string",
+    "hidden": true
+   },
+   {
+    "name": "createButtonLabel",
+    "type": "string",
+    "hidden": true
+   }
+  ],
+  "docs": "https://confluence.atlassian.com/display/ConfCloud/Content+Report+Table+Macro"
+ },
+ "contentbylabel": {
+  "title": "Filter by label",
+  "body": "NONE",
+  "output": "BLOCK",
+  "node": "extension",
+  "hidden": false,
+  "aliases": [],
+  "params": [
+   {
+    "name": "cql",
+    "type": "cql",
+    "required": true
+   },
+   {
+    "name": "sort",
+    "type": "enum",
+    "enum": [
+     "title",
+     "creation",
+     "modified"
+    ]
+   },
+   {
+    "name": "reverse",
+    "type": "boolean",
+    "default": "false"
+   },
+   {
+    "name": "max",
+    "type": "int",
+    "default": "15",
+    "aliases": [
+     "maxResults"
+    ]
+   },
+   {
+    "name": "title",
+    "type": "string"
+   },
+   {
+    "name": "showLabels",
+    "type": "boolean",
+    "default": "true"
+   },
+   {
+    "name": "showSpace",
+    "type": "boolean",
+    "default": "true"
+   },
+   {
+    "name": "excerptType",
+    "type": "enum",
+    "default": "none",
+    "enum": [
+     "none",
+     "simple",
+     "rich content"
+    ]
+   }
+  ],
+  "docs": "https://confluence.atlassian.com/display/ConfCloud/Content+by+Label+Macro"
+ },
+ "contributors": {
+  "title": "Contributors",
+  "body": "NONE",
+  "output": "BLOCK",
+  "node": "extension",
+  "hidden": false,
+  "aliases": [],
+  "params": [
+   {
+    "name": "include",
+    "type": "enum",
+    "multiple": true,
+    "default": "authors",
+    "enum": [
+     "authors",
+     "comments",
+     "labels",
+     "watches"
+    ]
+   },
+   {
+    "name": "order",
+    "type": "enum",
+    "default": "count",
+    "enum": [
+     "count",
+     "name",
+     "update"
+    ]
+   },
+   {
+    "name": "reverse",
+    "type": "boolean",
+    "default": "false"
+   },
+   {
+    "name": "limit",
+    "type": "int"
+   },
+   {
+    "name": "mode",
+    "type": "enum",
+    "default": "inline",
+    "enum": [
+     "inline",
+     "list"
+    ]
+   },
+   {
+    "name": "showAnonymous",
+    "type": "boolean",
+    "default": "false"
+   },
+   {
+    "name": "showCount",
+    "type": "boolean",
+    "default": "false"
+   },
+   {
+    "name": "showLastTime",
+    "type": "boolean",
+    "default": "false"
+   },
+   {
+    "name": "page",
+    "type": "confluence-content"
+   },
+   {
+    "name": "labels",
+    "type": "label",
+    "multiple": true
+   },
+   {
+    "name": "spaces",
+    "type": "spacekey",
+    "multiple": true
+   },
+   {
+    "name": "contentType",
+    "type": "enum",
+    "enum": [
+     "pages",
+     "blogposts"
+    ]
+   },
+   {
+    "name": "publishDate",
+    "type": "date"
+   },
+   {
+    "name": "scope",
+    "type": "enum",
+    "enum": [
+     "children",
+     "descendants"
+    ]
+   },
+   {
+    "name": "showPages",
+    "type": "boolean",
+    "default": "false"
+   },
+   {
+    "name": "noneFoundMessage",
+    "type": "string"
+   }
+  ],
+  "docs": "https://confluence.atlassian.com/display/ConfCloud/Contributors+Macro"
+ },
+ "contributors-summary": {
+  "title": "Contributors Summary (Deprecated)",
+  "body": "NONE",
+  "output": "BLOCK",
+  "node": "extension",
+  "hidden": true,
+  "aliases": [],
+  "params": [
+   {
+    "name": "groupby",
+    "type": "enum",
+    "default": "contributors",
+    "enum": [
+     "contributors",
+     "pages"
+    ]
+   },
+   {
+    "name": "columns",
+    "type": "enum",
+    "multiple": true,
+    "default": "edits,comments,labels",
+    "enum": [
+     "edits",
+     "edited",
+     "comments",
+     "commented",
+     "labels",
+     "labeled",
+     "labellist",
+     "watches",
+     "watching",
+     "lastupdate"
+    ]
+   },
+   {
+    "name": "order",
+    "type": "enum",
+    "default": "edits",
+    "enum": [
+     "edits",
+     "name",
+     "editTime",
+     "update"
+    ]
+   },
+   {
+    "name": "reverse",
+    "type": "boolean",
+    "default": "false"
+   },
+   {
+    "name": "limit",
+    "type": "int"
+   },
+   {
+    "name": "showAnonymous",
+    "type": "boolean",
+    "default": "false"
+   },
+   {
+    "name": "showZeroCounts",
+    "type": "boolean",
+    "default": "false"
+   },
+   {
+    "name": "page",
+    "type": "confluence-content"
+   },
+   {
+    "name": "labels",
+    "type": "label",
+    "multiple": true
+   },
+   {
+    "name": "spaces",
+    "type": "spacekey",
+    "multiple": true
+   },
+   {
+    "name": "contentType",
+    "type": "enum",
+    "enum": [
+     "pages",
+     "blogposts"
+    ]
+   },
+   {
+    "name": "publishDate",
+    "type": "date"
+   },
+   {
+    "name": "scope",
+    "type": "enum",
+    "enum": [
+     "children",
+     "descendants"
+    ]
+   }
+  ]
+ },
+ "copyright": {
+  "title": "Copyright",
+  "body": "RICH_TEXT",
+  "output": "INLINE",
+  "node": "paragraph",
+  "hidden": false,
+  "aliases": [],
+  "params": [
+   {
+    "name": "id",
+    "type": "string"
+   },
+   {
+    "name": "class",
+    "type": "string"
+   }
+  ]
+ },
+ "create-from-template": {
+  "title": "Create from template",
+  "body": "NONE",
+  "output": "INLINE",
+  "node": "inlineExtension",
+  "hidden": false,
+  "aliases": [],
+  "params": [
+   {
+    "name": "buttonLabel",
+    "type": "string"
+   },
+   {
+    "name": "templateName",
+    "type": "enum",
+    "required": true,
+    "enum": []
+   },
+   {
+    "name": "title",
+    "type": "string"
+   },
+   {
+    "name": "pageType",
+    "type": "enum",
+    "required": true,
+    "default": "page",
+    "enum": []
+   },
+   {
+    "name": "spaceKey",
+    "type": "spacekey",
+    "default": ""
+   },
+   {
+    "name": "templateId",
+    "type": "string",
+    "hidden": true
+   },
+   {
+    "name": "blueprintModuleCompleteKey",
+    "type": "string",
+    "hidden": true
+   },
+   {
+    "name": "contentBlueprintId",
+    "type": "string",
+    "hidden": true
+   }
+  ]
+ },
+ "create-space-button": {
+  "title": "Create Space Button",
+  "body": "NONE",
+  "output": "BLOCK",
+  "node": "extension",
+  "hidden": false,
+  "aliases": [],
+  "params": [
+   {
+    "name": "size",
+    "type": "enum",
+    "default": "large",
+    "enum": [
+     "small",
+     "large"
+    ]
+   }
+  ]
+ },
+ "decisionreport": {
+  "title": "Decision report",
+  "body": "NONE",
+  "output": "BLOCK",
+  "node": "extension",
+  "hidden": false,
+  "aliases": [],
+  "params": [
+   {
+    "name": "cql",
+    "type": "cql",
+    "required": true,
+    "default": "space=currentSpace()"
+   },
+   {
+    "name": "sort",
+    "type": "enum",
+    "enum": [
+     "Page title",
+     "Page created",
+     "Page modified"
+    ]
+   },
+   {
+    "name": "columns",
+    "type": "enum",
+    "multiple": true,
+    "enum": [
+     "Page created",
+     "Page modified"
+    ]
+   },
+   {
+    "name": "reverse",
+    "type": "boolean",
+    "default": "false"
+   },
+   {
+    "name": "max",
+    "type": "int",
+    "required": true,
+    "default": "20",
+    "aliases": [
+     "maxResults"
+    ]
+   }
+  ]
+ },
+ "deck": {
+  "title": "deck",
+  "body": "RICH_TEXT",
+  "output": "BLOCK",
+  "node": "bodiedExtension",
+  "hidden": true,
+  "aliases": [],
+  "params": [
+   {
+    "name": "title",
+    "type": "string"
+   },
+   {
+    "name": "borderStyle",
+    "type": "string"
+   },
+   {
+    "name": "borderColor",
+    "type": "color"
+   },
+   {
+    "name": "borderWidth",
+    "type": "string"
+   },
+   {
+    "name": "bgColor",
+    "type": "color"
+   },
+   {
+    "name": "titleBGColor",
+    "type": "color"
+   },
+   {
+    "name": "titleColor",
+    "type": "color"
+   }
+  ],
+  "docs": "https://confluence.atlassian.com/display/ConfCloud/Panel+Macro"
+ },
+ "details": {
+  "title": "Page Properties",
+  "body": "RICH_TEXT",
+  "output": "BLOCK",
+  "node": "bodiedExtension",
+  "hidden": false,
+  "aliases": [],
+  "params": [
+   {
+    "name": "id",
+    "type": "string",
+    "default": "",
+    "aliases": [
+     "label"
+    ]
+   },
+   {
+    "name": "hidden",
+    "type": "boolean",
+    "default": "false"
+   }
+  ],
+  "docs": "https://confluence.atlassian.com/display/ConfCloud/Page+Properties+Macro"
+ },
+ "detailssummary": {
+  "title": "Page Properties Report",
+  "body": "NONE",
+  "output": "BLOCK",
+  "node": "extension",
+  "hidden": false,
+  "aliases": [],
+  "params": [
+   {
+    "name": "cql",
+    "type": "cql",
+    "required": true,
+    "default": "space = currentSpace()"
+   },
+   {
+    "name": "id",
+    "type": "string",
+    "default": ""
+   },
+   {
+    "name": "firstcolumn",
+    "type": "string",
+    "default": ""
+   },
+   {
+    "name": "headings",
+    "type": "string",
+    "default": ""
+   },
+   {
+    "name": "pageSize",
+    "type": "string",
+    "default": "30"
+   },
+   {
+    "name": "sortBy",
+    "type": "string",
+    "default": ""
+   },
+   {
+    "name": "reverseSort",
+    "type": "boolean",
+    "default": "false"
+   },
+   {
+    "name": "showCommentsCount",
+    "type": "boolean",
+    "default": "false"
+   },
+   {
+    "name": "showLikesCount",
+    "type": "boolean",
+    "default": "false"
+   },
+   {
+    "name": "showUnresolvedCommentsCount",
+    "type": "boolean",
+    "default": "false"
+   },
+   {
+    "name": "showPageLabels",
+    "type": "boolean",
+    "default": "false"
+   },
+   {
+    "name": "showCreator",
+    "type": "boolean",
+    "default": "false"
+   },
+   {
+    "name": "showLastModified",
+    "type": "boolean",
+    "default": "false"
+   },
+   {
+    "name": "blankTitle",
+    "type": "string",
+    "hidden": true
+   },
+   {
+    "name": "blankDescription",
+    "type": "string",
+    "hidden": true
+   },
+   {
+    "name": "contentBlueprintId",
+    "type": "string",
+    "hidden": true
+   },
+   {
+    "name": "blueprintModuleCompleteKey",
+    "type": "string",
+    "hidden": true
+   },
+   {
+    "name": "createButtonLabel",
+    "type": "string",
+    "hidden": true
+   }
+  ],
+  "docs": "https://confluence.atlassian.com/display/ConfCloud/Page+Properties+Report+Macro"
+ },
+ "div": {
+  "title": "Div",
+  "body": "RICH_TEXT",
+  "output": "BLOCK",
+  "node": "bodiedExtension",
+  "hidden": false,
+  "aliases": [],
+  "params": [
+   {
+    "name": "id",
+    "type": "string"
+   },
+   {
+    "name": "class",
+    "type": "string"
+   },
+   {
+    "name": "style",
+    "type": "string"
+   },
+   {
+    "name": "title",
+    "type": "string"
+   },
+   {
+    "name": "dir",
+    "type": "enum",
+    "enum": [
+     "rtl",
+     "ltr"
+    ]
+   },
+   {
+    "name": "align",
+    "type": "enum",
+    "enum": [
+     "left",
+     "center",
+     "right",
+     "justify"
+    ]
+   },
+   {
+    "name": "lang",
+    "type": "string"
+   }
+  ]
+ },
+ "excerpt": {
+  "title": "Excerpt",
+  "body": "RICH_TEXT",
+  "output": "INLINE",
+  "node": "bodiedExtension",
+  "hidden": false,
+  "aliases": [],
+  "params": [
+   {
+    "name": "name",
+    "type": "string"
+   },
+   {
+    "name": "hidden",
+    "type": "boolean",
+    "default": "false"
+   }
+  ],
+  "docs": "https://confluence.atlassian.com/display/ConfCloud/Excerpt+Macro"
+ },
+ "excerpt-include": {
+  "title": "Insert excerpt",
+  "body": "NONE",
+  "output": "INLINE",
+  "node": "extension",
+  "hidden": false,
+  "aliases": [],
+  "params": [
+   {
+    "name": "",
+    "type": "confluence-content",
+    "required": true
+   },
+   {
+    "name": "name",
+    "type": "string"
+   },
+   {
+    "name": "nopanel",
+    "type": "boolean",
+    "default": "false"
+   }
+  ]
+ },
+ "expand": {
+  "title": "Expand",
+  "body": "RICH_TEXT",
+  "output": "BLOCK",
+  "node": "expand",
+  "hidden": false,
+  "aliases": [],
+  "params": [
+   {
+    "name": "title",
+    "type": "string",
+    "default": "Click here to expand..."
+   }
+  ],
+  "docs": "http://confluence.atlassian.com/display/DOC/Expand+Macro"
+ },
+ "fancy-bullets": {
+  "title": "Fancy Bullets",
+  "body": "RICH_TEXT",
+  "output": "BLOCK",
+  "node": "bodiedExtension",
+  "hidden": false,
+  "aliases": [],
+  "params": [
+   {
+    "name": "id",
+    "type": "string"
+   },
+   {
+    "name": "type",
+    "type": "enum",
+    "enum": [
+     "image",
+     "disc",
+     "circle",
+     "square",
+     "decimal",
+     "decimal-leading-zero",
+     "lower-roman",
+     "upper-roman",
+     "lower-alpha",
+     "upper-alpha",
+     "lower-greek",
+     "lower-latin",
+     "upper-latin",
+     "hebrew",
+     "armenian",
+     "georgian",
+     "cjk-ideographic",
+     "hiragana",
+     "katakana",
+     "hiragana-iroha",
+     "katakana-iroha",
+     "none"
+    ]
+   },
+   {
+    "name": "image",
+    "type": "url",
+    "aliases": [
+     ""
+    ]
+   },
+   {
+    "name": "padding",
+    "type": "string"
+   }
+  ]
+ },
+ "favpages": {
+  "title": "Favourite Pages",
+  "body": "NONE",
+  "output": "BLOCK",
+  "node": "extension",
+  "hidden": false,
+  "aliases": [
+   "fav-pages"
+  ],
+  "params": [],
+  "docs": "https://confluence.atlassian.com/display/ConfCloud/Favourite+Pages+Macro"
+ },
+ "gallery": {
+  "title": "Gallery (Deprecated)",
+  "body": "NONE",
+  "output": "BLOCK",
+  "node": "extension",
+  "hidden": true,
+  "aliases": [],
+  "params": [
+   {
+    "name": "title",
+    "type": "string"
+   },
+   {
+    "name": "columns",
+    "type": "int",
+    "default": "4"
+   },
+   {
+    "name": "exclude",
+    "type": "string"
+   },
+   {
+    "name": "include",
+    "type": "string"
+   },
+   {
+    "name": "excludeLabel",
+    "type": "string"
+   },
+   {
+    "name": "includeLabel",
+    "type": "string"
+   },
+   {
+    "name": "page",
+    "type": "string"
+   },
+   {
+    "name": "sort",
+    "type": "enum",
+    "enum": [
+     "name",
+     "comment",
+     "date",
+     "size"
+    ]
+   },
+   {
+    "name": "reverse",
+    "type": "boolean",
+    "default": "false"
+   }
+  ],
+  "docs": "https://confluence.atlassian.com/display/ConfCloud/Gallery+Macro"
+ },
+ "global-reports": {
+  "title": "Global Reports",
+  "body": "NONE",
+  "output": "BLOCK",
+  "node": "extension",
+  "hidden": false,
+  "aliases": [],
+  "params": [
+   {
+    "name": "width",
+    "type": "percentage"
+   }
+  ]
+ },
+ "highlight": {
+  "title": "Highlight",
+  "body": "RICH_TEXT",
+  "output": "INLINE",
+  "node": "bodiedExtension",
+  "hidden": false,
+  "aliases": [],
+  "params": [
+   {
+    "name": "id",
+    "type": "string"
+   },
+   {
+    "name": "class",
+    "type": "string"
+   },
+   {
+    "name": "color",
+    "type": "string",
+    "required": true,
+    "default": "yellow",
+    "aliases": [
+     "",
+     "colour"
+    ]
+   }
+  ]
+ },
+ "htmlcomment": {
+  "title": "HTML Comment",
+  "body": "RICH_TEXT",
+  "output": "INLINE",
+  "node": "bodiedExtension",
+  "hidden": false,
+  "aliases": [],
+  "params": [
+   {
+    "name": "hidden",
+    "type": "boolean",
+    "default": "false"
+   }
+  ]
+ },
+ "iframe": {
+  "title": "Iframe",
+  "body": "NONE",
+  "output": "BLOCK",
+  "node": "extension",
+  "hidden": false,
+  "aliases": [],
+  "params": [
+   {
+    "name": "src",
+    "type": "url",
+    "required": true
+   },
+   {
+    "name": "id",
+    "type": "string"
+   },
+   {
+    "name": "class",
+    "type": "string"
+   },
+   {
+    "name": "style",
+    "type": "string"
+   },
+   {
+    "name": "title",
+    "type": "string"
+   },
+   {
+    "name": "width",
+    "type": "string"
+   },
+   {
+    "name": "height",
+    "type": "string"
+   },
+   {
+    "name": "align",
+    "type": "enum",
+    "enum": [
+     "left",
+     "right",
+     "middle",
+     "top",
+     "bottom"
+    ]
+   },
+   {
+    "name": "frameborder",
+    "type": "enum",
+    "enum": [
+     "show",
+     "hide"
+    ]
+   },
+   {
+    "name": "longdesc",
+    "type": "string"
+   },
+   {
+    "name": "marginheight",
+    "type": "string"
+   },
+   {
+    "name": "marginwidth",
+    "type": "string"
+   },
+   {
+    "name": "name",
+    "type": "string"
+   },
+   {
+    "name": "scrolling",
+    "type": "enum",
+    "enum": [
+     "yes",
+     "no",
+     "auto"
+    ]
+   },
+   {
+    "name": "dir",
+    "type": "enum",
+    "enum": [
+     "ltr",
+     "rtl"
+    ]
+   },
+   {
+    "name": "lang",
+    "type": "string"
+   },
+   {
+    "name": "allowfullscreen",
+    "type": "boolean",
+    "default": "false"
+   }
+  ]
+ },
+ "img": {
+  "title": "img",
+  "body": "NONE",
+  "output": "BLOCK",
+  "node": "extension",
+  "hidden": true,
+  "aliases": [],
+  "params": [
+   {
+    "name": "dir",
+    "type": "enum",
+    "enum": [
+     "ltr",
+     "rtl"
+    ]
+   },
+   {
+    "name": "align",
+    "type": "enum",
+    "enum": [
+     "left",
+     "right",
+     "top",
+     "middle",
+     "bottom"
+    ]
+   },
+   {
+    "name": "lang",
+    "type": "string"
+   },
+   {
+    "name": "height",
+    "type": "string"
+   },
+   {
+    "name": "width",
+    "type": "string"
+   },
+   {
+    "name": "border",
+    "type": "string"
+   },
+   {
+    "name": "src",
+    "type": "url"
+   },
+   {
+    "name": "alt",
+    "type": "string"
+   },
+   {
+    "name": "longdesc",
+    "type": "url"
+   },
+   {
+    "name": "ismap",
+    "type": "string"
+   },
+   {
+    "name": "usemap",
+    "type": "string"
+   }
+  ]
+ },
+ "include": {
+  "title": "Include Page",
+  "body": "NONE",
+  "output": "BLOCK",
+  "node": "extension",
+  "hidden": false,
+  "aliases": [],
+  "params": [
+   {
+    "name": "",
+    "type": "confluence-content",
+    "required": true
+   }
+  ],
+  "docs": "https://confluence.atlassian.com/display/ConfCloud/Include+Page+Macro"
+ },
+ "index": {
+  "title": "Page Index (Deprecated)",
+  "body": "NONE",
+  "output": "BLOCK",
+  "node": "extension",
+  "hidden": true,
+  "aliases": [],
+  "params": [],
+  "docs": "https://confluence.atlassian.com/display/ConfCloud/Page+Index+Macro"
+ },
+ "info": {
+  "title": "Info",
+  "body": "RICH_TEXT",
+  "output": "BLOCK",
+  "node": "panel",
+  "hidden": false,
+  "aliases": [],
+  "params": [
+   {
+    "name": "title",
+    "type": "string"
+   },
+   {
+    "name": "icon",
+    "type": "boolean",
+    "default": "true"
+   }
+  ]
+ },
+ "jira": {
+  "title": "Jira Legacy",
+  "body": "NONE",
+  "output": "BLOCK",
+  "node": "inlineExtension",
+  "hidden": false,
+  "aliases": [],
+  "params": [
+   {
+    "name": "key",
+    "type": "string"
+   },
+   {
+    "name": "jqlQuery",
+    "type": "string"
+   },
+   {
+    "name": "server",
+    "type": "string",
+    "required": true
+   },
+   {
+    "name": "serverId",
+    "type": "string"
+   },
+   {
+    "name": "serverUrl",
+    "type": "string"
+   },
+   {
+    "name": "showSummary",
+    "type": "boolean",
+    "default": "true"
+   }
+  ],
+  "docs": "https://confluence.atlassian.com/display/DOC/JIRA+Issues+Macro"
+ },
+ "jirachart": {
+  "title": "Jira charts",
+  "body": "NONE",
+  "output": "BLOCK",
+  "node": "extension",
+  "hidden": false,
+  "aliases": [],
+  "params": [
+   {
+    "name": "server",
+    "type": "string",
+    "required": true
+   }
+  ],
+  "docs": "https://confluence.atlassian.com/display/ConfCloud/"
+ },
+ "jiraissues": {
+  "title": "Jira Issues",
+  "body": "NONE",
+  "output": "BLOCK",
+  "node": "extension",
+  "hidden": true,
+  "aliases": [],
+  "params": [
+   {
+    "name": "url",
+    "type": "url",
+    "required": true
+   },
+   {
+    "name": "columns",
+    "type": "string"
+   },
+   {
+    "name": "count",
+    "type": "boolean",
+    "default": "false"
+   },
+   {
+    "name": "cache",
+    "type": "enum",
+    "default": "on",
+    "enum": [
+     "on",
+     "off"
+    ]
+   },
+   {
+    "name": "anonymous",
+    "type": "boolean",
+    "default": "false"
+   },
+   {
+    "name": "width",
+    "type": "string",
+    "default": "100%"
+   },
+   {
+    "name": "height",
+    "type": "int",
+    "default": "480"
+   },
+   {
+    "name": "title",
+    "type": "string"
+   },
+   {
+    "name": "renderMode",
+    "type": "enum",
+    "default": "dynamic",
+    "enum": [
+     "dynamic",
+     "static"
+    ]
+   },
+   {
+    "name": "showSummary",
+    "type": "boolean",
+    "default": "true"
+   }
+  ],
+  "docs": "https://confluence.atlassian.com/display/DOC/JIRA+Issues+Macro"
+ },
+ "li": {
+  "title": "List Item",
+  "body": "RICH_TEXT",
+  "output": "BLOCK",
+  "node": "bodiedExtension",
+  "hidden": true,
+  "aliases": [],
+  "params": [
+   {
+    "name": "id",
+    "type": "string"
+   },
+   {
+    "name": "class",
+    "type": "string"
+   },
+   {
+    "name": "style",
+    "type": "string"
+   },
+   {
+    "name": "title",
+    "type": "string"
+   },
+   {
+    "name": "dir",
+    "type": "enum",
+    "enum": [
+     "ltr",
+     "rtl"
+    ]
+   },
+   {
+    "name": "lang",
+    "type": "string"
+   }
+  ]
+ },
+ "listlabels": {
+  "title": "Labels list",
+  "body": "NONE",
+  "output": "BLOCK",
+  "node": "extension",
+  "hidden": false,
+  "aliases": [],
+  "params": [
+   {
+    "name": "spaceKey",
+    "type": "spacekey"
+   },
+   {
+    "name": "excludedLabels",
+    "type": "label",
+    "multiple": true
+   }
+  ],
+  "docs": "https://confluence.atlassian.com/display/ConfCloud/Labels+List+Macro"
+ },
+ "livesearch": {
+  "title": "Live search",
+  "body": "NONE",
+  "output": "INLINE",
+  "node": "inlineExtension",
+  "hidden": false,
+  "aliases": [],
+  "params": [
+   {
+    "name": "spaceKey",
+    "type": "spacekey"
+   },
+   {
+    "name": "type",
+    "type": "enum",
+    "default": "all",
+    "enum": [
+     "all",
+     "page",
+     "blogpost",
+     "comment",
+     "spacedesc"
+    ]
+   },
+   {
+    "name": "labels",
+    "type": "label",
+    "multiple": true
+   },
+   {
+    "name": "placeholder",
+    "type": "string",
+    "default": "Search"
+   },
+   {
+    "name": "size",
+    "type": "enum",
+    "default": "medium",
+    "enum": [
+     "medium",
+     "large"
+    ]
+   },
+   {
+    "name": "additional",
+    "type": "enum",
+    "default": "space name",
+    "enum": [
+     "none",
+     "space name",
+     "page excerpt"
+    ]
+   }
+  ]
+ },
+ "loremipsum": {
+  "title": "Loremipsum",
+  "body": "NONE",
+  "output": "BLOCK",
+  "node": "extension",
+  "hidden": false,
+  "aliases": [],
+  "params": [
+   {
+    "name": "",
+    "type": "int",
+    "default": "3"
+   }
+  ],
+  "docs": "https://confluence.atlassian.com/display/ConfCloud/Loremipsum+macro"
+ },
+ "lozenge": {
+  "title": "Lozenge",
+  "body": "RICH_TEXT",
+  "output": "BLOCK",
+  "node": "bodiedExtension",
+  "hidden": true,
+  "aliases": [],
+  "params": [
+   {
+    "name": "link",
+    "type": "confluence-content"
+   },
+   {
+    "name": "title",
+    "type": "string"
+   },
+   {
+    "name": "color",
+    "type": "enum",
+    "default": "silver",
+    "enum": [
+     "bronze",
+     "silver",
+     "gold",
+     "blue",
+     "cyan",
+     "green",
+     "purple",
+     "pink",
+     "red"
+    ]
+   },
+   {
+    "name": "arrow",
+    "type": "enum",
+    "enum": [
+     "none",
+     "blue",
+     "green"
+    ]
+   },
+   {
+    "name": "width",
+    "type": "string"
+   }
+  ]
+ },
+ "multimedia": {
+  "title": "multimedia",
+  "body": "NONE",
+  "output": "BLOCK",
+  "node": "extension",
+  "hidden": false,
+  "aliases": [],
+  "params": [
+   {
+    "name": "page",
+    "type": "confluence-content"
+   },
+   {
+    "name": "name",
+    "type": "attachment",
+    "required": true,
+    "aliases": [
+     ""
+    ]
+   },
+   {
+    "name": "width",
+    "type": "int"
+   },
+   {
+    "name": "height",
+    "type": "int"
+   },
+   {
+    "name": "autostart",
+    "type": "boolean",
+    "default": "false"
+   }
+  ],
+  "docs": "https://confluence.atlassian.com/display/ConfCloud/Multimedia+Macro"
+ },
+ "navmap": {
+  "title": "Navigation Map",
+  "body": "NONE",
+  "output": "BLOCK",
+  "node": "extension",
+  "hidden": false,
+  "aliases": [],
+  "params": [
+   {
+    "name": "",
+    "type": "string",
+    "required": true
+   },
+   {
+    "name": "title",
+    "type": "string"
+   },
+   {
+    "name": "wrapAfter",
+    "type": "int",
+    "default": "5"
+   },
+   {
+    "name": "cellWidth",
+    "type": "string",
+    "default": "90px"
+   },
+   {
+    "name": "cellHeight",
+    "type": "string",
+    "default": "60px"
+   },
+   {
+    "name": "theme",
+    "type": "string"
+   }
+  ],
+  "docs": "https://confluence.atlassian.com/display/ConfCloud/Navmap+Macro"
+ },
+ "network": {
+  "title": "Network",
+  "body": "NONE",
+  "output": "BLOCK",
+  "node": "extension",
+  "hidden": false,
+  "aliases": [],
+  "params": [
+   {
+    "name": "username",
+    "type": "username"
+   },
+   {
+    "name": "",
+    "type": "enum",
+    "required": true,
+    "enum": [
+     "following",
+     "followers"
+    ]
+   },
+   {
+    "name": "theme",
+    "type": "enum",
+    "enum": [
+     "full",
+     "tiny"
+    ]
+   },
+   {
+    "name": "max",
+    "type": "int",
+    "aliases": [
+     "maxResult"
+    ]
+   }
+  ],
+  "docs": "https://confluence.atlassian.com/display/ConfCloud/Network+Macro"
+ },
+ "noformat": {
+  "title": "No Format",
+  "body": "PLAIN_TEXT",
+  "output": "BLOCK",
+  "node": "codeBlock",
+  "hidden": false,
+  "aliases": [],
+  "params": [
+   {
+    "name": "nopanel",
+    "type": "boolean",
+    "default": "false"
+   }
+  ],
+  "docs": "https://confluence.atlassian.com/display/ConfCloud/Noformat+Macro"
+ },
+ "note": {
+  "title": "Note",
+  "body": "RICH_TEXT",
+  "output": "BLOCK",
+  "node": "panel",
+  "hidden": false,
+  "aliases": [],
+  "params": [
+   {
+    "name": "title",
+    "type": "string"
+   },
+   {
+    "name": "icon",
+    "type": "boolean",
+    "default": "true"
+   }
+  ]
+ },
+ "ol": {
+  "title": "Ordered List",
+  "body": "RICH_TEXT",
+  "output": "BLOCK",
+  "node": "bodiedExtension",
+  "hidden": true,
+  "aliases": [],
+  "params": [
+   {
+    "name": "id",
+    "type": "string"
+   },
+   {
+    "name": "class",
+    "type": "string"
+   },
+   {
+    "name": "style",
+    "type": "string"
+   },
+   {
+    "name": "title",
+    "type": "string"
+   },
+   {
+    "name": "dir",
+    "type": "enum",
+    "enum": [
+     "ltr",
+     "rtl"
+    ]
+   },
+   {
+    "name": "lang",
+    "type": "string"
+   }
+  ]
+ },
+ "p": {
+  "title": "p",
+  "body": "RICH_TEXT",
+  "output": "BLOCK",
+  "node": "bodiedExtension",
+  "hidden": true,
+  "aliases": [],
+  "params": [
+   {
+    "name": "id",
+    "type": "string"
+   },
+   {
+    "name": "class",
+    "type": "string"
+   },
+   {
+    "name": "style",
+    "type": "string"
+   },
+   {
+    "name": "title",
+    "type": "string"
+   },
+   {
+    "name": "dir",
+    "type": "enum",
+    "enum": [
+     "lrt",
+     "rtl"
+    ]
+   },
+   {
+    "name": "align",
+    "type": "enum",
+    "enum": [
+     "left",
+     "center",
+     "right",
+     "justify"
+    ]
+   },
+   {
+    "name": "lang",
+    "type": "string"
+   }
+  ]
+ },
+ "pagetree": {
+  "title": "Page Tree",
+  "body": "NONE",
+  "output": "INLINE",
+  "node": "inlineExtension",
+  "hidden": false,
+  "aliases": [],
+  "params": [
+   {
+    "name": "root",
+    "type": "confluence-content"
+   },
+   {
+    "name": "spaces",
+    "type": "spacekey",
+    "aliases": [
+     "space"
+    ]
+   },
+   {
+    "name": "sort",
+    "type": "enum",
+    "default": "position",
+    "enum": [
+     "bitwise",
+     "creation",
+     "modified",
+     "natural",
+     "position"
+    ]
+   },
+   {
+    "name": "excerpt",
+    "type": "boolean",
+    "default": "false"
+   },
+   {
+    "name": "reverse",
+    "type": "boolean",
+    "default": "false"
+   },
+   {
+    "name": "searchBox",
+    "type": "boolean",
+    "default": "false"
+   },
+   {
+    "name": "expandCollapseAll",
+    "type": "boolean",
+    "default": "false"
+   },
+   {
+    "name": "startDepth",
+    "type": "int",
+    "default": "1"
+   }
+  ]
+ },
+ "pagetreesearch": {
+  "title": "Page tree search",
+  "body": "NONE",
+  "output": "BLOCK",
+  "node": "extension",
+  "hidden": false,
+  "aliases": [],
+  "params": [
+   {
+    "name": "rootPage",
+    "type": "string"
+   }
+  ],
+  "docs": "https://confluence.atlassian.com/display/ConfCloud/Pagetree+Search+Macro"
+ },
+ "panel": {
+  "title": "Panel",
+  "body": "RICH_TEXT",
+  "output": "BLOCK",
+  "node": "panel",
+  "hidden": false,
+  "aliases": [],
+  "params": [
+   {
+    "name": "title",
+    "type": "string"
+   },
+   {
+    "name": "borderStyle",
+    "type": "string"
+   },
+   {
+    "name": "borderColor",
+    "type": "color"
+   },
+   {
+    "name": "borderWidth",
+    "type": "string"
+   },
+   {
+    "name": "bgColor",
+    "type": "color"
+   },
+   {
+    "name": "titleBGColor",
+    "type": "color"
+   },
+   {
+    "name": "titleColor",
+    "type": "color"
+   }
+  ],
+  "docs": "https://confluence.atlassian.com/display/ConfCloud/Panel+Macro"
+ },
+ "popular-labels": {
+  "title": "Popular labels",
+  "body": "NONE",
+  "output": "BLOCK",
+  "node": "extension",
+  "hidden": false,
+  "aliases": [],
+  "params": [
+   {
+    "name": "count",
+    "type": "int",
+    "default": "100"
+   },
+   {
+    "name": "spaceKey",
+    "type": "spacekey"
+   },
+   {
+    "name": "style",
+    "type": "enum",
+    "default": "list",
+    "enum": [
+     "list",
+     "heatmap"
+    ]
+   }
+  ],
+  "docs": "https://confluence.atlassian.com/display/ConfCloud/Popular+Labels+Macro"
+ },
+ "portfolioforjiraplan": {
+  "title": "Jira Premium plan",
+  "body": "NONE",
+  "output": "BLOCK",
+  "node": "extension",
+  "hidden": true,
+  "aliases": [],
+  "params": [
+   {
+    "name": "url",
+    "type": "string",
+    "required": true
+   },
+   {
+    "name": "planHeight",
+    "type": "string",
+    "required": true
+   }
+  ]
+ },
+ "pre": {
+  "title": "Pre",
+  "body": "RICH_TEXT",
+  "output": "BLOCK",
+  "node": "bodiedExtension",
+  "hidden": true,
+  "aliases": [],
+  "params": [
+   {
+    "name": "id",
+    "type": "string"
+   },
+   {
+    "name": "class",
+    "type": "string"
+   },
+   {
+    "name": "title",
+    "type": "string"
+   },
+   {
+    "name": "style",
+    "type": "string"
+   },
+   {
+    "name": "dir",
+    "type": "enum",
+    "default": "ltr",
+    "enum": [
+     "ltr",
+     "rtl"
+    ]
+   },
+   {
+    "name": "lang",
+    "type": "string"
+   },
+   {
+    "name": "width",
+    "type": "string"
+   }
+  ]
+ },
+ "privacy-mark": {
+  "title": "Privacy Mark",
+  "body": "NONE",
+  "output": "INLINE",
+  "node": "inlineExtension",
+  "hidden": false,
+  "aliases": [],
+  "params": [
+   {
+    "name": "id",
+    "type": "string"
+   },
+   {
+    "name": "class",
+    "type": "string"
+   },
+   {
+    "name": "tooltip",
+    "type": "string",
+    "aliases": [
+     ""
+    ]
+   }
+  ]
+ },
+ "privacy-policy": {
+  "title": "Privacy Policy",
+  "body": "RICH_TEXT",
+  "output": "BLOCK",
+  "node": "bodiedExtension",
+  "hidden": false,
+  "aliases": [],
+  "params": [
+   {
+    "name": "id",
+    "type": "string"
+   },
+   {
+    "name": "page",
+    "type": "confluence-content",
+    "default": "Privacy Policy",
+    "aliases": [
+     ""
+    ]
+   },
+   {
+    "name": "class",
+    "type": "string"
+   }
+  ]
+ },
+ "profile": {
+  "title": "User profile",
+  "body": "NONE",
+  "output": "BLOCK",
+  "node": "extension",
+  "hidden": false,
+  "aliases": [],
+  "params": [
+   {
+    "name": "user",
+    "type": "username",
+    "required": true
+   }
+  ],
+  "docs": "https://confluence.atlassian.com/display/ConfCloud/User+Profile+Macro"
+ },
+ "profile-picture": {
+  "title": "Profile picture",
+  "body": "NONE",
+  "output": "INLINE",
+  "node": "inlineExtension",
+  "hidden": false,
+  "aliases": [],
+  "params": [
+   {
+    "name": "User",
+    "type": "username",
+    "required": true
+   },
+   {
+    "name": "Size",
+    "type": "enum",
+    "default": "normal",
+    "enum": [
+     "normal",
+     "large",
+     "extra large"
+    ]
+   }
+  ]
+ },
+ "recently-updated": {
+  "title": "Recent updates",
+  "body": "NONE",
+  "output": "BLOCK",
+  "node": "extension",
+  "hidden": false,
+  "aliases": [],
+  "params": [
+   {
+    "name": "author",
+    "type": "username",
+    "multiple": true
+   },
+   {
+    "name": "spaces",
+    "type": "spacekey",
+    "multiple": true,
+    "aliases": [
+     "space"
+    ]
+   },
+   {
+    "name": "labels",
+    "type": "string",
+    "aliases": [
+     "label"
+    ]
+   },
+   {
+    "name": "width",
+    "type": "percentage",
+    "default": "100%"
+   },
+   {
+    "name": "types",
+    "type": "string",
+    "aliases": [
+     "type"
+    ]
+   },
+   {
+    "name": "max",
+    "type": "int",
+    "default": "15",
+    "aliases": [
+     "maxResults"
+    ]
+   },
+   {
+    "name": "theme",
+    "type": "enum",
+    "enum": [
+     "concise",
+     "social",
+     "sidebar"
+    ]
+   },
+   {
+    "name": "showProfilePic",
+    "type": "boolean",
+    "default": "false"
+   },
+   {
+    "name": "hideHeading",
+    "type": "boolean",
+    "default": "false"
+   }
+  ],
+  "docs": "https://confluence.atlassian.com/display/ConfCloud/Recently+Updated+Macro"
+ },
+ "recently-updated-dashboard": {
+  "title": "Recently Updated Dashboard (Deprecated)",
+  "body": "NONE",
+  "output": "BLOCK",
+  "node": "extension",
+  "hidden": true,
+  "aliases": [],
+  "params": [
+   {
+    "name": "spaces",
+    "type": "spacekey",
+    "multiple": true
+   },
+   {
+    "name": "types",
+    "type": "string",
+    "multiple": true
+   },
+   {
+    "name": "labels",
+    "type": "string",
+    "multiple": true
+   },
+   {
+    "name": "users",
+    "type": "username",
+    "multiple": true
+   },
+   {
+    "name": "width",
+    "type": "percentage",
+    "default": "100%"
+   },
+   {
+    "name": "showProfilePic",
+    "type": "boolean",
+    "default": "false"
+   }
+  ]
+ },
+ "recently-used-labels": {
+  "title": "Recently Used Labels",
+  "body": "NONE",
+  "output": "BLOCK",
+  "node": "extension",
+  "hidden": false,
+  "aliases": [],
+  "params": [
+   {
+    "name": "count",
+    "type": "int",
+    "default": "10"
+   },
+   {
+    "name": "scope",
+    "type": "enum",
+    "default": "global",
+    "enum": [
+     "global",
+     "space",
+     "personal"
+    ]
+   },
+   {
+    "name": "style",
+    "type": "enum",
+    "default": "list",
+    "enum": [
+     "list",
+     "table"
+    ]
+   },
+   {
+    "name": "title",
+    "type": "string"
+   }
+  ],
+  "docs": "https://confluence.atlassian.com/display/ConfCloud/Recently+Used+Labels+Macro"
+ },
+ "reg-tm": {
+  "title": "Registered Trademark",
+  "body": "RICH_TEXT",
+  "output": "INLINE",
+  "node": "paragraph",
+  "hidden": false,
+  "aliases": [],
+  "params": [
+   {
+    "name": "id",
+    "type": "string"
+   },
+   {
+    "name": "class",
+    "type": "string"
+   }
+  ]
+ },
+ "related-labels": {
+  "title": "Related Labels (Deprecated)",
+  "body": "NONE",
+  "output": "BLOCK",
+  "node": "extension",
+  "hidden": true,
+  "aliases": [],
+  "params": [
+   {
+    "name": "labels",
+    "type": "string"
+   }
+  ],
+  "docs": "https://confluence.atlassian.com/display/ConfCloud/Related+Labels+Macro"
+ },
+ "roadmap": {
+  "title": "Roadmap planner",
+  "body": "NONE",
+  "output": "BLOCK",
+  "node": "extension",
+  "hidden": false,
+  "aliases": [],
+  "params": [
+   {
+    "name": "source",
+    "type": "string",
+    "required": true
+   },
+   {
+    "name": "pagelinks",
+    "type": "confluence-content",
+    "multiple": true
+   },
+   {
+    "name": "maplinks",
+    "type": "string"
+   }
+  ]
+ },
+ "roundrect": {
+  "title": "Round Rectangle",
+  "body": "RICH_TEXT",
+  "output": "BLOCK",
+  "node": "bodiedExtension",
+  "hidden": true,
+  "aliases": [],
+  "params": [
+   {
+    "name": "title",
+    "type": "string"
+   },
+   {
+    "name": "footer",
+    "type": "string"
+   },
+   {
+    "name": "bgcolor",
+    "type": "string"
+   },
+   {
+    "name": "width",
+    "type": "string"
+   },
+   {
+    "name": "height",
+    "type": "string"
+   },
+   {
+    "name": "cornersize",
+    "type": "string"
+   },
+   {
+    "name": "hSize",
+    "type": "string"
+   },
+   {
+    "name": "vSize",
+    "type": "string"
+   },
+   {
+    "name": "titlebgcolor",
+    "type": "string"
+   },
+   {
+    "name": "footerbgcolor",
+    "type": "string"
+   },
+   {
+    "name": "corners",
+    "type": "string"
+   },
+   {
+    "name": "rows",
+    "type": "string"
+   },
+   {
+    "name": "class",
+    "type": "string"
+   }
+  ]
+ },
+ "search": {
+  "title": "Search Results",
+  "body": "NONE",
+  "output": "BLOCK",
+  "node": "extension",
+  "hidden": false,
+  "aliases": [],
+  "params": [
+   {
+    "name": "query",
+    "type": "string",
+    "required": true
+   },
+   {
+    "name": "maxLimit",
+    "type": "int"
+   },
+   {
+    "name": "spacekey",
+    "type": "spacekey"
+   },
+   {
+    "name": "type",
+    "type": "enum",
+    "enum": [
+     "page",
+     "comment",
+     "blogpost",
+     "attachment",
+     "userinfo",
+     "spacedesc"
+    ]
+   },
+   {
+    "name": "lastModified",
+    "type": "relativedate"
+   },
+   {
+    "name": "contributor",
+    "type": "username"
+   }
+  ],
+  "docs": "https://confluence.atlassian.com/display/ConfCloud/Search+Results+Macro"
+ },
+ "search-box": {
+  "title": "Search",
+  "body": "NONE",
+  "output": "INLINE",
+  "node": "inlineExtension",
+  "hidden": true,
+  "aliases": [],
+  "params": [
+   {
+    "name": "spaceKey",
+    "type": "spacekey"
+   },
+   {
+    "name": "type",
+    "type": "enum",
+    "default": "all",
+    "enum": [
+     "all",
+     "page",
+     "blogpost",
+     "comment",
+     "spacedesc"
+    ]
+   },
+   {
+    "name": "labels",
+    "type": "label",
+    "multiple": true
+   },
+   {
+    "name": "placeholder",
+    "type": "string",
+    "default": "Search"
+   },
+   {
+    "name": "size",
+    "type": "enum",
+    "default": "medium",
+    "enum": [
+     "medium",
+     "large"
+    ]
+   },
+   {
+    "name": "additional",
+    "type": "enum",
+    "default": "space name",
+    "enum": [
+     "none",
+     "space name",
+     "page excerpt"
+    ]
+   }
+  ]
+ },
+ "section": {
+  "title": "Section",
+  "body": "RICH_TEXT",
+  "output": "BLOCK",
+  "node": "paragraph",
+  "hidden": false,
+  "aliases": [],
+  "params": [
+   {
+    "name": "border",
+    "type": "boolean",
+    "default": "false"
+   }
+  ],
+  "docs": "https://confluence.atlassian.com/display/ConfCloud/Page+Layouts%2C+Columns+and+Sections"
+ },
+ "sharelinks-urlmacro": {
+  "title": "Shared links bookmarklet button",
+  "body": "NONE",
+  "output": "BLOCK",
+  "node": "extension",
+  "hidden": false,
+  "aliases": [],
+  "params": []
+ },
+ "sm": {
+  "title": "Service Mark",
+  "body": "RICH_TEXT",
+  "output": "INLINE",
+  "node": "paragraph",
+  "hidden": false,
+  "aliases": [],
+  "params": [
+   {
+    "name": "id",
+    "type": "string"
+   },
+   {
+    "name": "class",
+    "type": "string"
+   }
+  ]
+ },
+ "space-attachments": {
+  "title": "Space Attachments",
+  "body": "NONE",
+  "output": "BLOCK",
+  "node": "extension",
+  "hidden": false,
+  "aliases": [],
+  "params": [
+   {
+    "name": "space",
+    "type": "spacekey"
+   },
+   {
+    "name": "showFilter",
+    "type": "boolean",
+    "default": "true"
+   }
+  ]
+ },
+ "space-details": {
+  "title": "Space Details",
+  "body": "NONE",
+  "output": "BLOCK",
+  "node": "extension",
+  "hidden": false,
+  "aliases": [],
+  "params": [
+   {
+    "name": "width",
+    "type": "percentage"
+   }
+  ]
+ },
+ "spaces": {
+  "title": "Spaces List (Deprecated)",
+  "body": "NONE",
+  "output": "BLOCK",
+  "node": "extension",
+  "hidden": true,
+  "aliases": [
+   "spaces-list"
+  ],
+  "params": [
+   {
+    "name": "",
+    "type": "enum",
+    "enum": [
+     "all",
+     "category",
+     "favourite",
+     "new"
+    ]
+   },
+   {
+    "name": "width",
+    "type": "percentage",
+    "default": "100%"
+   }
+  ]
+ },
+ "span": {
+  "title": "Span (Deprecated)",
+  "body": "RICH_TEXT",
+  "output": "INLINE",
+  "node": "bodiedExtension",
+  "hidden": true,
+  "aliases": [],
+  "params": [
+   {
+    "name": "id",
+    "type": "string"
+   },
+   {
+    "name": "class",
+    "type": "string"
+   },
+   {
+    "name": "style",
+    "type": "string"
+   },
+   {
+    "name": "title",
+    "type": "string"
+   },
+   {
+    "name": "dir",
+    "type": "enum",
+    "enum": [
+     "rtl",
+     "ltr"
+    ]
+   },
+   {
+    "name": "lang",
+    "type": "string"
+   }
+  ]
+ },
+ "status": {
+  "title": "Status",
+  "body": "NONE",
+  "output": "INLINE",
+  "node": "status",
+  "hidden": false,
+  "aliases": [],
+  "params": [
+   {
+    "name": "title",
+    "type": "string"
+   },
+   {
+    "name": "colour",
+    "type": "enum",
+    "required": true,
+    "default": "Grey",
+    "enum": [
+     "Grey",
+     "Green",
+     "Red",
+     "Blue",
+     "Purple",
+     "Yellow"
+    ],
+    "aliases": [
+     "color"
+    ]
+   },
+   {
+    "name": "subtle",
+    "type": "boolean",
+    "default": "false"
+   },
+   {
+    "name": "mixedCase",
+    "type": "boolean",
+    "default": "false"
+   }
+  ]
+ },
+ "strike": {
+  "title": "Strike",
+  "body": "RICH_TEXT",
+  "output": "INLINE",
+  "node": "bodiedExtension",
+  "hidden": false,
+  "aliases": [],
+  "params": [
+   {
+    "name": "id",
+    "type": "string"
+   }
+  ]
+ },
+ "style": {
+  "title": "Style",
+  "body": "PLAIN_TEXT",
+  "output": "BLOCK",
+  "node": "extension",
+  "hidden": false,
+  "aliases": [],
+  "params": [
+   {
+    "name": "media",
+    "type": "string"
+   },
+   {
+    "name": "import",
+    "type": "string"
+   }
+  ]
+ },
+ "table": {
+  "title": "HTML Table",
+  "body": "RICH_TEXT",
+  "output": "INLINE",
+  "node": "bodiedExtension",
+  "hidden": true,
+  "aliases": [],
+  "params": [
+   {
+    "name": "align",
+    "type": "enum",
+    "enum": [
+     "left",
+     "right",
+     "center",
+     "justify",
+     "char"
+    ]
+   },
+   {
+    "name": "bgcolor",
+    "type": "string"
+   },
+   {
+    "name": "border",
+    "type": "string"
+   },
+   {
+    "name": "cellpadding",
+    "type": "string"
+   },
+   {
+    "name": "id",
+    "type": "string"
+   },
+   {
+    "name": "class",
+    "type": "string"
+   },
+   {
+    "name": "style",
+    "type": "string"
+   }
+  ]
+ },
+ "tasklist": {
+  "title": "Tasklist",
+  "body": "PLAIN_TEXT",
+  "output": "BLOCK",
+  "node": "extension",
+  "hidden": true,
+  "aliases": [
+   "dynamictasklist"
+  ],
+  "params": [
+   {
+    "name": "title",
+    "type": "string"
+   },
+   {
+    "name": "width",
+    "type": "string"
+   },
+   {
+    "name": "enableLocking",
+    "type": "boolean",
+    "default": "false"
+   },
+   {
+    "name": "promptOnDelete",
+    "type": "boolean",
+    "default": "false"
+   }
+  ],
+  "docs": "https://confluence.atlassian.com/x/LiEC"
+ },
+ "tasks-report-macro": {
+  "title": "Task report",
+  "body": "NONE",
+  "output": "BLOCK",
+  "node": "extension",
+  "hidden": false,
+  "aliases": [],
+  "params": [
+   {
+    "name": "spaceAndPage",
+    "type": "string",
+    "required": true,
+    "multiple": true
+   },
+   {
+    "name": "labels",
+    "type": "label",
+    "multiple": true
+   },
+   {
+    "name": "assignees",
+    "type": "username",
+    "multiple": true
+   },
+   {
+    "name": "creators",
+    "type": "username",
+    "multiple": true
+   },
+   {
+    "name": "createddateFrom",
+    "type": "date"
+   },
+   {
+    "name": "status",
+    "type": "enum",
+    "default": "incomplete",
+    "enum": [
+     "complete",
+     "incomplete"
+    ]
+   },
+   {
+    "name": "pageSize",
+    "type": "enum",
+    "default": "20",
+    "enum": [
+     "10",
+     "20",
+     "40"
+    ]
+   },
+   {
+    "name": "columns",
+    "type": "string",
+    "default": "description,duedate,assignee,location"
+   },
+   {
+    "name": "sortBy",
+    "type": "enum",
+    "default": "due date",
+    "enum": [
+     "due date",
+     "assignee",
+     "page title"
+    ]
+   },
+   {
+    "name": "reverseSort",
+    "type": "boolean",
+    "default": "false"
+   }
+  ]
+ },
+ "tbody": {
+  "title": "Table Body (tbody)",
+  "body": "RICH_TEXT",
+  "output": "INLINE",
+  "node": "bodiedExtension",
+  "hidden": true,
+  "aliases": [],
+  "params": [
+   {
+    "name": "align",
+    "type": "enum",
+    "enum": [
+     "left",
+     "right",
+     "center",
+     "justify",
+     "char"
+    ]
+   },
+   {
+    "name": "char",
+    "type": "string"
+   },
+   {
+    "name": "charoff",
+    "type": "string"
+   },
+   {
+    "name": "valign",
+    "type": "enum",
+    "enum": [
+     "top",
+     "middle",
+     "bottom",
+     "baseline"
+    ]
+   },
+   {
+    "name": "id",
+    "type": "string"
+   },
+   {
+    "name": "class",
+    "type": "string"
+   },
+   {
+    "name": "style",
+    "type": "string"
+   },
+   {
+    "name": "title",
+    "type": "string"
+   }
+  ]
+ },
+ "td": {
+  "title": "Table Cell (td)",
+  "body": "RICH_TEXT",
+  "output": "INLINE",
+  "node": "bodiedExtension",
+  "hidden": true,
+  "aliases": [],
+  "params": [
+   {
+    "name": "align",
+    "type": "enum",
+    "enum": [
+     "left",
+     "right",
+     "center",
+     "justify",
+     "char"
+    ]
+   },
+   {
+    "name": "bgcolor",
+    "type": "color"
+   },
+   {
+    "name": "colspan",
+    "type": "string"
+   },
+   {
+    "name": "height",
+    "type": "string"
+   },
+   {
+    "name": "rowspan",
+    "type": "int"
+   },
+   {
+    "name": "scope",
+    "type": "string"
+   },
+   {
+    "name": "width",
+    "type": "string"
+   },
+   {
+    "name": "id",
+    "type": "string"
+   },
+   {
+    "name": "class",
+    "type": "string"
+   },
+   {
+    "name": "style",
+    "type": "string"
+   }
+  ]
+ },
+ "th": {
+  "title": "Table Head (th)",
+  "body": "RICH_TEXT",
+  "output": "INLINE",
+  "node": "bodiedExtension",
+  "hidden": true,
+  "aliases": [],
+  "params": [
+   {
+    "name": "abbr",
+    "type": "string"
+   },
+   {
+    "name": "align",
+    "type": "enum",
+    "enum": [
+     "left",
+     "right",
+     "center",
+     "justify",
+     "char"
+    ]
+   },
+   {
+    "name": "axis",
+    "type": "string"
+   },
+   {
+    "name": "bgcolor",
+    "type": "color"
+   },
+   {
+    "name": "char",
+    "type": "string"
+   },
+   {
+    "name": "charoff",
+    "type": "string"
+   },
+   {
+    "name": "colspan",
+    "type": "string"
+   },
+   {
+    "name": "headers",
+    "type": "string"
+   },
+   {
+    "name": "height",
+    "type": "string"
+   },
+   {
+    "name": "nowrap",
+    "type": "boolean",
+    "default": "false"
+   },
+   {
+    "name": "rowspan",
+    "type": "int"
+   },
+   {
+    "name": "scope",
+    "type": "string"
+   },
+   {
+    "name": "valign",
+    "type": "enum",
+    "enum": [
+     "top",
+     "middle",
+     "bottom",
+     "baseline"
+    ]
+   },
+   {
+    "name": "width",
+    "type": "string"
+   },
+   {
+    "name": "id",
+    "type": "string"
+   },
+   {
+    "name": "class",
+    "type": "string"
+   },
+   {
+    "name": "style",
+    "type": "string"
+   },
+   {
+    "name": "title",
+    "type": "string"
+   }
+  ]
+ },
+ "thead": {
+  "title": "Table Head (thead)",
+  "body": "RICH_TEXT",
+  "output": "INLINE",
+  "node": "bodiedExtension",
+  "hidden": true,
+  "aliases": [],
+  "params": [
+   {
+    "name": "align",
+    "type": "enum",
+    "enum": [
+     "left",
+     "right",
+     "center",
+     "justify",
+     "char"
+    ]
+   },
+   {
+    "name": "char",
+    "type": "string"
+   },
+   {
+    "name": "charoff",
+    "type": "string"
+   },
+   {
+    "name": "valign",
+    "type": "enum",
+    "enum": [
+     "top",
+     "middle",
+     "bottom",
+     "baseline"
+    ]
+   },
+   {
+    "name": "id",
+    "type": "string"
+   },
+   {
+    "name": "class",
+    "type": "string"
+   },
+   {
+    "name": "style",
+    "type": "string"
+   },
+   {
+    "name": "title",
+    "type": "string"
+   }
+  ]
+ },
+ "tip": {
+  "title": "Tip",
+  "body": "RICH_TEXT",
+  "output": "BLOCK",
+  "node": "panel",
+  "hidden": false,
+  "aliases": [],
+  "params": [
+   {
+    "name": "title",
+    "type": "string"
+   },
+   {
+    "name": "icon",
+    "type": "boolean",
+    "default": "true"
+   }
+  ]
+ },
+ "tm": {
+  "title": "Trademark",
+  "body": "RICH_TEXT",
+  "output": "INLINE",
+  "node": "paragraph",
+  "hidden": false,
+  "aliases": [],
+  "params": [
+   {
+    "name": "id",
+    "type": "string"
+   },
+   {
+    "name": "class",
+    "type": "string"
+   }
+  ]
+ },
+ "toc": {
+  "title": "Table of Contents",
+  "body": "NONE",
+  "output": "BLOCK",
+  "node": "extension",
+  "hidden": false,
+  "aliases": [],
+  "params": [
+   {
+    "name": "type",
+    "type": "enum",
+    "default": "list",
+    "enum": [
+     "list",
+     "flat"
+    ]
+   },
+   {
+    "name": "outline",
+    "type": "boolean",
+    "default": "false"
+   },
+   {
+    "name": "style",
+    "type": "string",
+    "default": "disc"
+   },
+   {
+    "name": "indent",
+    "type": "string"
+   },
+   {
+    "name": "separator",
+    "type": "string",
+    "default": "brackets"
+   },
+   {
+    "name": "minLevel",
+    "type": "int",
+    "default": "1"
+   },
+   {
+    "name": "maxLevel",
+    "type": "int",
+    "default": "7"
+   },
+   {
+    "name": "include",
+    "type": "string"
+   },
+   {
+    "name": "exclude",
+    "type": "string"
+   },
+   {
+    "name": "printable",
+    "type": "boolean",
+    "default": "true"
+   },
+   {
+    "name": "class",
+    "type": "string"
+   },
+   {
+    "name": "absoluteUrl",
+    "type": "boolean",
+    "default": "false"
+   }
+  ],
+  "docs": "https://confluence.atlassian.com/display/ConfCloud/Table+of+Contents+Macro"
+ },
+ "toc-zone": {
+  "title": "Table of content zone",
+  "body": "RICH_TEXT",
+  "output": "BLOCK",
+  "node": "bodiedExtension",
+  "hidden": false,
+  "aliases": [],
+  "params": [
+   {
+    "name": "location",
+    "type": "enum",
+    "default": "both",
+    "enum": [
+     "both",
+     "top",
+     "bottom"
+    ]
+   },
+   {
+    "name": "type",
+    "type": "enum",
+    "default": "list",
+    "enum": [
+     "list",
+     "flat"
+    ]
+   },
+   {
+    "name": "outline",
+    "type": "boolean",
+    "default": "false"
+   },
+   {
+    "name": "style",
+    "type": "string",
+    "default": "none"
+   },
+   {
+    "name": "indent",
+    "type": "string"
+   },
+   {
+    "name": "separator",
+    "type": "string",
+    "default": "brackets"
+   },
+   {
+    "name": "minLevel",
+    "type": "int",
+    "default": "1"
+   },
+   {
+    "name": "maxLevel",
+    "type": "int",
+    "default": "7"
+   },
+   {
+    "name": "include",
+    "type": "string"
+   },
+   {
+    "name": "exclude",
+    "type": "string"
+   },
+   {
+    "name": "printable",
+    "type": "boolean",
+    "default": "true"
+   },
+   {
+    "name": "class",
+    "type": "string"
+   }
+  ],
+  "docs": "https://confluence.atlassian.com/display/ConfCloud/Table+of+Contents+Zone+Macro"
+ },
+ "tr": {
+  "title": "Table Row (tr)",
+  "body": "RICH_TEXT",
+  "output": "INLINE",
+  "node": "bodiedExtension",
+  "hidden": true,
+  "aliases": [],
+  "params": [
+   {
+    "name": "bgcolor",
+    "type": "string"
+   },
+   {
+    "name": "id",
+    "type": "string"
+   },
+   {
+    "name": "class",
+    "type": "string"
+   },
+   {
+    "name": "style",
+    "type": "string"
+   }
+  ]
+ },
+ "ul": {
+  "title": "Unordered List",
+  "body": "RICH_TEXT",
+  "output": "BLOCK",
+  "node": "bodiedExtension",
+  "hidden": true,
+  "aliases": [],
+  "params": [
+   {
+    "name": "id",
+    "type": "string"
+   },
+   {
+    "name": "class",
+    "type": "string"
+   },
+   {
+    "name": "style",
+    "type": "string"
+   },
+   {
+    "name": "title",
+    "type": "string"
+   },
+   {
+    "name": "dir",
+    "type": "enum",
+    "enum": [
+     "ltr",
+     "rtl"
+    ]
+   },
+   {
+    "name": "lang",
+    "type": "string"
+   }
+  ]
+ },
+ "unmigrated-inline-wiki-markup": {
+  "title": "Wiki Markup",
+  "body": "PLAIN_TEXT",
+  "output": "INLINE",
+  "node": "inlineExtension",
+  "hidden": true,
+  "aliases": [],
+  "params": []
+ },
+ "unmigrated-wiki-markup": {
+  "title": "Wiki Markup",
+  "body": "PLAIN_TEXT",
+  "output": "BLOCK",
+  "node": "extension",
+  "hidden": true,
+  "aliases": [],
+  "params": []
+ },
+ "userlister": {
+  "title": "User list",
+  "body": "NONE",
+  "output": "BLOCK",
+  "node": "extension",
+  "hidden": false,
+  "aliases": [],
+  "params": [
+   {
+    "name": "groups",
+    "type": "group",
+    "required": true,
+    "multiple": true
+   }
+  ],
+  "docs": "https://confluence.atlassian.com/display/ConfCloud/User+list+Macro"
+ },
+ "view-file": {
+  "title": "view-file",
+  "body": "NONE",
+  "output": "INLINE",
+  "node": null,
+  "hidden": true,
+  "aliases": [],
+  "params": [
+   {
+    "name": "page",
+    "type": "confluence-content"
+   },
+   {
+    "name": "space",
+    "type": "spacekey"
+   },
+   {
+    "name": "date",
+    "type": "date"
+   },
+   {
+    "name": "name",
+    "type": "full_attachment",
+    "required": true,
+    "aliases": [
+     ""
+    ]
+   }
+  ],
+  "docs": "https://confluence.atlassian.com/display/ConfCloud/Excerpt+Macro"
+ },
+ "viewdoc": {
+  "title": "Word (Deprecated)",
+  "body": "NONE",
+  "output": "BLOCK",
+  "node": "extension",
+  "hidden": true,
+  "aliases": [],
+  "params": [
+   {
+    "name": "page",
+    "type": "confluence-content"
+   },
+   {
+    "name": "name",
+    "type": "attachment",
+    "required": true,
+    "aliases": [
+     ""
+    ]
+   },
+   {
+    "name": "date",
+    "type": "date"
+   },
+   {
+    "name": "space",
+    "type": "spacekey"
+   }
+  ],
+  "docs": "https://confluence.atlassian.com/display/ConfCloud/Office+Word+Macro"
+ },
+ "viewfile": {
+  "title": "View File",
+  "body": "NONE",
+  "output": "BLOCK",
+  "node": "extension",
+  "hidden": true,
+  "aliases": [],
+  "params": [
+   {
+    "name": "name",
+    "type": "attachment",
+    "required": true,
+    "aliases": [
+     ""
+    ]
+   },
+   {
+    "name": "page",
+    "type": "confluence-content"
+   },
+   {
+    "name": "date",
+    "type": "date"
+   },
+   {
+    "name": "space",
+    "type": "spacekey"
+   },
+   {
+    "name": "height",
+    "type": "string"
+   },
+   {
+    "name": "width",
+    "type": "string"
+   }
+  ],
+  "docs": "https://confluence.atlassian.com/display/ConfCloud/Macros"
+ },
+ "viewpdf": {
+  "title": "PDF",
+  "body": "NONE",
+  "output": "BLOCK",
+  "node": "extension",
+  "hidden": false,
+  "aliases": [],
+  "params": [
+   {
+    "name": "page",
+    "type": "confluence-content"
+   },
+   {
+    "name": "name",
+    "type": "attachment",
+    "required": true,
+    "aliases": [
+     ""
+    ]
+   },
+   {
+    "name": "date",
+    "type": "date"
+   },
+   {
+    "name": "space",
+    "type": "spacekey"
+   }
+  ],
+  "docs": "https://confluence.atlassian.com/display/ConfCloud/PDF+Macro"
+ },
+ "viewppt": {
+  "title": "Powerpoint (Deprecated)",
+  "body": "NONE",
+  "output": "BLOCK",
+  "node": "extension",
+  "hidden": true,
+  "aliases": [],
+  "params": [
+   {
+    "name": "page",
+    "type": "confluence-content"
+   },
+   {
+    "name": "name",
+    "type": "attachment",
+    "required": true,
+    "aliases": [
+     ""
+    ]
+   },
+   {
+    "name": "date",
+    "type": "date"
+   },
+   {
+    "name": "space",
+    "type": "spacekey"
+   },
+   {
+    "name": "height",
+    "type": "string"
+   },
+   {
+    "name": "width",
+    "type": "string"
+   }
+  ],
+  "docs": "https://confluence.atlassian.com/display/ConfCloud/Office+Powerpoint+Macro"
+ },
+ "viewxls": {
+  "title": "Excel",
+  "body": "NONE",
+  "output": "BLOCK",
+  "node": "extension",
+  "hidden": false,
+  "aliases": [],
+  "params": [
+   {
+    "name": "page",
+    "type": "confluence-content"
+   },
+   {
+    "name": "name",
+    "type": "attachment",
+    "required": true,
+    "aliases": [
+     ""
+    ]
+   },
+   {
+    "name": "date",
+    "type": "date"
+   },
+   {
+    "name": "space",
+    "type": "spacekey"
+   },
+   {
+    "name": "sheet",
+    "type": "string",
+    "aliases": [
+     "sheetName"
+    ]
+   }
+  ],
+  "docs": "https://confluence.atlassian.com/display/ConfCloud/Office+Excel+Macro"
+ },
+ "warning": {
+  "title": "Warning",
+  "body": "RICH_TEXT",
+  "output": "BLOCK",
+  "node": "panel",
+  "hidden": false,
+  "aliases": [],
+  "params": [
+   {
+    "name": "title",
+    "type": "string"
+   },
+   {
+    "name": "icon",
+    "type": "boolean",
+    "default": "true"
+   }
+  ]
+ },
+ "welcome-message": {
+  "title": "Welcome Message",
+  "body": "NONE",
+  "output": "BLOCK",
+  "node": "extension",
+  "hidden": true,
+  "aliases": [],
+  "params": []
+ },
+ "widget": {
+  "title": "Widget connector",
+  "body": "NONE",
+  "output": "BLOCK",
+  "node": "extension",
+  "hidden": false,
+  "aliases": [
+   "web-widget"
+  ],
+  "params": [
+   {
+    "name": "url",
+    "type": "url",
+    "required": true
+   },
+   {
+    "name": "width",
+    "type": "int"
+   },
+   {
+    "name": "height",
+    "type": "int"
+   }
+  ]
+ }
+}

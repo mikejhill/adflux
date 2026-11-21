@@ -61,7 +61,7 @@ jobs:
         run: |
           python -m venv /tmp/relsmoke
           /tmp/relsmoke/bin/pip install dist/*.whl
-          /tmp/relsmoke/bin/adflux list-formats
+          /tmp/relsmoke/bin/adflux --version && echo "# t" | /tmp/relsmoke/bin/adflux to-adf --compact
 
       - uses: actions/upload-artifact@v7
         with:

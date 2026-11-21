@@ -36,6 +36,7 @@ from pathlib import Path
 
 import pytest
 from dotenv import load_dotenv
+
 from tests.e2e.confluence_client import ConfluenceAuthError, ConfluenceClient
 from tests.e2e.jira_client import JiraAuthError, JiraClient
 
@@ -145,10 +146,7 @@ def _parent_placeholder_adf(run_label: str) -> str:
                 "content": [
                     {
                         "type": "text",
-                        "text": (
-                            f"Container for adflux E2E test artifacts (run {run_label}). "
-                            "Safe to delete."
-                        ),
+                        "text": (f"Container for adflux E2E test artifacts (run {run_label}). Safe to delete."),
                     }
                 ],
             }

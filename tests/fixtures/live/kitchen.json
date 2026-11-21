@@ -1,0 +1,612 @@
+{
+ "heading": {
+  "type": "heading",
+  "attrs": {
+   "level": 2
+  },
+  "content": [
+   {
+    "type": "text",
+    "text": "Heading"
+   }
+  ]
+ },
+ "marks": {
+  "type": "paragraph",
+  "content": [
+   {
+    "type": "text",
+    "text": "b",
+    "marks": [
+     {
+      "type": "strong"
+     }
+    ]
+   },
+   {
+    "type": "text",
+    "text": "i",
+    "marks": [
+     {
+      "type": "em"
+     }
+    ]
+   },
+   {
+    "type": "text",
+    "text": "u",
+    "marks": [
+     {
+      "type": "underline"
+     }
+    ]
+   },
+   {
+    "type": "text",
+    "text": "s",
+    "marks": [
+     {
+      "type": "strike"
+     }
+    ]
+   },
+   {
+    "type": "text",
+    "text": "c",
+    "marks": [
+     {
+      "type": "code"
+     }
+    ]
+   },
+   {
+    "type": "text",
+    "text": "sub",
+    "marks": [
+     {
+      "type": "subsup",
+      "attrs": {
+       "type": "sub"
+      }
+     }
+    ]
+   },
+   {
+    "type": "text",
+    "text": "color",
+    "marks": [
+     {
+      "type": "textColor",
+      "attrs": {
+       "color": "#ff5630"
+      }
+     }
+    ]
+   },
+   {
+    "type": "text",
+    "text": "bg",
+    "marks": [
+     {
+      "type": "backgroundColor",
+      "attrs": {
+       "color": "#fedec8"
+      }
+     }
+    ]
+   },
+   {
+    "type": "text",
+    "text": "link",
+    "marks": [
+     {
+      "type": "link",
+      "attrs": {
+       "href": "https://example.com"
+      }
+     }
+    ]
+   }
+  ]
+ },
+ "hardBreak": {
+  "type": "paragraph",
+  "content": [
+   {
+    "type": "text",
+    "text": "a"
+   },
+   {
+    "type": "hardBreak"
+   },
+   {
+    "type": "text",
+    "text": "b"
+   }
+  ]
+ },
+ "emoji": {
+  "type": "paragraph",
+  "content": [
+   {
+    "type": "emoji",
+    "attrs": {
+     "shortName": ":grinning:",
+     "id": "1f600",
+     "text": "😀"
+    }
+   },
+   {
+    "type": "emoji",
+    "attrs": {
+     "shortName": ":check_mark:",
+     "id": "atlassian-check_mark",
+     "text": ":check_mark:"
+    }
+   }
+  ]
+ },
+ "mention": {
+  "type": "paragraph",
+  "content": [
+   {
+    "type": "mention",
+    "attrs": {
+     "id": "557058:00000000-0000-0000-0000-000000000000",
+     "text": "@Ada Lovelace"
+    }
+   }
+  ]
+ },
+ "status": {
+  "type": "paragraph",
+  "content": [
+   {
+    "type": "status",
+    "attrs": {
+     "text": "DONE",
+     "color": "green"
+    }
+   }
+  ]
+ },
+ "date": {
+  "type": "paragraph",
+  "content": [
+   {
+    "type": "date",
+    "attrs": {
+     "timestamp": "1763683200000"
+    }
+   }
+  ]
+ },
+ "inlineCard": {
+  "type": "paragraph",
+  "content": [
+   {
+    "type": "inlineCard",
+    "attrs": {
+     "url": "https://example.com"
+    }
+   }
+  ]
+ },
+ "bulletList": {
+  "type": "bulletList",
+  "content": [
+   {
+    "type": "listItem",
+    "content": [
+     {
+      "type": "paragraph",
+      "content": [
+       {
+        "type": "text",
+        "text": "x"
+       }
+      ]
+     }
+    ]
+   }
+  ]
+ },
+ "orderedList": {
+  "type": "orderedList",
+  "attrs": {
+   "order": 3
+  },
+  "content": [
+   {
+    "type": "listItem",
+    "content": [
+     {
+      "type": "paragraph",
+      "content": [
+       {
+        "type": "text",
+        "text": "x"
+       }
+      ]
+     }
+    ]
+   }
+  ]
+ },
+ "codeBlock": {
+  "type": "codeBlock",
+  "attrs": {
+   "language": "python"
+  },
+  "content": [
+   {
+    "type": "text",
+    "text": "print(1)"
+   }
+  ]
+ },
+ "blockquote": {
+  "type": "blockquote",
+  "content": [
+   {
+    "type": "paragraph",
+    "content": [
+     {
+      "type": "text",
+      "text": "q"
+     }
+    ]
+   }
+  ]
+ },
+ "rule": {
+  "type": "rule"
+ },
+ "panel": {
+  "type": "panel",
+  "attrs": {
+   "panelType": "info"
+  },
+  "content": [
+   {
+    "type": "paragraph",
+    "content": [
+     {
+      "type": "text",
+      "text": "p"
+     }
+    ]
+   }
+  ]
+ },
+ "panelCustom": {
+  "type": "panel",
+  "attrs": {
+   "panelType": "custom",
+   "panelColor": "#E3FCEF",
+   "panelIcon": ":rocket:",
+   "panelIconText": "🚀"
+  },
+  "content": [
+   {
+    "type": "paragraph",
+    "content": [
+     {
+      "type": "text",
+      "text": "p"
+     }
+    ]
+   }
+  ]
+ },
+ "expand": {
+  "type": "expand",
+  "attrs": {
+   "title": "More"
+  },
+  "content": [
+   {
+    "type": "paragraph",
+    "content": [
+     {
+      "type": "text",
+      "text": "e"
+     }
+    ]
+   }
+  ]
+ },
+ "table": {
+  "type": "table",
+  "attrs": {
+   "isNumberColumnEnabled": false,
+   "layout": "default"
+  },
+  "content": [
+   {
+    "type": "tableRow",
+    "content": [
+     {
+      "type": "tableHeader",
+      "content": [
+       {
+        "type": "paragraph",
+        "content": [
+         {
+          "type": "text",
+          "text": "h"
+         }
+        ]
+       }
+      ]
+     },
+     {
+      "type": "tableHeader",
+      "content": [
+       {
+        "type": "paragraph",
+        "content": [
+         {
+          "type": "text",
+          "text": "h2"
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "type": "tableRow",
+    "content": [
+     {
+      "type": "tableCell",
+      "attrs": {
+       "colspan": 2
+      },
+      "content": [
+       {
+        "type": "paragraph",
+        "content": [
+         {
+          "type": "text",
+          "text": "c"
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  ]
+ },
+ "taskList": {
+  "type": "taskList",
+  "attrs": {
+   "localId": "tl1"
+  },
+  "content": [
+   {
+    "type": "taskItem",
+    "attrs": {
+     "localId": "t1",
+     "state": "TODO"
+    },
+    "content": [
+     {
+      "type": "text",
+      "text": "task"
+     }
+    ]
+   }
+  ]
+ },
+ "decisionList": {
+  "type": "decisionList",
+  "attrs": {
+   "localId": "dl1"
+  },
+  "content": [
+   {
+    "type": "decisionItem",
+    "attrs": {
+     "localId": "d1",
+     "state": "DECIDED"
+    },
+    "content": [
+     {
+      "type": "text",
+      "text": "dec"
+     }
+    ]
+   }
+  ]
+ },
+ "layout": {
+  "type": "layoutSection",
+  "content": [
+   {
+    "type": "layoutColumn",
+    "attrs": {
+     "width": 50
+    },
+    "content": [
+     {
+      "type": "paragraph",
+      "content": [
+       {
+        "type": "text",
+        "text": "l"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "type": "layoutColumn",
+    "attrs": {
+     "width": 50
+    },
+    "content": [
+     {
+      "type": "paragraph",
+      "content": [
+       {
+        "type": "text",
+        "text": "r"
+       }
+      ]
+     }
+    ]
+   }
+  ]
+ },
+ "blockCard": {
+  "type": "blockCard",
+  "attrs": {
+   "url": "https://example.com"
+  }
+ },
+ "embedCard": {
+  "type": "embedCard",
+  "attrs": {
+   "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+   "layout": "center"
+  }
+ },
+ "mediaExternal": {
+  "type": "mediaSingle",
+  "attrs": {
+   "layout": "center"
+  },
+  "content": [
+   {
+    "type": "media",
+    "attrs": {
+     "type": "external",
+     "url": "https://www.atlassian.com/favicon.ico"
+    }
+   }
+  ]
+ },
+ "extension": {
+  "type": "extension",
+  "attrs": {
+   "extensionType": "com.atlassian.confluence.macro.core",
+   "extensionKey": "toc",
+   "parameters": {
+    "macroParams": {
+     "maxLevel": {
+      "value": "3"
+     }
+    }
+   }
+  }
+ },
+ "bodiedExtension": {
+  "type": "bodiedExtension",
+  "attrs": {
+   "extensionType": "com.atlassian.confluence.macro.core",
+   "extensionKey": "excerpt",
+   "parameters": {
+    "macroParams": {}
+   }
+  },
+  "content": [
+   {
+    "type": "paragraph",
+    "content": [
+     {
+      "type": "text",
+      "text": "ex"
+     }
+    ]
+   }
+  ]
+ },
+ "inlineExtension": {
+  "type": "paragraph",
+  "content": [
+   {
+    "type": "inlineExtension",
+    "attrs": {
+     "extensionType": "com.atlassian.confluence.macro.core",
+     "extensionKey": "jira",
+     "parameters": {
+      "macroParams": {
+       "key": {
+        "value": "SAM1-6"
+       }
+      }
+     }
+    }
+   }
+  ]
+ },
+ "alignment": {
+  "type": "paragraph",
+  "marks": [
+   {
+    "type": "alignment",
+    "attrs": {
+     "align": "center"
+    }
+   }
+  ],
+  "content": [
+   {
+    "type": "text",
+    "text": "centered"
+   }
+  ]
+ },
+ "indentation": {
+  "type": "paragraph",
+  "marks": [
+   {
+    "type": "indentation",
+    "attrs": {
+     "level": 1
+    }
+   }
+  ],
+  "content": [
+   {
+    "type": "text",
+    "text": "indented"
+   }
+  ]
+ },
+ "nestedExpand": {
+  "type": "table",
+  "content": [
+   {
+    "type": "tableRow",
+    "content": [
+     {
+      "type": "tableCell",
+      "content": [
+       {
+        "type": "nestedExpand",
+        "attrs": {
+         "title": "n"
+        },
+        "content": [
+         {
+          "type": "paragraph",
+          "content": [
+           {
+            "type": "text",
+            "text": "x"
+           }
+          ]
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}
