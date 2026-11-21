@@ -28,7 +28,7 @@ markdown = to_markdown(doc, "jira")
 ## What it does
 
 | | |
-|---|---|
+| --- | --- |
 | **Lossless** | Every schema-valid ADF document converts to Markdown and back to the same ADF (up to server-generated ids). Property tests generate random documents to hold this. |
 | **Idiomatic** | Plain Markdown wherever it fits: `**bold**`, lists, GFM tables, `- [ ]` tasks, `> [!NOTE]` alerts, `<https://…>` smart links, `:smile:`. Directives (`:::expand{title=…}`, `:status[DONE]{color=green}`) cover the rest. |
 | **Complete** | The ADF spec is generated from Atlassian's official JSON Schema, so every node, mark and attribute is known. Any node can be written as a directive named after it; raw ADF (```` ```adf ````) is the last resort. |
@@ -50,7 +50,7 @@ Owner :mention[@Ada]{id=557058:…}, due :date[2026-12-31], state :status[AT RIS
 
 :::expand{title="Rollout plan"}
 | Stage | Users |
-|:------|------:|
+| :------ | ------: |
 | Canary | 1% |
 | GA | 100% |
 :::
@@ -64,7 +64,7 @@ Design notes: [`docs/design.md`](docs/design.md).
 ## API
 
 | Function | |
-|---|---|
+| --- | --- |
 | `to_adf(markdown, profile="generic", strict=False, check=True)` | Markdown → ADF `dict`. `strict` turns warnings into errors. |
 | `to_markdown(adf, profile="generic", keep_metadata=False)` | ADF (dict, JSON text, a Confluence `{"representation","value"}` body, or a `Node`) → Markdown. |
 | `convert(source, src, dst, profile)` | Either direction by name (`"markdown"`, `"adf"`). |
@@ -75,9 +75,9 @@ Design notes: [`docs/design.md`](docs/design.md).
 ## Development
 
 ```bash
-uv sync --all-groups
-uv run poe check                       # lint + typecheck + tests
-HYPOTHESIS_PROFILE=thorough uv run pytest tests/roundtrip   # 2000 random documents
+uv sync
+uv run poe check                       # format, lint, types, tests with coverage
+uv run poe test-deep                   # 2000 random documents per property
 uv run python scripts/generate_spec.py # after updating src/adflux/adf/schema/full.json
 uv run python scripts/build_profile_data.py
 ```
@@ -85,12 +85,14 @@ uv run python scripts/build_profile_data.py
 `tests/fixtures/live` holds ADF captured from live Jira and Confluence sites (every node
 type as stored by each product, every Confluence macro, Jira wiki conversions). The e2e
 suite (`poe test-e2e`, needs `.env`) creates real pages and issues and requires the
-products to store adflux output unchanged.
+products to store adflux output unchanged. See [CONTRIBUTING](CONTRIBUTING.md) and
+[testing](docs/testing.md).
 
 ## Releasing
 
-Land Conventional Commits on `main`, then run the **Release** workflow:
-`go-semantic-release` picks the version, builds, tags, and publishes to PyPI.
+Releases are automatic: release-please turns Conventional Commits on `main` into a release
+pull request, and merging it tags, builds, attests, and publishes to PyPI. See
+[releasing](docs/releasing.md).
 
 ## License
 

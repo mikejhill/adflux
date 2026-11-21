@@ -14,10 +14,10 @@ def test_emoji_lookup():
 
 
 def test_profile_aliases():
-    assert CONFLUENCE.resolve_emoji("tick")["id"] == "atlassian-check_mark"
-    assert JIRA.resolve_emoji("tick")["id"] == "atlassian-check_mark"
+    assert (CONFLUENCE.resolve_emoji("tick") or {}).get("id") == "atlassian-check_mark"
+    assert (JIRA.resolve_emoji("tick") or {}).get("id") == "atlassian-check_mark"
     # a real short name always wins over an alias
-    assert CONFLUENCE.resolve_emoji("smile")["shortName"] == ":smile:"
+    assert (CONFLUENCE.resolve_emoji("smile") or {}).get("shortName") == ":smile:"
     assert GENERIC.emoji_code({"shortName": ":smile:", "id": "1f604", "text": "😄"}) == "smile"
 
 

@@ -57,7 +57,7 @@ def macros() -> dict[str, Any]:
         name = item["name"]
         block = _node_of(item.get("adf_block"), False)
         node_type = block.get("type") if block else None
-        if node_type in ("extension", "bodiedExtension", "inlineExtension"):
+        if block and node_type in ("extension", "bodiedExtension", "inlineExtension"):
             key = block["attrs"].get("extensionKey")
             if key != name:  # converted to an "unsupported content" placeholder
                 node_type = None

@@ -263,7 +263,7 @@ def test_keep_local_ids_covers_tables() -> None:
 
 def test_convert_rejects_unknown_formats() -> None:
     with pytest.raises(ValueError, match="unsupported format"):
-        convert("x", "markdown", "panflute")
+        convert("x", "markdown", "panflute")  # ty: ignore[invalid-argument-type]
 
 
 def test_cli_validates_markdown_against_the_schema(tmp_path: Any, capsys: pytest.CaptureFixture[str]) -> None:

@@ -49,7 +49,7 @@ others. Directives were chosen over HTML comments or `<details>`-style HTML beca
 are readable, nest, carry typed attributes, and are already familiar to agents.
 
 | Choice | Why |
-|---|---|
+| --- | --- |
 | `> [!NOTE]` alerts for panels | GitHub syntax, renders on GitHub, agents know it |
 | `<https://…>` for inlineCard, `[t](u)` for link | the two Markdown link forms map to the two ADF link kinds |
 | `:status[DONE]{color=green}` etc. | short directives named after the node |
@@ -76,7 +76,7 @@ Both products store any schema-valid ADF unchanged (verified live for every node
 so profiles do not change the ADF model; they change what text means and what renders:
 
 | | generic | jira | confluence |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | Emoji | standard + Atlassian sets | + Jira wiki shortcuts (`:tick:` …) | + Confluence emoticon names |
 | Unknown directive | error | error | Confluence macro |
 | Macros | catalog known | warn (not rendered) | catalog, native mapping |
@@ -99,7 +99,7 @@ tests compare canonical forms.
 ## Testing
 
 | Suite | What it proves |
-|---|---|
+| --- | --- |
 | `tests/unit` | attribute grammar, spec, model, validator, profiles, reader and writer per construct, CLI, every example in the syntax guide |
 | `tests/roundtrip/test_live.py` | every node as Jira and Confluence returned it, all 111 Confluence macros, Jira wiki output round-trip |
 | `tests/roundtrip/test_property.py` | random schema-valid documents round-trip in all three profiles (Hypothesis; `HYPOTHESIS_PROFILE=thorough` for 2000 cases) |
