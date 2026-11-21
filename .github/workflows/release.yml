@@ -32,11 +32,14 @@ jobs:
       # CodeQL for approval on such pull requests. Dispatching is allowed, and the
       # required CodeQL results for the release branch's head come from this run.
       - name: Start CI and CodeQL for release pull request
+        # With RELEASE_PLEASE_TOKEN set, the release PR already triggers them itself.
         if: steps.release.outputs.prs_created == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
           PR_JSON: ${{ steps.release.outputs.pr }}
+          HAS_RELEASE_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN != '' }}
         run: |
+          if [ "$HAS_RELEASE_TOKEN" = true ]; then exit 0; fi
           branch=$(jq -r '.headBranchName' <<< "$PR_JSON")
           gh workflow run ci.yml --repo "$GITHUB_REPOSITORY" --ref "$branch"
           gh workflow run codeql.yml --repo "$GITHUB_REPOSITORY" --ref "$branch"

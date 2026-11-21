@@ -32,7 +32,7 @@ the nightly job fails instead when any live test skips (`scripts/require_no_skip
 
 | Gate | Threshold | Where |
 | --- | --- | --- |
-| Branch coverage, whole package | 84% (baseline 84.8%; raise, never lower) | `poe test`, every CI cell |
+| Coverage (statements and branches combined), whole package | 84% (baseline 84.8%; raise, never lower) | `poe test`, every CI cell |
 | Coverage of changed lines | 100% | `coverage` job (`diff-cover` against the base branch) |
 | Strict types | every `ty` rule is an error, minus the documented exceptions | `poe typecheck` |
 | Mutation score, per shard | reader 77%, writer 70%, core 60% (baseline 71.0% overall; raise, never lower) | `mutation` workflow |

@@ -15,7 +15,9 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: ci-${{ github.event.pull_request.number || github.ref }}
+  # Release-tag CI (workflow_call) runs under main's ref; key it by the tag so a later push
+  # to main cannot replace it while it is pending.
+  group: ci-${{ inputs.ref || github.event.pull_request.number || github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
   title:

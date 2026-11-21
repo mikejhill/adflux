@@ -23,6 +23,8 @@ LIVE = ROOT / "fixtures" / "live"
 
 def pytest_collection_modifyitems(config: pytest.Config, items: list[pytest.Item]) -> None:
     for item in items:
+        if not item.path.is_relative_to(ROOT):
+            continue
         parts = item.path.relative_to(ROOT).parts
         if parts and parts[0] in SUITES:
             item.add_marker(getattr(pytest.mark, parts[0]))

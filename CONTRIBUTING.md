@@ -11,7 +11,7 @@ review:
 
 Use Python 3.11 or newer and [uv](https://docs.astral.sh/uv/). Run `uv sync`, then
 `uv run poe check` before opening a pull request. It runs formatting, lint, strict type
-checks, and the unit and round-trip suites with the branch-coverage gate. See
+checks, and the unit and round-trip suites with the coverage gate. See
 [testing](docs/testing.md) for the suites and gates.
 
 - Use a Conventional Commit title for every pull request (`feat:`, `fix:`, `docs:`, …;

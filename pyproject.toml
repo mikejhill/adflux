@@ -113,7 +113,7 @@ branch = true
 source = ["adflux"]
 
 [tool.coverage.report]
-# Baseline 2026-11-21: 84.8%. Raise as coverage grows; never lower.
+# Statements and branches combined. Baseline 2026-11-21: 84.8%. Raise as coverage grows; never lower.
 fail_under = 84
 show_missing = true
 exclude_also = [
