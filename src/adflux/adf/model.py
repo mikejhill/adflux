@@ -128,7 +128,9 @@ class Node:
             if not isinstance(raw_content, list):
                 raise AdfError("'content' must be an array", f"{path}.content")
             content = [cls.from_json(child, f"{path}.content[{i}]") for i, child in enumerate(raw_content)]
-        raw_marks = value.get("marks") or []
+        raw_marks = value.get("marks")
+        if raw_marks is None:
+            raw_marks = []
         if not isinstance(raw_marks, list):
             raise AdfError("'marks' must be an array", f"{path}.marks")
         marks = [Mark.from_json(m, f"{path}.marks[{i}]") for i, m in enumerate(raw_marks)]
@@ -167,12 +169,8 @@ def mark(kind: str, **attrs: Any) -> Mark:
     return Mark(kind, {k: v for k, v in attrs.items() if v is not None})
 
 
-def load(value: str | bytes | Mapping[str, Any]) -> Node:
-    """Parse ADF from a JSON string, bytes, or an already decoded mapping.
-
-    A bare node that is not ``doc`` is wrapped in a document, and Confluence's
-    ``{"value": "<json>", "representation": "atlas_doc_format"}`` envelope is unwrapped.
-    """
+def decode(value: str | bytes | Mapping[str, Any]) -> Any:
+    """Return the decoded JSON of ``value``, unwrapping Confluence's body envelope."""
     data: Any = value
     if isinstance(value, bytes | str):
         try:
@@ -180,8 +178,17 @@ def load(value: str | bytes | Mapping[str, Any]) -> Node:
         except json.JSONDecodeError as error:
             raise AdfError(f"not valid JSON: {error.msg} (line {error.lineno})", "") from None
     if isinstance(data, Mapping) and "representation" in data and isinstance(data.get("value"), str):
-        return load(data["value"])
-    root = Node.from_json(data)
+        return decode(data["value"])
+    return data
+
+
+def load(value: str | bytes | Mapping[str, Any]) -> Node:
+    """Parse ADF from a JSON string, bytes, or an already decoded mapping.
+
+    A bare node that is not ``doc`` is wrapped in a document, and Confluence's
+    ``{"value": "<json>", "representation": "atlas_doc_format"}`` envelope is unwrapped.
+    """
+    root = Node.from_json(decode(value))
     if root.type != "doc":
         root = Node("doc", content=[root], extra={"version": 1})
     return root

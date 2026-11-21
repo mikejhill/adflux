@@ -11,7 +11,6 @@ from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
 from typing import Any
 
-from adflux.adf.model import load
 from adflux.adf.validate import validation_issues
 from adflux.api import to_adf, to_markdown
 from adflux.errors import AdfluxError, AdfValidationError
@@ -59,10 +58,10 @@ def _cmd_validate(args: argparse.Namespace) -> int:
     if fmt == "auto":
         fmt = "adf" if source.lstrip().startswith("{") else "markdown"
     if fmt == "markdown":
-        to_adf(source, args.profile, strict=args.strict)
-        issues = []
+        document: Any = to_adf(source, args.profile, strict=args.strict)
     else:
-        issues = validation_issues(load(source), schema=not args.no_schema)
+        document = source
+    issues = validation_issues(document, schema=not args.no_schema)
     if issues:
         for issue in issues:
             print(f"{issue.path}: {issue.message}", file=sys.stderr)

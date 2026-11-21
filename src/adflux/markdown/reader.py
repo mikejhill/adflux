@@ -10,7 +10,6 @@ from __future__ import annotations
 
 import json
 import re
-import textwrap
 import uuid
 import warnings
 from dataclasses import dataclass, field
@@ -31,7 +30,7 @@ from adflux.profiles.macros import CONFLUENCE_MACRO_TYPE
 from adflux.profiles.profile import Profile
 
 ALERT = re.compile(r"^\[!([A-Za-z]+)\][ \t]*(?:\n|$)")
-TASK = re.compile(r"^\[([ xX])\][ \t]+")
+TASK = re.compile(r"^\[([ xX])\](?:[ \t]+|$)")
 HTML_TAG = re.compile(r"^<(/?)([A-Za-z][A-Za-z0-9]*)\s*(/?)>$")
 
 
@@ -87,6 +86,9 @@ class Reader:
         self._lines = source.split("\n")
         doc = Node("doc", content=[], extra={"version": 1})
         doc.content = self._blocks(_fold(tokens), "doc")
+        for node in doc.walk():
+            if node.type in self.profile.unsupported:
+                self._warn(f"{self.profile.name} does not render {node.type!r} nodes")
         return normalize(doc)
 
     def inline(self, source: str, parent: str = "paragraph") -> list[Node]:
@@ -129,10 +131,12 @@ class Reader:
     def _blocks(self, trees: list[_Tree], parent: str) -> list[Node]:
         out: list[Node] = []
         for tree in trees:
-            out.extend(self._block(tree, parent))
-        for node in out:
-            if node.type in self.profile.unsupported:
-                self._warn(f"{self.profile.name} does not render {node.type!r} nodes")
+            try:
+                out.extend(self._block(tree, parent))
+            except (ValueError, TypeError, json.JSONDecodeError, AdfError) as error:
+                if isinstance(error, MarkdownError):
+                    raise
+                raise MarkdownError(str(error), self._line(tree)) from None
         return out
 
     def _block(self, tree: _Tree, parent: str) -> list[Node]:
@@ -180,7 +184,7 @@ class Reader:
         if len(significant) == 1 and significant[0].type == "image" and self._fits(parent, "mediaSingle"):
             image = significant[0]
             media = {"type": "external", "url": image.attrs.get("src", "")}
-            alt = image.content or "".join(c.content for c in image.children or [])
+            alt = _plain_tokens(image.children or [])
             if alt:
                 media["alt"] = alt
             return [Node("mediaSingle", {"layout": "center"}, [Node("media", media)])]
@@ -209,15 +213,29 @@ class Reader:
         source = TASK.sub("", inline.token.content, count=1)
         return self.inline(source, "taskItem")
 
-    def _task_list(self, items: list[_Tree], kind: str) -> Node:
+    def _task_list(self, items: list[_Tree], kind: str, line: int | None = None) -> Node:
         item_type, list_type = ("decisionItem", "decisionList") if kind == "decisionList" else ("taskItem", "taskList")
         content: list[Node] = []
         for item in items:
             marker = self._task_marker(item)
+            if marker is None:
+                where = self._line(item) if self._line(item) is not None else line
+                raise MarkdownError(f"each {list_type} item needs a [ ] or [x] marker and text", where)
             done = marker in ("x", "X")
             state = ("DECIDED" if done else "UNDECIDED") if kind == "decisionList" else "DONE" if done else "TODO"
-            content.append(Node(item_type, {"localId": _local_id(), "state": state}, self._strip_task(item)))
-            for extra in item.children[1:]:
+            first = self._strip_task(item)
+            extras = item.children[1:]
+            blocks = [e for e in extras if e.token.type != "bullet_list_open"]
+            if kind == "taskList" and blocks and all(e.token.type == "paragraph_open" for e in blocks):
+                # more paragraphs under the item: a block task item keeps them
+                paragraphs = [Node("paragraph", content=first)]
+                rest = [e for e in extras if e.token.type == "paragraph_open"]
+                paragraphs.extend(n for e in rest for n in self._paragraph(e, "blockTaskItem"))
+                content.append(Node("blockTaskItem", {"localId": _local_id(), "state": state}, paragraphs))
+                extras = [e for e in extras if e.token.type == "bullet_list_open"]
+            else:
+                content.append(Node(item_type, {"localId": _local_id(), "state": state}, first or None))
+            for extra in extras:
                 if extra.token.type == "bullet_list_open" and kind == "taskList":
                     nested = extra.children
                     if nested and all(self._task_marker(n) is not None for n in nested):
@@ -310,21 +328,25 @@ class Reader:
         if canonical == "panel":
             node_attrs = self._typed("panel", names.rename(attrs, names.PANEL_ATTRS), line)
             node_attrs.setdefault("panelType", "info")
-            return [Node("panel", node_attrs, self._blocks(body, "panel") or [Node("paragraph", content=[])])]
+            panel = Node("panel", node_attrs, self._blocks(body, "panel") or [Node("paragraph", content=[])])
+            panel.marks = self._block_marks(attrs, line)
+            return [panel]
         if canonical in ("expand", "nestedExpand"):
             kind = canonical
             if canonical == "expand" and not self._fits(parent, "expand") and self._fits(parent, "nestedExpand"):
                 kind = "nestedExpand"
             node_attrs = self._typed(kind, attrs, line)
             node_attrs.setdefault("title", "")
-            return [Node(kind, node_attrs, self._blocks(body, kind) or [Node("paragraph", content=[])])]
-        if canonical == "decisionList":
+            expand = Node(kind, node_attrs, self._blocks(body, kind) or [Node("paragraph", content=[])])
+            expand.marks = self._block_marks(attrs, line)
+            return [expand]
+        if canonical == "decisionList" and name == "decisions":
             lists = [c for c in body if c.token.type == "bullet_list_open"]
             if len(lists) != 1 or len(body) != 1:
                 raise MarkdownError(":::decisions must contain exactly one list", line)
-            return [self._task_list(lists[0].children, "decisionList")]
+            return [self._task_list(lists[0].children, "decisionList", line)]
         if canonical == "extension":
-            return [self._extension(attrs, meta.get("label"), body, "bodiedExtension", line, self._raw_body(tree))]
+            return [self._extension(attrs, meta.get("label"), body, "bodiedExtension", line, meta.get("body"))]
         if canonical in NODES and canonical not in names.LEAF_ONLY:
             return [self._generic(canonical, attrs, body, line, parent)]
         macro = self.profile.macros.get(name)
@@ -336,7 +358,7 @@ class Reader:
                     body,
                     "bodiedExtension",
                     line,
-                    self._raw_body(tree),
+                    meta.get("body"),
                 )
             ]
         raise MarkdownError(f"unknown directive :::{name} for profile {self.profile.name}", line)
@@ -353,6 +375,8 @@ class Reader:
         if canonical == "embedCard":
             return [Node("embedCard", self._typed("embedCard", attrs, line))]
         if canonical == "mediaSingle":
+            if not self._fits(parent, "mediaSingle") and self._fits(parent, "media"):
+                return [self._generic("media", attrs, [], line, parent)]  # inside mediaGroup
             return [self._media_single(attrs, label, line)]
         if canonical == "extension":
             return self._wrap_inline(self._extension(attrs, label, None, "extension", line), parent)
@@ -416,6 +440,9 @@ class Reader:
         spec = node_spec(kind)
         node = Node(kind, self._typed(kind, attrs, line))
         node.marks = self._block_marks(attrs, line)
+        local_id = spec.attrs.get("localId")
+        if local_id is not None and local_id.required and "localId" not in node.attrs:
+            node.attrs["localId"] = _local_id()
         if spec.leaf:
             return node
         inline_content = bool(spec.content) and all(NODES.get(c) is None or NODES[c].inline for c in spec.content)
@@ -540,15 +567,6 @@ class Reader:
             return Node("status", {"text": params.get("title", ""), "color": color})
         return None
 
-    def _raw_body(self, tree: _Tree) -> str | None:
-        """Return the source lines inside a container directive, dedented."""
-        token_map = tree.token.map
-        if not token_map or self._lines is None:
-            return None
-        start, end = token_map
-        lines = self._lines[start + 1 : end]
-        return textwrap.dedent("\n".join(lines))
-
     def _make_extension(
         self,
         kind: str,
@@ -564,9 +582,11 @@ class Reader:
         reserved = {k: attrs.pop(k) for k in list(attrs) if k.startswith("adf.")}
         if "adf.params" in reserved:
             try:
-                node_attrs["parameters"] = json.loads(reserved.pop("adf.params"))
+                parameters_value = json.loads(reserved.pop("adf.params"))
             except json.JSONDecodeError as error:
                 raise MarkdownError(f"adf.params is not JSON: {error.msg}", line) from None
+            if parameters_value is not None:  # null: the node has no parameters
+                node_attrs["parameters"] = parameters_value
         else:
             params: dict[str, Any] = {}
             if label is not None:
@@ -627,7 +647,7 @@ class Reader:
                             Node("text", text=url[len("mailto:") :], marks=[*marks, Mark("link", {"href": url})])
                         )
                     else:
-                        out.append(Node("inlineCard", {"url": url}))
+                        out.append(_marked(Node("inlineCard", {"url": url}), marks))
                 else:
                     link: dict[str, Any] = {"href": str(token.attrs.get("href", ""))}
                     if token.attrs.get("title"):
@@ -636,14 +656,14 @@ class Reader:
             elif kind == "link_close":
                 self._pop(marks, "link")
             elif kind == "image":
-                alt = token.content or "".join(c.content for c in token.children or [])
+                alt = _plain_tokens(token.children or [])
                 src = str(token.attrs.get("src", ""))
                 self._warn("inline images become links (ADF has no inline external image)")
                 out.append(Node("text", text=alt or src, marks=[*marks, Mark("link", {"href": src})]))
             elif kind == "html_inline":
                 self._html(token.content, marks, out)
             elif kind == "emoji":
-                out.append(Node("emoji", dict(token.meta["attrs"])))
+                out.append(_marked(Node("emoji", dict(token.meta["attrs"])), marks))
             elif kind == "directive_inline_open":
                 depth = 1
                 end = index + 1
@@ -656,7 +676,13 @@ class Reader:
                             break
                     end += 1
                 inner = tokens[index + 1 : end]
-                out.extend(self._inline_directive(token.meta, inner, marks, parent))
+                try:
+                    made = self._inline_directive(token.meta, inner, marks, parent)
+                except (ValueError, TypeError, json.JSONDecodeError, AdfError) as error:
+                    if isinstance(error, MarkdownError):
+                        raise
+                    raise MarkdownError(f":{token.meta['name']}: {error}") from None
+                out.extend(n if n.type == "text" else _marked(n, marks) for n in made)
                 index = end
             index += 1
         return out
@@ -700,10 +726,10 @@ class Reader:
         name: str = meta["name"]
         attrs: dict[str, str] = dict(meta["attrs"])
         raw_label: str | None = meta.get("label")
-        label = self.plain(raw_label)
         canonical = names.INLINE_ALIASES.get(name, name)
         if canonical == "span":
             return self._inlines(inner, parent, list(marks) + self._span_marks(attrs))
+        label = _plain_tokens(inner) if raw_label is not None else None
         if canonical == "status":
             node_attrs = self._typed("status", attrs, None)
             node_attrs["text"] = label or node_attrs.get("text", "")
@@ -716,7 +742,7 @@ class Reader:
             return [Node("date", node_attrs)]
         if canonical == "mention":
             node_attrs = self._typed("mention", attrs, None)
-            if label is not None:
+            if label is not None and "text" not in node_attrs:
                 node_attrs["text"] = label if label.startswith("@") else "@" + label
             if "id" not in node_attrs:
                 resolved = self.profile.mention_resolver(label or "") if self.profile.mention_resolver else None
@@ -726,11 +752,8 @@ class Reader:
                 node_attrs = {**node_attrs, **resolved}
             return [Node("mention", node_attrs)]
         if canonical == "emoji":
-            resolved = (
-                self.profile.resolve_emoji(label or attrs.get("shortName", ""))
-                if label or attrs.get("shortName")
-                else None
-            )
+            # a label is authoring shorthand that the profile completes; attributes are exact
+            resolved = self.profile.resolve_emoji(label) if label else None
             node_attrs = dict(resolved or {})
             node_attrs.update(self._typed("emoji", attrs, None))
             if label and "shortName" not in attrs:
@@ -755,7 +778,7 @@ class Reader:
         if macro is not None or self.profile.unknown_directives_are_macros:
             return [self._extension(dict(attrs, **{"adf.key": name}), raw_label, None, "inlineExtension", None)]
         self._warn(f"unknown inline directive :{name}; kept as text")
-        return [Node("text", text=f":{name}", marks=list(marks)), *self._inlines(inner, parent, marks)]
+        return [Node("text", text=str(meta.get("source") or f":{name}"), marks=list(marks))]
 
     @staticmethod
     def _span_marks(attrs: dict[str, str]) -> list[Mark]:
@@ -767,12 +790,52 @@ class Reader:
         if "size" in attrs:
             marks.append(Mark("fontSize", {"fontSize": attrs["size"]}))
         if "marks" in attrs:
-            for raw in json.loads(attrs["marks"]):
+            try:
+                raw_marks = json.loads(attrs["marks"])
+            except json.JSONDecodeError as error:
+                raise MarkdownError(f"marks must be a JSON array: {error.msg}") from None
+            if not isinstance(raw_marks, list):
+                raise MarkdownError("marks must be a JSON array")
+            for raw in raw_marks:
                 found = Mark.from_json(raw)
                 spec = mark_spec(found.type)
                 found.attrs = {k: v for k, v in found.attrs.items() if spec.attr(k)}
                 marks.append(found)
         return marks
+
+
+def _marked(node: Node, marks: list[Mark]) -> Node:
+    """Give an inline node the active marks its type allows (a link around an inline card)."""
+    allowed = node_spec(node.type).marks
+    node.marks = [*node.marks, *(m for m in marks if m.type in allowed and m not in node.marks)]
+    return node
+
+
+def _plain_tokens(tokens: list[Token]) -> str:
+    """Return the text of inline tokens with Markdown escapes and entities resolved.
+
+    A nested directive contributes its source text.
+    """
+    parts: list[str] = []
+    depth = 0
+    for token in tokens:
+        if token.type == "directive_inline_open":
+            if depth == 0:
+                parts.append(str(token.meta.get("source", "")))
+            depth += 1
+        elif token.type == "directive_inline_close":
+            depth -= 1
+        elif depth:
+            continue
+        elif token.type in ("text", "code_inline", "html_inline", "emoji"):
+            parts.append(token.content)
+        elif token.type == "softbreak":
+            parts.append(" ")
+        elif token.type == "hardbreak":
+            parts.append("\n")
+        elif token.children:
+            parts.append(_plain_tokens(token.children))
+    return "".join(parts)
 
 
 def timestamp_now() -> str:

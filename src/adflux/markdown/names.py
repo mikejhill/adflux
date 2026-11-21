@@ -61,7 +61,7 @@ INLINE_ALIASES = {
 RESERVED = frozenset(BLOCK_ALIASES) | frozenset(INLINE_ALIASES) | {"paragraph", "heading", "table"}
 
 # Node types that are never containers / never block leaves in directive form.
-LEAF_ONLY = frozenset({"blockCard", "embedCard", "rule", "extension", "media", "mediaSingle"})
+LEAF_ONLY = frozenset({"blockCard", "embedCard", "rule", "extension", "media"})
 INLINE_ONLY = frozenset({"text", "hardBreak", "status", "date", "mention", "emoji", "inlineCard", "placeholder"})
 
 # Block-mark attributes (alignment, indentation, breakout, raw marks) on generic directives.

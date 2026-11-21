@@ -145,6 +145,8 @@ def _strip(node: Node, keep_local_ids: bool) -> Node:
     if not keep_local_ids:
         attrs.pop("localId", None)
     for key, default in SERVER_ATTRS.get(node.type, {}).items():
+        if key == "localId":
+            continue  # handled above, so keep_local_ids is honoured
         if key in attrs and (default is None or attrs[key] == default):
             del attrs[key]
     if node.type in ("extension", "bodiedExtension", "inlineExtension"):

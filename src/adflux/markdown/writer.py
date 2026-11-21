@@ -40,7 +40,7 @@ _LINE_START = re.compile(
 )
 _ENTITY = re.compile(r"&(#[0-9]+|#[xX][0-9a-fA-F]+|[A-Za-z][A-Za-z0-9]*);")
 _COLON_WORD = re.compile(r":(?=([A-Za-z0-9_+\-]+)(:|[\[{]))")
-_TRAILING_NAME = re.compile(rf"(?<!\\)(:{NAME})$")
+_TRAILING_NAME = re.compile(rf"(?<!\\)((?:\\\\)*)(:{NAME})$")
 _INLINE_SPECIAL = re.compile(r"([\\`*_\[\]<>~])")
 _HTML_LIKE = re.compile(r"<(?=[A-Za-z/!?])")
 
@@ -161,7 +161,14 @@ class Writer:
 
     def _generic_block(self, node: Node, parent: str) -> list[str]:
         spec = NODES.get(node.type)
-        if spec is None or spec.inline or not _NAME_RE.match(node.type) or node.text is not None or node.extra:
+        if (
+            spec is None
+            or spec.inline
+            or not _NAME_RE.match(node.type)
+            or node.text is not None
+            or node.extra
+            or node.type == "extension"  # ::extension is the macro form
+        ):
             return self._raw_block(node)
         attrs = {**self._attrs(node), **(self._mark_attrs(node) or {})}
         if spec.leaf:
@@ -185,6 +192,9 @@ class Writer:
         if "\n" in text:
             return None
         level = int(node.attrs.get("level", 1))
+        closing = re.search(r"(^|[ \t])(#+)$", text)
+        if closing:  # a trailing run of # would read as the closing sequence
+            text = text[: closing.start(2)] + "\\" + text[closing.start(2) :]
         return [("#" * level + " " + text).rstrip()]
 
     def _b_rule(self, node: Node, parent: str) -> list[str] | None:
@@ -206,7 +216,7 @@ class Writer:
             lines = [f"[!{names.PANEL_TO_ALERT[panel_type]}]", *body]
             return [("> " + line) if line else ">" for line in lines]
         friendly = names.unrename(attrs, names.PANEL_ATTRS)
-        return self._directive("panel", friendly, body)
+        return self._directive("panel", {**friendly, **(self._mark_attrs(node) or {})}, body)
 
     def _b_expand(self, node: Node, parent: str) -> list[str] | None:
         if node.marks:
@@ -223,7 +233,7 @@ class Writer:
             return None
         attrs = self._attrs(node)
         language = attrs.pop("language", None) or ""
-        if not re.fullmatch(r"[^\s`{]*", language):
+        if not re.fullmatch(r"[^\s`{]*", language) or language == "adf":  # ```adf is raw ADF
             return None
         body = node.text_content()
         runs = [len(m) for m in re.findall(r"`{3,}", body)]
@@ -244,7 +254,7 @@ class Writer:
         if not body:
             body = [""]
         # A list item starting like a task marker would be read as a task.
-        if item.children and item.children[0].type == "paragraph" and re.match(r"^\[[ xX]\]\s", body[0]):
+        if item.children and item.children[0].type == "paragraph" and re.match(r"^\[[ xX]\](\s|$)", body[0]):
             body[0] = "\\" + body[0]
         return _indent(body, marker, " " * len(marker))
 
@@ -288,6 +298,8 @@ class Writer:
         if attrs or node.marks:
             return None
         start = int(node.attrs.get("order", 1))
+        if start < 0 or start + max(len(node.children) - 1, 0) > 999_999_999:
+            return None  # CommonMark list markers have at most nine digits
         delimiter = ")" if self._alternate else "."
         tight = self._tight(node.children)
         rendered = []
@@ -299,17 +311,27 @@ class Writer:
         return self._join_items(rendered, tight)
 
     def _task_lines(self, node: Node, item_type: str, bullet: str = "-") -> list[str] | None:
+        states = ("TODO", "DONE") if item_type == "taskItem" else ("UNDECIDED", "DECIDED")
         lines: list[str] = []
         previous_item = False
         for child in node.children:
-            if child.type == item_type:
-                if set(self._attrs(child)) - {"state"}:
+            if child.type in (item_type, "blockTaskItem") and (child.type == item_type or item_type == "taskItem"):
+                if set(self._attrs(child)) - {"state"} or child.marks:
                     return None
                 state = child.attrs.get("state")
-                done = state in ("DONE", "DECIDED")
-                text = self._inline(child.children, item_type)
-                body = text.split("\n") if text else [""]
-                lines.extend(_indent(body, f"{bullet} [{'x' if done else ' '}] ", "  "))
+                if state not in states:
+                    return None  # only two states fit a checkbox
+                marker = f"{bullet} [{'x' if state == states[1] else ' '}] "
+                if child.type == "blockTaskItem":
+                    body = self._block_task_body(child)
+                    if body is None:
+                        return None
+                else:
+                    text = self._inline(child.children, item_type)
+                    if child.content == [] or (not text and child.content):
+                        return None  # empty content array or content that renders as nothing
+                    body = text.split("\n") if text else [""]
+                lines.extend(_indent(body, marker, "  "))
                 previous_item = True
             elif child.type == node.type and previous_item and item_type == "taskItem":
                 nested = self._task_lines(child, item_type)
@@ -319,6 +341,20 @@ class Writer:
             else:
                 return None
         return lines
+
+    def _block_task_body(self, item: Node) -> list[str] | None:
+        """Lines for a block task item: two or more plain paragraphs (one reads as a task item)."""
+        paragraphs = item.children
+        if len(paragraphs) < 2 or any(
+            p.type != "paragraph" or p.attrs or p.marks or not p.children for p in paragraphs
+        ):
+            return None
+        body: list[str] = []
+        for paragraph in paragraphs:
+            if body:
+                body.append("")
+            body.extend(self._inline(paragraph.children, "paragraph").split("\n"))
+        return body
 
     def _b_taskList(self, node: Node, parent: str) -> list[str] | None:  # noqa: N802
         if node.marks or set(self._attrs(node)):
@@ -361,6 +397,7 @@ class Writer:
             and caption is None
             and "url" in item
             and not re.search(r"[\s()<>]", str(item["url"]))
+            and _url_kept(str(item["url"]))
         ):
             alt = _escape_inline(str(item.get("alt", "")), table=False)
             return [f"![{alt}]({item['url']})"]
@@ -489,8 +526,10 @@ class Writer:
                 isinstance(v, dict) and set(v) == {"value"} and isinstance(v["value"], str) for v in params.values()
             )
         )
-        if parameters is not None and not simple:
-            out["adf.params"] = parameters
+        if parameters is None:
+            out["adf.params"] = "null"  # no parameters at all (the reader would add macroParams)
+        elif not simple:
+            out["adf.params"] = json.dumps(parameters, ensure_ascii=False, separators=(",", ":"))
         elif params:
             label_name = names.label_param(macro)
             for name, value in params.items():
@@ -503,8 +542,8 @@ class Writer:
                     out[name] = text
                 else:
                     return None
-            if self.keep_metadata and isinstance(parameters, dict) and "macroMetadata" in parameters:
-                out["adf.meta"] = parameters["macroMetadata"]
+        if simple and self.keep_metadata and isinstance(parameters, dict) and "macroMetadata" in parameters:
+            out["adf.meta"] = parameters["macroMetadata"]
         for name in ("layout", "localId", "text"):
             if name in attrs:
                 out[f"adf.{name}"] = attrs.pop(name)
@@ -531,7 +570,7 @@ class Writer:
 
     def _b_extension(self, node: Node, parent: str) -> list[str] | None:
         if node.marks:
-            return None
+            return self._raw_block(node)
         parts = self._extension_parts(node)
         if parts is None:
             return None
@@ -540,7 +579,7 @@ class Writer:
 
     def _b_bodiedExtension(self, node: Node, parent: str) -> list[str] | None:  # noqa: N802
         if node.marks:
-            return None
+            return self._raw_block(node)
         parts = self._extension_parts(node)
         if parts is None:
             return None
@@ -651,9 +690,16 @@ class Writer:
         if kind == "text":
             value = node.text or ""
             if node.has_mark("code"):
+                if "\n" in value or "\r" in value:  # a code span would turn the newline into a space
+                    return (
+                        ":span["
+                        + _escape_inline(value, table=table)
+                        + "]"
+                        + format_attrs({"marks": '[{"type":"code"}]'})
+                    )
                 return _code_span(value, table)
             # ":name" right before a link or span would read as an inline directive
-            return _TRAILING_NAME.sub(r"\\\1", _escape_inline(value, table=table))
+            return _TRAILING_NAME.sub(r"\1\\\2", _escape_inline(value, table=table))
         if kind == "hardBreak":
             return "<br>" if table else "\\\n"
         if kind == "emoji":
@@ -662,11 +708,12 @@ class Writer:
                 if set(node.attrs) - {"localId"} <= {"shortName", "id", "text"}
                 else None
             )
+            wanted = {k: v for k, v in node.attrs.items() if k != "localId"}
+            if code is not None and self.profile.resolve_emoji(code) != wanted:
+                code = None  # :code: would fill in or change attributes
             if code is not None:
                 return f":{code}:"
-            attrs = self._attrs(node)
-            short = str(attrs.pop("shortName", "")).strip(":")
-            return ":emoji[" + _escape_label(short) + "]" + format_attrs(self._strs(attrs))
+            return ":emoji" + (format_attrs(self._strs(self._attrs(node))) or "{}")
         if kind == "status":
             attrs = self._attrs(node)
             label = str(attrs.pop("text", ""))
@@ -679,10 +726,13 @@ class Writer:
             return ":date" + (format_attrs(self._strs(attrs)) or "{}")
         if kind == "mention":
             attrs = self._attrs(node)
-            label = str(attrs.pop("text", ""))
             if attrs.get("accessLevel") == "":
                 attrs.pop("accessLevel")
-            return ":mention[" + _escape_label(label) + "]" + format_attrs(self._strs(attrs))
+            shown = attrs.get("text")
+            if isinstance(shown, str) and shown.startswith("@") and not shown.startswith("@@"):
+                attrs.pop("text")
+                return ":mention[" + _escape_label(shown[1:]) + "]" + format_attrs(self._strs(attrs))
+            return ":mention" + (format_attrs(self._strs(attrs)) or "{}")
         if kind == "inlineCard":
             attrs = self._attrs(node)
             url = attrs.get("url")
@@ -690,6 +740,7 @@ class Writer:
                 set(attrs) == {"url"}
                 and isinstance(url, str)
                 and _AUTOLINK_SAFE.match(url)
+                and _url_kept(url)
                 and not url.lower().startswith("mailto:")
             ):
                 return f"<{url}>"
@@ -735,7 +786,17 @@ def _ends_with_bang(text: str) -> bool:
 
 
 def _simple_link(mark: Mark) -> bool:
-    return set(mark.attrs) <= {"href", "title"} and bool(mark.attrs.get("href"))
+    href = mark.attrs.get("href")
+    return set(mark.attrs) <= {"href", "title"} and isinstance(href, str) and bool(href) and _url_kept(href)
+
+
+@functools.cache
+def _url_kept(url: str) -> bool:
+    """Whether Markdown keeps ``url`` exactly (it percent-encodes spaces, non-ASCII...)."""
+    from adflux.markdown.reader import _parser
+
+    md = _parser()
+    return bool(md.validateLink(url)) and md.normalizeLink(url) == url
 
 
 def _label_safe(text: str) -> bool:

@@ -13,6 +13,7 @@ class AdfError(AdfluxError):
     def __init__(self, message: str, path: str = "$") -> None:
         super().__init__(f"{path}: {message}" if path else message)
         self.path = path
+        self.message = message
 
 
 class AdfValidationError(AdfluxError):

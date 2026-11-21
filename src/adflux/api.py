@@ -58,8 +58,10 @@ def convert(
     **options: Any,
 ) -> str:
     """Convert between ``markdown`` and ``adf`` (ADF output is JSON text)."""
-    src_kind = "adf" if src == "adf" else "markdown"
-    dst_kind = "adf" if dst == "adf" else "markdown"
+    for name in (src, dst):
+        if name not in ("adf", "markdown"):
+            raise ValueError(f"unsupported format {name!r}; use 'markdown' or 'adf'")
+    src_kind, dst_kind = src, dst
     if src_kind == "markdown":
         text = source.decode("utf-8") if isinstance(source, bytes) else source
         if not isinstance(text, str):

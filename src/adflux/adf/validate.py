@@ -16,9 +16,9 @@ from functools import cache
 from importlib import resources
 from typing import Any
 
-from adflux.adf.model import Node, load
+from adflux.adf.model import Node, decode
 from adflux.adf.spec import MARKS, NODES
-from adflux.errors import AdfValidationError, ValidationIssue
+from adflux.errors import AdfError, AdfValidationError, ValidationIssue
 
 
 @cache
@@ -30,15 +30,31 @@ def _schema_validator() -> Any:
 
 
 def validation_issues(document: Node | dict[str, Any] | str, *, schema: bool = True) -> list[ValidationIssue]:
-    """Return every problem found in ``document`` (empty when it is valid ADF)."""
-    root = document if isinstance(document, Node) else load(document)
+    """Return every problem found in ``document`` (empty when it is valid ADF).
+
+    JSON input is checked as given: the schema pass sees the decoded value, not the
+    model's re-serialization, so defaults the model fills in cannot hide problems.
+    """
+    if isinstance(document, Node):
+        data: Any = document.to_json()
+    else:
+        try:
+            data = decode(document)
+        except AdfError as error:
+            return [ValidationIssue(error.path or "$", str(error.message))]
     issues: list[ValidationIssue] = []
-    if root.type != "doc":
+    if not isinstance(data, dict) or data.get("type") != "doc":
         issues.append(ValidationIssue("$", "the root node must be 'doc'"))
-    _check(root, "$", issues)
+    elif "version" not in data:
+        issues.append(ValidationIssue("$", "doc needs 'version': 1"))
+    if not issues:
+        try:
+            root = Node.from_json(data)
+        except AdfError as error:
+            return [ValidationIssue(error.path or "$", str(error.message))]
+        _check(root, "$", issues)
     if not issues and schema:
         validator = _schema_validator()
-        data = root.to_json()
         # is_valid stops at the first failure in each anyOf branch; iter_errors explores
         # every branch, which is exponential on deep documents. Only explain failures.
         errors = [] if validator.is_valid(data) else [validator.iter_errors(data)]
@@ -50,11 +66,10 @@ def validation_issues(document: Node | dict[str, Any] | str, *, schema: bool = T
 
 def validate(document: Node | dict[str, Any] | str, *, schema: bool = True) -> Node:
     """Return the parsed document, or raise :class:`AdfValidationError`."""
-    root = document if isinstance(document, Node) else load(document)
-    issues = validation_issues(root, schema=schema)
+    issues = validation_issues(document, schema=schema)
     if issues:
         raise AdfValidationError(issues)
-    return root
+    return document if isinstance(document, Node) else Node.from_json(decode(document))
 
 
 def _short(message: str) -> str:
@@ -102,7 +117,9 @@ def _check(node: Node, path: str, issues: list[ValidationIssue]) -> None:
             problem = _attr_problem(attr.kind, attr.enum, attr.pattern, attr.minimum, attr.maximum, value)
             if problem:
                 issues.append(ValidationIssue(f"{mark_path}.attrs.{name}", problem))
-    if spec.content_required and not node.content:
+    if spec.content_required and node.content is None:
+        issues.append(ValidationIssue(path, f"{node.type} needs a content array"))
+    elif spec.content_min and len(node.children) < spec.content_min:
         issues.append(ValidationIssue(path, f"{node.type} needs content"))
     for i, child in enumerate(node.children):
         child_path = f"{path}.content[{i}]"

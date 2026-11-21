@@ -116,6 +116,33 @@ def _children(defs: dict[str, Any], schema: dict[str, Any] | None, seen: set[str
     return names
 
 
+def _merge_attr(old: dict[str, Any], new: dict[str, Any]) -> dict[str, Any]:
+    """Combine one attribute's spec from two schema variants: keep only what both allow."""
+    if old.get("kind") != new.get("kind"):
+        return {"kind": "any"}
+    merged: dict[str, Any] = {"kind": old["kind"]}
+    if old.get("kind") == "enum":
+        merged["enum"] = sorted(set(old.get("enum", [])) | set(new.get("enum", [])))
+    if "minimum" in old and "minimum" in new:
+        merged["minimum"] = min(old["minimum"], new["minimum"])
+    if "maximum" in old and "maximum" in new:
+        merged["maximum"] = max(old["maximum"], new["maximum"])
+    if old.get("pattern") is not None and old.get("pattern") == new.get("pattern"):
+        merged["pattern"] = old["pattern"]
+    return merged
+
+
+def _min_items(defs: dict[str, Any], schema: Any) -> int:
+    """Return the ``minItems`` of a content array schema (0 when it has none)."""
+    while isinstance(schema, dict) and "$ref" in schema:
+        schema = defs[schema["$ref"].rsplit("/", 1)[-1]]
+    if not isinstance(schema, dict):
+        return 0
+    if "allOf" in schema:
+        return max((_min_items(defs, part) for part in schema["allOf"]), default=0)
+    return int(schema.get("minItems", 0))
+
+
 def build() -> dict[str, Any]:
     """Fold the schema into ``{"nodes": {...}, "marks": {...}}``."""
     defs = json.loads(SCHEMA.read_text(encoding="utf-8"))["definitions"]
@@ -132,10 +159,7 @@ def build() -> dict[str, Any]:
                 for attr, spec in props.items():
                     old = entry["attrs"].get(attr)
                     if old and old != spec:
-                        if old.get("kind") == "enum" and spec.get("kind") == "enum":
-                            old["enum"] = sorted(set(old["enum"]) | set(spec["enum"]))
-                        elif old.get("kind") != spec.get("kind"):
-                            entry["attrs"][attr] = {"kind": "any"}
+                        entry["attrs"][attr] = _merge_attr(old, spec)
                     else:
                         entry["attrs"][attr] = spec
                 entry["required"] = required if entry["required"] is None else entry["required"] & required
@@ -147,6 +171,8 @@ def build() -> dict[str, Any]:
                     entry["text"] = True
                 if "content" in obj.get("required", []):
                     entry["content_required"] = True
+                    least = _min_items(defs, props.get("content"))
+                    entry["content_min"] = min(entry.get("content_min", least), least)
     inline = _children(defs, {"$ref": "#/definitions/inline_node"}, set()) | {"text"}
     for name, entry in nodes.items():
         entry["required"] = sorted(entry["required"] or [])

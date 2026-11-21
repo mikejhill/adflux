@@ -89,6 +89,7 @@ class NodeSpec:
     group: str  # "block" | "inline"
     leaf: bool
     content_required: bool
+    content_min: int = 0
 
     @property
     def inline(self) -> bool:
@@ -136,6 +137,7 @@ NODES: dict[str, NodeSpec] = {
         entry["group"],
         not entry["content"] and not entry.get("text"),
         bool(entry.get("content_required")),
+        int(entry.get("content_min", 0)),
     )
     for name, entry in SPEC["nodes"].items()
 }

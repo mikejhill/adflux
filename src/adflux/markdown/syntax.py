@@ -117,6 +117,7 @@ def directive_block(state: StateBlock, start_line: int, end_line: int, silent: b
         if close and len(close.group(1)) >= colons:
             closed = True
             break
+    meta["body"] = _body(state, start_line, next_line)
     old_parent = state.parentType
     old_line_max = state.lineMax
     state.parentType = "directive"  # type: ignore[assignment]
@@ -136,6 +137,22 @@ def directive_block(state: StateBlock, start_line: int, end_line: int, silent: b
     return True
 
 
+def _body(state: StateBlock, start_line: int, end_line: int) -> str:
+    """Return the source lines inside a container, without the parent block's prefix.
+
+    ``bMarks`` already starts after a blockquote's ``>``; list-item indentation and the
+    opener's own indentation are removed, and anything deeper is kept verbatim.
+    """
+    indent = state.sCount[start_line]
+    lines: list[str] = []
+    for line in range(start_line + 1, end_line):
+        begin, finish = state.bMarks[line], state.eMarks[line]
+        text = state.src[begin:finish]
+        strip = min(len(text) - len(text.lstrip(" ")), indent)
+        lines.append(text[strip:])
+    return "\n".join(lines)
+
+
 def directive_inline(state: StateInline, silent: bool) -> bool:
     """Inline rule for ``:name[label]{attrs}``."""
     if state.src[state.pos] != ":":
@@ -151,7 +168,7 @@ def directive_inline(state: StateInline, silent: bool) -> bool:
         return False
     if not silent:
         token = state.push("directive_inline_open", "span", 1)
-        token.meta = {"name": match.group(1), "attrs": attrs, "label": label}
+        token.meta = {"name": match.group(1), "attrs": attrs, "label": label, "source": state.src[state.pos : end]}
         if label:
             label_start = match.end() + 1
             old_pos, old_max = state.pos, state.posMax
