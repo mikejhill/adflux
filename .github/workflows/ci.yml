@@ -1,92 +1,88 @@
 name: CI
-
 on:
-  push:
-    branches: [main, master]
   pull_request:
-    branches: [main, master]
-
+  push:
+    branches: [main]
+  workflow_dispatch:
+  workflow_call:
 permissions:
   contents: read
-  checks: write
-  pull-requests: write
-
 concurrency:
-  group: ci-${{ github.ref }}
-  cancel-in-progress: true
-
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
-  lint:
-    name: Lint
+  title:
+    name: Conventional PR title
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
-      - uses: astral-sh/setup-uv@v10.0.1
-        with:
-          enable-cache: true
-      - run: uv python install 3.12
-      - run: uv sync --all-groups --python 3.12
-      - name: Lint
-        run: uv run poe lint
-      - name: ty (strict)
-        run: uv run poe typecheck
+      - name: Check title
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          pattern='^(feat|fix|perf|docs|build|ci|refactor|test|chore|style|revert)(\([^)]+\))?!?: .+'
+          [[ "$TITLE" =~ $pattern ]]
 
-  test:
-    name: Test (${{ matrix.os }} / Python ${{ matrix.python-version }})
+  check:
+    name: Python ${{ matrix.python }} on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: ["3.11", "3.12", "3.13"]
+        python: ['3.11', '3.14']
     steps:
-      - uses: actions/checkout@v7
-      - uses: astral-sh/setup-uv@v10.0.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          enable-cache: true
-      - run: uv python install ${{ matrix.python-version }}
-      - run: uv sync --all-groups --python ${{ matrix.python-version }}
-      - name: Run tests with coverage
-        run: uv run pytest --ignore=tests/e2e --cov=adflux --cov-report=xml --cov-report=term --junitxml=junit.xml
-      - name: Publish test report
-        if: always()
-        uses: mikepenz/action-junit-report@v6
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
         with:
-          report_paths: junit.xml
-          check_name: Tests (${{ matrix.os }} / py${{ matrix.python-version }})
-          include_passed: true
-          detailed_summary: true
-          require_tests: true
-      - name: Upload test results
-        if: always()
-        uses: actions/upload-artifact@v7
-        with:
-          name: test-results-${{ matrix.os }}-py${{ matrix.python-version }}
-          path: |
-            junit.xml
-            coverage.xml
-          if-no-files-found: ignore
-      - name: Upload coverage
-        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.12'
-        uses: actions/upload-artifact@v7
-        with:
-          name: coverage-xml
-          path: coverage.xml
-
-  build:
-    name: Build distribution
-    runs-on: ubuntu-latest
-    needs: [lint, test]
-    steps:
-      - uses: actions/checkout@v7
-      - uses: astral-sh/setup-uv@v10.0.1
+          python-version: ${{ matrix.python }}
+          enable-cache: false
+      - run: uv sync --locked
+      - run: uv run poe check
       - run: uv build
-      - name: Verify wheel installs and CLI runs
+      - run: uv run twine check --strict dist/*
+      - name: Smoke-test the built wheel in a clean environment
+        shell: bash
         run: |
-          python -m venv /tmp/smoketest
-          /tmp/smoketest/bin/pip install dist/*.whl
-          /tmp/smoketest/bin/adflux --version && echo "# t" | /tmp/smoketest/bin/adflux to-adf --compact
-      - uses: actions/upload-artifact@v7
+          uv venv --python "${{ matrix.python }}" "$RUNNER_TEMP/smoke"
+          uv pip install --python "$RUNNER_TEMP/smoke" dist/*.whl
+          uv run --no-project --python "$RUNNER_TEMP/smoke" adflux --version
+          echo "# t" | uv run --no-project --python "$RUNNER_TEMP/smoke" adflux to-adf --compact
+
+  coverage:
+    name: Coverage of changed lines
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          name: dist
-          path: dist/
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          python-version: '3.14'
+          enable-cache: false
+      - run: uv sync --locked
+      - run: uv run poe test
+      - name: Every changed source line is covered
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          git fetch --no-tags origin "$BASE_REF"
+          uv run diff-cover coverage.xml --compare-branch="origin/$BASE_REF" --fail-under=100 \
+            --markdown-report diff-coverage.md
+          cat diff-coverage.md >> "$GITHUB_STEP_SUMMARY"
+
+  passed:
+    name: CI passed
+    if: always()
+    needs: [check, coverage, title]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require all checks
+        env:
+          RESULTS: ${{ toJSON(needs) }}
+        run: |
+          echo "$RESULTS" | jq -e 'to_entries | all(.value.result == "success" or .value.result == "skipped")'

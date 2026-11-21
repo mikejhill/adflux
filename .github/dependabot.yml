@@ -1,15 +1,28 @@
 version: 2
 updates:
-  - package-ecosystem: "uv"
-    directory: "/"
+  - package-ecosystem: github-actions
+    directory: /
     schedule:
-      interval: "weekly"
-    open-pull-requests-limit: 5
+      interval: weekly
     commit-message:
-      prefix: "chore(deps)"
-  - package-ecosystem: "github-actions"
-    directory: "/"
+      prefix: ci
+    groups:
+      actions:
+        patterns: ["*"]
+    cooldown:
+      default-days: 7
+
+  - package-ecosystem: uv
+    directory: /
     schedule:
-      interval: "weekly"
+      interval: weekly
     commit-message:
-      prefix: "chore(ci)"
+      prefix: build
+      prefix-development: chore
+    groups:
+      runtime:
+        dependency-type: production
+      dev-tools:
+        dependency-type: development
+    cooldown:
+      default-days: 7

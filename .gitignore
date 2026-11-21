@@ -265,3 +265,8 @@ diff.txt
 
 # Re-allow the env template (overrides base-template `.env.*` ignore).
 !.env.example
+
+# Mutation testing and diff-coverage outputs.
+mutants/
+mutation-report/
+diff-coverage.md

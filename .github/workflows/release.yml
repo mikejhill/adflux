@@ -1,98 +1,94 @@
 name: Release
-
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
-    inputs:
-      force-patch:
-        description: "Force a patch version bump (use when only docs/test/chore commits exist)"
-        type: boolean
-        default: false
-
 permissions:
-  contents: write
-
+  contents: read
 concurrency:
   group: release
   cancel-in-progress: false
-
 jobs:
-  release:
+  version:
+    # Repository and publisher setup must be completed before enabling releases.
+    if: vars.RELEASES_ENABLED == 'true'
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      actions: write
+      pull-requests: write
+      issues: write
     outputs:
-      version: ${{ steps.semrel.outputs.version }}
+      created: ${{ steps.release.outputs.release_created }}
+      tag: ${{ steps.release.outputs.tag_name }}
     steps:
-      - uses: actions/checkout@v7
+      - id: release
+        uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
         with:
-          fetch-depth: 0
-
-      - name: Determine next version
-        id: semrel
-        uses: go-semantic-release/action@v1
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          allow-initial-development-versions: true
-          force-bump-patch-version: ${{ inputs.force-patch }}
-          dry: true
-
-      - name: Require new version
-        if: steps.semrel.outputs.version == ''
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN || secrets.GITHUB_TOKEN }}
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+      # Pushes made with GITHUB_TOKEN start no pull_request workflows, and GitHub holds
+      # CodeQL for approval on such pull requests. Dispatching is allowed, and the
+      # required CodeQL results for the release branch's head come from this run.
+      - name: Start CI and CodeQL for release pull request
+        if: steps.release.outputs.prs_created == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_JSON: ${{ steps.release.outputs.pr }}
         run: |
-          echo "::error::No new version to release. Ensure there are unreleased commits with conventional commit messages."
-          exit 1
-
-      - name: Create local tag
-        run: git tag "v${{ steps.semrel.outputs.version }}"
-
-      - uses: astral-sh/setup-uv@v10.0.1
+          branch=$(jq -r '.headBranchName' <<< "$PR_JSON")
+          gh workflow run ci.yml --repo "$GITHUB_REPOSITORY" --ref "$branch"
+          gh workflow run codeql.yml --repo "$GITHUB_REPOSITORY" --ref "$branch"
+  ci:
+    needs: version
+    if: needs.version.outputs.created == 'true'
+    uses: ./.github/workflows/ci.yml # zizmor: ignore[self-repository] -- portable local reuse
+    permissions:
+      contents: read
+  build:
+    needs: [version, ci]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          enable-cache: true
-      - run: uv python install 3.12
-      - run: uv sync --all-groups --python 3.12
-      - name: Verify tests pass before release
-        run: uv run pytest -q
-
-      - name: Set version in pyproject.toml
-        run: uv version "${{ steps.semrel.outputs.version }}"
-
-      - name: Build sdist + wheel
-        run: uv build
-
-      - name: Verify built wheel
-        run: |
-          python -m venv /tmp/relsmoke
-          /tmp/relsmoke/bin/pip install dist/*.whl
-          /tmp/relsmoke/bin/adflux --version && echo "# t" | /tmp/relsmoke/bin/adflux to-adf --compact
-
-      - uses: actions/upload-artifact@v7
+          persist-credentials: false
+          ref: ${{ needs.version.outputs.tag }}
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          enable-cache: false
+      - run: uv sync --locked
+      - run: uv build
+      - run: uv run twine check --strict dist/*
+      - name: Verify distribution and tag versions
+        env:
+          RELEASE_TAG: ${{ needs.version.outputs.tag }}
+        run: uv run python scripts/verify_dist.py
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: dist
           path: dist/
-
-      - name: Push tag
-        run: git push origin "v${{ steps.semrel.outputs.version }}"
-
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v3
-        with:
-          tag_name: "v${{ steps.semrel.outputs.version }}"
-          generate_release_notes: true
-          files: |
-            dist/*.tar.gz
-            dist/*.whl
-
-  pypi:
-    name: Publish to PyPI
-    needs: release
+  publish:
+    needs: [version, build]
     runs-on: ubuntu-latest
     environment:
       name: pypi
       url: https://pypi.org/p/adflux
     permissions:
       id-token: write
+      attestations: write
+      contents: write
     steps:
-      - uses: actions/download-artifact@v8
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: dist
           path: dist/
-
-      - uses: pypa/gh-action-pypi-publish@release/v1
+      - uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-path: dist/*
+      - uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33 # v1.14.2
+      - name: Attach distributions
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.version.outputs.tag }}
+        run: gh release upload "$TAG" dist/* --repo "$GITHUB_REPOSITORY"

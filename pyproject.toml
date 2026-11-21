@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "adflux"
-version = "0.1.0"
+version = "0.3.1"
 description = "Lossless Markdown <-> Atlassian Document Format (ADF) conversion with Jira and Confluence profiles, macros and emoji"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -38,6 +38,7 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Programming Language :: Python :: Implementation :: CPython",
     "Topic :: Documentation",
     "Topic :: Software Development :: Documentation",
@@ -52,16 +53,19 @@ dependencies = [
 ]
 
 [dependency-groups]
+mutation = ["mutmut>=3.8.0,<4; sys_platform != 'win32'"]
 dev = [
-    "pytest>=8.0",
-    "pytest-cov>=5.0",
+    "pytest>=9",
+    "pytest-cov>=7",
     "hypothesis>=6.100",
-    "ruff>=0.5",
-    "ty>=0.0.1a8",
+    "ruff>=0.14",
+    "ty>=0.0.1",
     "types-jsonschema",
     "httpx>=0.27",
     "python-dotenv>=1.0",
-    "poethepoet>=0.27",
+    "poethepoet>=0.37",
+    "twine>=6",
+    "diff-cover>=11.0.1",
 ]
 
 [project.scripts]
@@ -94,32 +98,45 @@ include = [
 
 [tool.pytest.ini_options]
 minversion = "8.0"
-addopts = "-ra --strict-markers --strict-config -p no:cacheprovider"
+addopts = ["-ra", "--strict-markers", "--strict-config", "-p", "no:cacheprovider"]
+xfail_strict = true
 testpaths = ["tests"]
 pythonpath = ["src", "."]
 markers = [
-    "slow: marks tests as slow",
-    "roundtrip: round-trip fidelity tests",
-    "e2e: end-to-end tests that hit a live Confluence Cloud site",
+    "unit: fast, isolated tests of one module (tests/unit)",
+    "roundtrip: lossless round trips over live captures and generated documents (tests/roundtrip)",
+    "e2e: live Jira and Confluence round trips; skip without credentials (tests/e2e)",
 ]
 
 [tool.coverage.run]
 branch = true
-source = ["src/adflux"]
+source = ["adflux"]
 
 [tool.coverage.report]
-exclude_lines = [
-    "pragma: no cover",
+# Baseline 2026-11-21: 84.8%. Raise as coverage grows; never lower.
+fail_under = 84
+show_missing = true
+exclude_also = [
+    '^\s*\.\.\.$',
     "raise NotImplementedError",
     "if TYPE_CHECKING:",
-    "\\.\\.\\.",
 ]
+
+[tool.mutmut]
+source_paths = ["src/adflux/"]
+# Generated from the ADF JSON Schema; tests/unit/test_spec.py checks it is fresh.
+do_not_mutate = ["src/adflux/adf/_spec.py"]
+# Mutants are judged by the hermetic suites; the live e2e suite adds network calls, not signal.
+pytest_add_cli_args_test_selection = ["tests/unit/", "tests/roundtrip/"]
+pytest_add_cli_args = ["-p", "no:cacheprovider", "-x", "-q"]
+also_copy = ["scripts/", "tests/"]
+mutate_only_covered_lines = true
 
 [tool.ruff]
 line-length = 120
 target-version = "py311"
 src = ["src", "tests"]
-extend-exclude = ["src/adflux/adf/_spec.py"]
+extend-exclude = ["src/adflux/adf/_spec.py", ".tmp", ".venv*", "dist", "mutants", "mutation-report"]
 
 [tool.ruff.lint]
 select = [
@@ -127,6 +144,7 @@ select = [
     "F",         # pyflakes
     "I",         # isort
     "B",         # bugbear
+    "S",         # bandit
     "UP",        # pyupgrade
     "C4",        # comprehensions
     "SIM",       # simplify
@@ -142,58 +160,43 @@ ignore = [
 ]
 
 [tool.ruff.lint.per-file-ignores]
-"tests/**/*.py" = ["D"]
+"tests/**/*.py" = ["D", "S101", "S105", "S106", "S603", "S607", "S311"]
+"scripts/**/*.py" = ["S603", "S607"]
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"
 
-[tool.ty]
-# Astral type checker — replaces mypy.
-# See https://github.com/astral-sh/ty for configuration reference.
-
 [tool.ty.src]
-include = ["src"]
+include = ["src", "tests", "scripts"]
 
 [tool.ty.environment]
 python-version = "3.11"
-root = ["src"]
 
 [tool.ty.rules]
-# Strictness — promote categories to errors.
-import-not-found = "error"
-missing-attribute = "error"
-invalid-return-type = "error"
-invalid-argument-type = "error"
-invalid-assignment = "error"
-possibly-missing-attribute = "error"
+all = "error"
+# Empty strings and None are deliberately both "absent" in attribute handling.
+truthiness-test-of-none-union = "ignore"
+# JSON boundary code narrows `Any` explicitly; these flag every such narrowing.
+unsound-return-statement = "ignore"
+unsound-assignment = "ignore"
+# typing.override needs Python 3.12; adflux supports 3.11.
+missing-override-decorator = "ignore"
 
 [tool.poe.tasks]
-_format       = "ruff format src tests"
-_format_check = "ruff format --check src tests"
-_lint         = "ruff check src tests"
-_lint_fix     = "ruff check --fix src tests"
-_typecheck    = "ty check src"
-
-format       = ["_format", "_lint_fix"]
-lint         = ["_format_check", "_lint"]
-typecheck    = ["_typecheck"]
-test         = "pytest --ignore=tests/e2e"
-test-all     = "pytest"
-test-e2e     = "pytest tests/e2e -v"
-cov          = "pytest --ignore=tests/e2e --cov=adflux --cov-report=term-missing"
-build        = "python -m build"
-check        = ["lint", "typecheck", "test"]
-
-[tool.poe.tasks.clean]
-help = "Remove build artifacts and caches."
-shell = """
-python -c "
-import shutil, pathlib
-for p in ['dist','build','.pytest_cache','.mypy_cache','.ruff_cache','htmlcov','.coverage']:
-    pp = pathlib.Path(p)
-    if pp.is_dir(): shutil.rmtree(pp, ignore_errors=True)
-    elif pp.exists(): pp.unlink()
-for egg in pathlib.Path('.').glob('src/*.egg-info'): shutil.rmtree(egg, ignore_errors=True)
-for egg in pathlib.Path('.').glob('*.egg-info'): shutil.rmtree(egg, ignore_errors=True)
-"
-"""
+format = "ruff format ."
+format-check = "ruff format --check ."
+lint = "ruff check ."
+typecheck = "ty check"
+# Default gate: unit + round-trip suites with branch coverage (live e2e runs separately).
+test = "pytest -m 'not e2e' --cov --cov-report=term-missing --cov-report=xml"
+test-unit = "pytest -m unit"
+test-roundtrip = "pytest -m roundtrip"
+test-e2e = "pytest -m e2e -v"
+test-deep = { cmd = "pytest -m roundtrip", env = { HYPOTHESIS_PROFILE = "thorough" } }
+# Every changed line on this branch must be covered (CI compares against origin/main).
+diff-coverage = "diff-cover coverage.xml --compare-branch=origin/main --fail-under=100"
+mutation = "mutmut run --max-children 4"
+mutation-score = { shell = "mkdir -p mutation-report && mutmut results --all true > mutation-report/results.txt && python scripts/mutation_score.py --results mutation-report/results.txt" }
+lint-fix = "ruff check . --fix"
+fix = ["format", "lint-fix"]
+check = ["format-check", "lint", "typecheck", "test"]

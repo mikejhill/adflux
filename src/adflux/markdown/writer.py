@@ -542,7 +542,7 @@ class Writer:
                     out[name] = text
                 else:
                     return None
-        if simple and self.keep_metadata and isinstance(parameters, dict) and "macroMetadata" in parameters:
+        if simple and self.keep_metadata and "macroMetadata" in parameters:
             out["adf.meta"] = parameters["macroMetadata"]
         for name in ("layout", "localId", "text"):
             if name in attrs:
@@ -849,7 +849,7 @@ def _fix_line_starts(text: str) -> str:
                 rest = line[len(lead) :]
                 if rest[:1].isdigit():
                     digits = re.match(r"\d+", rest)
-                    assert digits
+                    assert digits  # noqa: S101 -- rest starts with a digit, so the match cannot fail
                     end = digits.end()
                     rest = rest[:end] + "\\" + rest[end:]
                 else:
