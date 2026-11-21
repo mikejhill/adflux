@@ -1,58 +1,35 @@
-"""Tests for the options system."""
-
-from __future__ import annotations
-
-import pytest
-
-from adflux.options import OptionDef, OptionRegistry, Options, get_registry
+from adflux.profiles import CONFLUENCE, GENERIC, JIRA, get_profile
+from adflux.profiles.emoji import default_index
+from adflux.profiles.macros import confluence_catalog
 
 
-def test_registry_has_core_options():
-    reg = get_registry()
-    names = [d.name for d in reg.all()]
-    assert "envelopes" in names
-    assert "jira-strict" in names
+def test_emoji_lookup():
+    index = default_index()
+    smile = index.resolve("smile")
+    assert smile is not None and smile.id == "1f604"
+    check = index.resolve("atlassian-check_mark")
+    assert check is not None
+    assert index.resolve("definitely-not-an-emoji") is None
+    assert any(e.short_name == "thumbsup" for e in index.search("thumbs"))
 
 
-def test_resolve_defaults():
-    reg = get_registry()
-    opts = reg.resolve()
-    assert opts["envelopes"] == "keep"
-    assert opts["jira-strict"] == "false"
+def test_profile_aliases():
+    assert CONFLUENCE.resolve_emoji("tick")["id"] == "atlassian-check_mark"
+    assert JIRA.resolve_emoji("tick")["id"] == "atlassian-check_mark"
+    # a real short name always wins over an alias
+    assert CONFLUENCE.resolve_emoji("smile")["shortName"] == ":smile:"
+    assert GENERIC.emoji_code({"shortName": ":smile:", "id": "1f604", "text": "😄"}) == "smile"
 
 
-def test_resolve_with_overrides():
-    reg = get_registry()
-    opts = reg.resolve({"envelopes": "drop", "jira-strict": "true"})
-    assert opts["envelopes"] == "drop"
-    assert opts["jira-strict"] == "true"
+def test_macro_catalog():
+    catalog = confluence_catalog()
+    toc = catalog.get("toc")
+    assert toc is not None and toc.param("maxLevel") is not None
+    assert catalog.get("info") is not None
+    assert "toc" in catalog
 
 
-def test_resolve_rejects_invalid_choice():
-    reg = get_registry()
-    with pytest.raises(ValueError, match="envelopes"):
-        reg.resolve({"envelopes": "nope"})
-
-
-def test_options_immutable():
-    opts = Options({"envelopes": "keep"})
-    with pytest.raises(TypeError):
-        opts["envelopes"] = "drop"  # type: ignore[index]
-
-
-def test_options_getitem_fallback_to_empty():
-    opts = Options({})
-    assert opts["unknown-key"] == ""
-
-
-def test_options_iter_and_len():
-    opts = Options({"a": "1", "b": "2"})
-    assert len(opts) == 2
-    assert set(opts) == {"a", "b"}
-
-
-def test_custom_registry():
-    reg = OptionRegistry()
-    reg.register(OptionDef(name="foo", description="A foo", choices=("x", "y"), default="x"))
-    opts = reg.resolve({"foo": "y"})
-    assert opts["foo"] == "y"
+def test_get_profile():
+    assert get_profile("jira") is JIRA
+    assert get_profile(None) is GENERIC
+    assert get_profile(CONFLUENCE) is CONFLUENCE

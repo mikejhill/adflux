@@ -1,163 +1,198 @@
-"""Typer-based CLI for adflux.
-
-Subcommands:
-
-* ``adflux convert`` — convert between formats.
-* ``adflux validate`` — validate a document (currently only ADF).
-* ``adflux inspect-ast`` — dump the internal IR as JSON.
-* ``adflux list-formats`` — list registered formats.
-* ``adflux list-options`` — list available conversion options.
-"""
+"""``adflux`` command line: convert, validate, and look up macros, emoji and syntax."""
 
 from __future__ import annotations
 
+import argparse
+import json
 import sys
+import warnings
+from importlib import resources
+from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
-from typing import Annotated
+from typing import Any
 
-import typer
+from adflux.adf.model import load
+from adflux.adf.validate import validation_issues
+from adflux.api import to_adf, to_markdown
+from adflux.errors import AdfluxError, AdfValidationError
+from adflux.markdown.reader import ConversionWarning
+from adflux.profiles import get_profile
 
-from adflux.api import convert as api_convert
-from adflux.api import inspect_ast as api_inspect_ast
-from adflux.api import list_formats as api_list_formats
-from adflux.api import validate as api_validate
-from adflux.errors import AdfluxError
-from adflux.logging import configure_logging
-from adflux.options import get_registry
-
-app = typer.Typer(
-    name="adflux",
-    help="Pure-Python Markdown ↔ Atlassian Document Format (ADF) converter.",
-    no_args_is_help=True,
-    add_completion=False,
-)
+PROFILES = ("generic", "jira", "confluence")
 
 
-def _read_input(input_path: Path | None) -> str:
-    if input_path is None:
+def _version() -> str:
+    try:
+        return version("adflux")
+    except PackageNotFoundError:  # pragma: no cover - source checkout
+        return "0+unknown"
+
+
+def _read(path: str | None) -> str:
+    if path in (None, "-"):
         return sys.stdin.read()
-    return input_path.read_text(encoding="utf-8")
+    return Path(path).read_text(encoding="utf-8")
 
 
-def _write_output(text: str, output_path: Path | None) -> None:
-    if output_path is None:
-        sys.stdout.write(text)
-        if not text.endswith("\n"):
-            sys.stdout.write("\n")
+def _write(text: str, path: str | None) -> None:
+    if path in (None, "-"):
+        sys.stdout.write(text if text.endswith("\n") else text + "\n")
     else:
-        output_path.write_text(text, encoding="utf-8")
+        Path(path).write_text(text, encoding="utf-8")
 
 
-def _parse_options(raw: list[str] | None) -> dict[str, str]:
-    """Parse ``--option key=value`` pairs into a dict."""
-    if not raw:
-        return {}
-    result: dict[str, str] = {}
-    for item in raw:
-        if "=" not in item:
-            raise typer.BadParameter(f"Option must be key=value, got: {item!r}")
-        key, value = item.split("=", 1)
-        result[key.strip()] = value.strip()
-    return result
+def _cmd_to_adf(args: argparse.Namespace) -> int:
+    doc = to_adf(_read(args.input), args.profile, strict=args.strict)
+    text = json.dumps(doc, ensure_ascii=False, indent=None if args.compact else 2)
+    _write(text, args.output)
+    return 0
 
 
-@app.command("convert")
-def convert_cmd(
-    input_path: Annotated[
-        Path | None,
-        typer.Argument(exists=True, dir_okay=False, readable=True, help="Input file (or stdin)."),
-    ] = None,
-    src: Annotated[str, typer.Option("--from", "-f", help="Source format.")] = "md",
-    dst: Annotated[str, typer.Option("--to", "-t", help="Target format.")] = "adf",
-    option: Annotated[
-        list[str] | None,
-        typer.Option(
-            "--option",
-            "-O",
-            help="Conversion option as key=value (repeatable).",
-        ),
-    ] = None,
-    output: Annotated[
-        Path | None, typer.Option("--output", "-o", help="Output file (or stdout).")
-    ] = None,
-    verbose: Annotated[bool, typer.Option("--verbose", "-v", help="Verbose logging.")] = False,
-) -> None:
-    """Convert INPUT_PATH (or stdin) from ``--from`` to ``--to``."""
-    configure_logging(level=10 if verbose else 20)
-    try:
-        source = _read_input(input_path)
-        opts = _parse_options(option)
-        result = api_convert(source, src=src, dst=dst, options=opts)
-        _write_output(result, output)
-    except AdfluxError as exc:
-        typer.secho(f"error: {exc}", fg=typer.colors.RED, err=True)
-        raise typer.Exit(code=2) from exc
+def _cmd_to_md(args: argparse.Namespace) -> int:
+    _write(to_markdown(_read(args.input), args.profile, keep_metadata=args.keep_metadata), args.output)
+    return 0
 
 
-@app.command("validate")
-def validate_cmd(
-    input_path: Annotated[
-        Path | None,
-        typer.Argument(exists=True, dir_okay=False, readable=True, help="Input file (or stdin)."),
-    ] = None,
-    fmt: Annotated[str, typer.Option("--format", "-f", help="Format to validate.")] = "adf",
-    option: Annotated[
-        list[str] | None,
-        typer.Option(
-            "--option",
-            "-O",
-            help="Validation option as key=value (repeatable).",
-        ),
-    ] = None,
-) -> None:
-    """Validate a document (currently only meaningful for ADF)."""
-    try:
-        source = _read_input(input_path)
-        opts = _parse_options(option)
-        api_validate(source, fmt=fmt, options=opts)
-        typer.secho("ok", fg=typer.colors.GREEN)
-    except AdfluxError as exc:
-        typer.secho(f"invalid: {exc}", fg=typer.colors.RED, err=True)
-        raise typer.Exit(code=1) from exc
+def _cmd_validate(args: argparse.Namespace) -> int:
+    source = _read(args.input)
+    fmt = args.format
+    if fmt == "auto":
+        fmt = "adf" if source.lstrip().startswith("{") else "markdown"
+    if fmt == "markdown":
+        to_adf(source, args.profile, strict=args.strict)
+        issues = []
+    else:
+        issues = validation_issues(load(source), schema=not args.no_schema)
+    if issues:
+        for issue in issues:
+            print(f"{issue.path}: {issue.message}", file=sys.stderr)
+        return 1
+    print("valid", file=sys.stderr)
+    return 0
 
 
-@app.command("inspect-ast")
-def inspect_ast_cmd(
-    input_path: Annotated[
-        Path | None,
-        typer.Argument(exists=True, dir_okay=False, readable=True, help="Input file (or stdin)."),
-    ] = None,
-    src: Annotated[str, typer.Option("--from", "-f", help="Source format.")] = "md",
-) -> None:
-    """Parse INPUT_PATH with the ``--from`` reader and dump the internal IR as JSON."""
-    try:
-        source = _read_input(input_path)
-        typer.echo(api_inspect_ast(source, src=src))
-    except AdfluxError as exc:
-        typer.secho(f"error: {exc}", fg=typer.colors.RED, err=True)
-        raise typer.Exit(code=2) from exc
+def _example(name: str, info: dict[str, Any]) -> str:
+    params = [p for p in info["params"] if p.get("required") and p["name"] != "(default)"]
+    attrs = " ".join(f"{p['name']}={p.get('default') or '...'}" for p in params)
+    default = next((p for p in info["params"] if p["name"] == "(default)"), None)
+    label = "[...]" if default else ""
+    tail = label + ("{" + attrs + "}" if attrs else "")
+    if info["adf"] == "inlineExtension":
+        return f":{name}{tail or '{}'}"
+    if info["body"] != "none":
+        return f":::{name}{tail}\nbody\n:::"
+    return f"::{name}{tail}"
 
 
-@app.command("list-formats")
-def list_formats_cmd() -> None:
-    """List registered format identifiers."""
-    typer.echo("formats:")
-    for fmt in api_list_formats():
-        typer.echo(f"  - {fmt}")
+def _cmd_macros(args: argparse.Namespace) -> int:
+    catalog = get_profile("confluence").macros
+    if args.name:
+        macro = catalog.get(args.name)
+        if macro is None:
+            print(f"unknown macro {args.name!r}; run 'adflux macros' for the list", file=sys.stderr)
+            return 1
+        info = macro.describe()
+        info["markdown"] = _example(macro.name, info)
+        print(json.dumps(info, ensure_ascii=False, indent=2))
+        return 0
+    rows = [m for m in catalog if args.all or not m.hidden]
+    if args.json:
+        print(json.dumps([{**m.describe(), "markdown": _example(m.name, m.describe())} for m in rows], indent=2))
+        return 0
+    for macro in rows:
+        info = macro.describe()
+        print(f"{macro.name:28} {info['adf']:16} {macro.title}")
+    return 0
 
 
-@app.command("list-options")
-def list_options_cmd() -> None:
-    """List available conversion options with descriptions and defaults."""
-    registry = get_registry()
-    for defn in registry.all():
-        choices = ", ".join(defn.choices) if defn.choices else "free-form"
-        typer.echo(f"{defn.name}")
-        typer.echo(f"  choices:  {choices}")
-        typer.echo(f"  default:  {defn.default}")
-        typer.echo(f"  {defn.description}")
-        typer.echo()
+def _cmd_emoji(args: argparse.Namespace) -> int:
+    profile = get_profile(args.profile)
+    aliases = {k: v for k, v in profile.emoticons.items() if args.query.lower().strip(":") in k}
+    for alias, target in sorted(aliases.items()):
+        print(f":{alias}:  -> :{target}:  ({profile.name} shortcut)")
+    for emoji in profile.emoji.search(args.query, limit=args.limit):
+        print(f":{emoji.short_name}:  {emoji.text}  ({emoji.id})")
+    return 0
 
 
-if __name__ == "__main__":
-    app()
+def _cmd_syntax(args: argparse.Namespace) -> int:
+    del args
+    sys.stdout.write(resources.files("adflux").joinpath("syntax.md").read_text(encoding="utf-8"))
+    return 0
+
+
+def build_parser() -> argparse.ArgumentParser:
+    """Return the argument parser."""
+    parser = argparse.ArgumentParser(
+        prog="adflux",
+        description="Convert between Markdown and Atlassian Document Format (ADF).",
+        epilog="Run 'adflux syntax' for the Markdown dialect.",
+    )
+    parser.add_argument("--version", action="version", version=f"adflux {_version()}")
+    sub = parser.add_subparsers(dest="command", required=True, metavar="COMMAND")
+
+    def common(p: argparse.ArgumentParser, *, output: bool = True) -> None:
+        p.add_argument("input", nargs="?", help="input file (default: stdin)")
+        p.add_argument("-p", "--profile", choices=PROFILES, default="generic", help="product profile")
+        if output:
+            p.add_argument("-o", "--output", help="output file (default: stdout)")
+
+    p = sub.add_parser("to-adf", aliases=["md2adf"], help="Markdown -> ADF JSON")
+    common(p)
+    p.add_argument("--strict", action="store_true", help="fail on conversion warnings")
+    p.add_argument("--compact", action="store_true", help="single-line JSON")
+    p.set_defaults(func=_cmd_to_adf)
+
+    p = sub.add_parser("to-md", aliases=["adf2md"], help="ADF JSON -> Markdown")
+    common(p)
+    p.add_argument("--keep-metadata", action="store_true", help="keep macro metadata (adf.meta)")
+    p.set_defaults(func=_cmd_to_md)
+
+    p = sub.add_parser("validate", help="validate ADF JSON or adflux Markdown")
+    common(p, output=False)
+    p.add_argument("-f", "--format", choices=("auto", "adf", "markdown"), default="auto")
+    p.add_argument("--strict", action="store_true", help="Markdown: fail on conversion warnings")
+    p.add_argument("--no-schema", action="store_true", help="ADF: skip the JSON Schema pass")
+    p.set_defaults(func=_cmd_validate)
+
+    p = sub.add_parser("macros", help="list Confluence macros or show one")
+    p.add_argument("name", nargs="?")
+    p.add_argument("--all", action="store_true", help="include hidden macros")
+    p.add_argument("--json", action="store_true")
+    p.set_defaults(func=_cmd_macros)
+
+    p = sub.add_parser("emoji", help="search emoji short names")
+    p.add_argument("query")
+    p.add_argument("-p", "--profile", choices=PROFILES, default="generic")
+    p.add_argument("-n", "--limit", type=int, default=20)
+    p.set_defaults(func=_cmd_emoji)
+
+    p = sub.add_parser("syntax", help="print the Markdown dialect reference")
+    p.set_defaults(func=_cmd_syntax)
+    return parser
+
+
+def main(argv: list[str] | None = None) -> int:
+    """Run the CLI; return the exit code."""
+    args = build_parser().parse_args(argv)
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("always", ConversionWarning)
+        try:
+            return int(args.func(args))
+        except AdfValidationError as error:
+            for issue in error.issues:
+                print(f"error: {issue.path}: {issue.message}", file=sys.stderr)
+            return 1
+        except BrokenPipeError:
+            return 0
+        except (AdfluxError, OSError) as error:
+            print(f"error: {error}", file=sys.stderr)
+            return 1
+        finally:
+            for item in caught:
+                prefix = "warning" if issubclass(item.category, ConversionWarning) else item.category.__name__
+                print(f"{prefix}: {item.message}", file=sys.stderr)
+
+
+if __name__ == "__main__":  # pragma: no cover
+    raise SystemExit(main())

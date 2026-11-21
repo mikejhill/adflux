@@ -1,58 +1,55 @@
-"""Typed exception hierarchy for adflux.
-
-All public exceptions inherit from :class:`AdfluxError` to allow callers to
-catch the whole library's errors with a single ``except`` clause.
-"""
+"""Exceptions raised by adflux."""
 
 from __future__ import annotations
 
 
 class AdfluxError(Exception):
-    """Base class for all adflux errors."""
+    """Base class for every adflux error."""
 
 
-class UnsupportedFormatError(AdfluxError):
-    """Raised when a requested source or target format is not registered."""
+class AdfError(AdfluxError):
+    """The input is not a well-formed ADF document (wrong JSON shape)."""
 
-    def __init__(self, fmt: str, *, role: str = "format") -> None:
-        super().__init__(f"Unsupported {role}: {fmt!r}")
-        self.fmt = fmt
-        self.role = role
-
-
-class InvalidADFError(AdfluxError):
-    """Raised when an ADF document fails JSON-schema validation.
-
-    Attributes:
-        pointer: JSON pointer into the offending node, if available.
-        validator_errors: Underlying ``jsonschema`` errors.
-    """
-
-    def __init__(
-        self,
-        message: str,
-        *,
-        pointer: str | None = None,
-        validator_errors: list[object] | None = None,
-    ) -> None:
-        super().__init__(message)
-        self.pointer = pointer
-        self.validator_errors = validator_errors or []
+    def __init__(self, message: str, path: str = "$") -> None:
+        super().__init__(f"{path}: {message}" if path else message)
+        self.path = path
 
 
-class MappingError(AdfluxError):
-    """Raised when the ADF YAML mapping table is malformed or incomplete."""
+class AdfValidationError(AdfluxError):
+    """The document breaks the ADF JSON Schema."""
+
+    def __init__(self, issues: list[ValidationIssue]) -> None:
+        self.issues = issues
+        lines = [f"{issue.path}: {issue.message}" for issue in issues[:10]]
+        more = f" (and {len(issues) - 10} more)" if len(issues) > 10 else ""
+        super().__init__("invalid ADF: " + "; ".join(lines) + more)
 
 
-class UnrepresentableNodeError(AdfluxError):
-    """Raised when a node cannot be represented in the target format.
+class MarkdownError(AdfluxError):
+    """The Markdown uses adflux syntax incorrectly (for example a bad directive)."""
 
-    Triggered by ``envelopes=keep-strict`` or ``jira-strict=true``.
-    """
+    def __init__(self, message: str, line: int | None = None) -> None:
+        super().__init__(f"line {line + 1}: {message}" if line is not None else message)
+        self.line = line
 
-    def __init__(self, node_type: str, target_format: str) -> None:
-        super().__init__(
-            f"Node type {node_type!r} has no representation in target format {target_format!r}"
+
+class ValidationIssue:
+    """One schema problem: a JSON path into the document and a message."""
+
+    __slots__ = ("message", "path")
+
+    def __init__(self, path: str, message: str) -> None:
+        self.path = path
+        self.message = message
+
+    def __repr__(self) -> str:
+        return f"ValidationIssue({self.path!r}, {self.message!r})"
+
+    def __eq__(self, other: object) -> bool:
+        return isinstance(other, ValidationIssue) and (self.path, self.message) == (
+            other.path,
+            other.message,
         )
-        self.node_type = node_type
-        self.target_format = target_format
+
+    def __hash__(self) -> int:
+        return hash((self.path, self.message))

@@ -1,180 +1,114 @@
-# Design
-
-This document explains _why_ `adflux` is built the way it is. For a
-high-level overview see [`architecture.md`](architecture.md). For practical
-usage see [`usage.md`](usage.md).
+# adflux design
 
 ## Goals
 
-1. **Convert losslessly** between Markdown and Atlassian Document Format (ADF),
-   including ADF-only constructs (panels, status, mentions, task lists,
-   Confluence macros). Under `envelopes=keep` (the default), both MD→ADF→MD
-   and ADF→MD→ADF round-trips preserve all structural content; the only
-   differences are non-semantic whitespace changes (e.g. trailing newlines).
-2. **Be grammar/config-driven**, not code-driven. Adding an ADF node type
-   should not require Python changes — only YAML.
-3. **Reuse community tooling** instead of writing yet another Markdown parser.
-4. **Be predictable**: explicit conversion options describe exactly how lossy
-   conversions behave.
+1. Agents and people read and write Jira and Confluence content as Markdown.
+2. Nothing is lost: ADF → Markdown → ADF reproduces the document.
+3. The Markdown stays idiomatic and readable; exotic content degrades to explicit, still
+   readable syntax rather than opaque blobs.
+4. ADF stays a first-class format; the library knows the whole ADF spec, not a subset.
 
-## Why pure Python
-
-`adflux` is a pure-Python library for lossless Markdown↔ADF conversion. It
-uses **markdown-it-py** (CommonMark + GFM plugins) for robust Markdown parsing,
-and a hand-rolled CommonMark+GFM writer for serialization. These embed
-seamlessly into any Python application — no system dependencies required.
-
-For the internal representation (IR), the library reuses **panflute AST classes**
-as a convenient, pre-existing tree structure. Panflute is normally used with
-the Pandoc binary, but we use it **purely as Python data structures** — the
-Pandoc binary is not required, not installed, and not called. This avoids
-reinventing an EBNF grammar and bespoke tree while keeping the library
-self-contained and deployable anywhere Python runs.
-
-## Why ADF needs a custom bridge
-
-ADF is not a Pandoc-supported format. Its node set overlaps with Markdown for
-basic block/inline content but diverges sharply for:
-
-- **Atlassian-specific blocks**: `panel`, `expand`, `mediaSingle`, `taskList`,
-  `decisionList`.
-- **Atlassian-specific inlines**: `mention`, `emoji`, `status`, `inlineCard`,
-  `date`, `placeholder`.
-- **Confluence macros**: `extension`, `bodiedExtension`, `inlineExtension`
-  with arbitrary opaque parameters.
-
-A Haskell patch to Pandoc is the "right" way to add a new format, but is
-inaccessible to most contributors and slow to evolve. Instead, `adflux`
-ships a pure-Python bridge that is **declarative** and lives entirely in
-config.
-
-## The mapping table
-
-`src/adflux/formats/adf/mapping.yaml` is the single source of truth for ADF
-node behavior. Each entry declares:
-
-```yaml
-panel:
-  pandoc: Div # Internal IR node kind (from panflute AST classes)
-  kind: block # block | inline
-  envelope_class: adf-panel
-  attrs:
-    panelType: string
-  # children inherit from panflute Div (any blocks)
-```
-
-The `MappingEntry.content_kind` field can override the default content shape:
-
-| `content_kind` | Meaning                                       | Example nodes              |
-| -------------- | --------------------------------------------- | -------------------------- |
-| `block`        | Children are ADF block nodes (the default).   | `panel`, `expand`          |
-| `inline`       | Children are ADF inline nodes.                | `taskItem`, `decisionItem` |
-| `none`         | Node is a leaf — no `content` array on write. | `mention`, `extension`     |
-
-Adding a new ADF node type is:
-
-1. Add a YAML stanza.
-2. Add a fixture in `tests/roundtrip/test_node_coverage.py`.
-
-No Python code is changed.
-
-## The envelope convention
-
-The internal IR (panflute AST classes) has no `Panel` or `Status` nodes, so
-`adflux` represents every ADF-exclusive construct as a panflute `Div` (block)
-or `Span` (inline) marked with a class prefix:
-
-```text
-adf-panel        # block-level ADF "panel"
-adf-status       # inline ADF "status"
-adf-extension    # Confluence macro
-adf-raw          # universal fallback for unmapped node types
-```
-
-Scalar attributes (`panelType: "info"`) become flat key/value pairs on the
-`Attr`. Complex attributes (nested objects, lists, booleans) are serialised to
-a base64-encoded JSON blob under the `data-adf-json` key. This survives a
-round-trip through the Markdown reader and writer because attribute syntax is
-preserved verbatim.
+## Architecture
 
 ```mermaid
 flowchart LR
-  src["ADF JSON node<br>type: panel<br>attrs: panelType=info"]
-  -->|reader| div["IR Div<br>class=adf-panel<br>panelType=info"]
-  -->|MD writer| md["GitHub alert blockquote<br>&gt; [!NOTE]<br>&gt; body"]
-  -->|MD reader| div2["IR Div<br>class=adf-panel<br>panelType=info"]
-  -->|writer| out["ADF JSON node<br>type: panel<br>attrs: panelType=info"]
+  schema[ADF JSON Schema<br/>@atlaskit/adf-schema] -->|scripts/generate_spec.py| spec[_spec.py<br/>nodes, marks, attrs, content rules]
+  live[Live captures<br/>tests/fixtures/live] -->|scripts/build_profile_data.py| data[emoji + macro tables]
+  md[Markdown] -->|markdown-it + directive rules| tokens[token stream]
+  tokens -->|Reader + Profile| tree[(ADF tree<br/>Node / Mark)]
+  json[ADF JSON] -->|load| tree
+  tree -->|dump| json
+  tree -->|Writer + Profile| md2[Markdown]
+  spec --> tree
+  data --> profile[Profiles: generic, jira, confluence]
+  profile --> tokens
+  profile --> md2
 ```
 
-The `adf-raw` envelope handles the long tail: any ADF node type that does not
-appear in `mapping.yaml` is wrapped verbatim in a Div whose blob carries the
-entire original JSON object. This gives us **provable zero data loss** for
-round-trips, even across Confluence schema upgrades that introduce node types
-the library has never heard of.
+* **The IR is the ADF tree.** ADF is a serialized ProseMirror document, so `Node`
+  (type, attrs, content, marks, text) and `Mark` model it exactly. There is no second
+  document model to drift from ADF (the old panflute IR needed per-construct envelopes).
+  Unknown JSON keys are kept in `Node.extra`, so content newer than the vendored schema
+  survives.
+* **The spec is generated.** `generate_spec.py` folds the official JSON Schema (all
+  `anyOf` variants, `$ref` groups) into one table per node and mark: attributes with
+  kind/enum/pattern/range, required attributes, allowed children, allowed marks,
+  inline/block group. The reader types directive attributes from it, the writer knows
+  which nodes can use the generic directive form, and the validator explains errors in
+  plain words. `--check` in CI keeps it in sync with the vendored schema.
+* **Validation has two passes.** The structural pass from the spec is fast and names
+  exact paths; the official JSON Schema (Draft 4) is the final authority but is slow on
+  deep documents (its `anyOf` trees are exponential), so `to_adf` runs only the
+  structural pass and `validate()` adds the schema pass.
 
-## Conversion options
+## Markdown dialect
 
-Different consumers want different behavior when ADF-only constructs hit a
-lossy target like plain Markdown. Options encode that as key=value pairs:
+CommonMark + GFM tables, strikethrough, task lists, plus the generic directive proposal
+(`:::container`, `::leaf`, `:inline[label]{attrs}`) used by remark-directive, MyST and
+others. Directives were chosen over HTML comments or `<details>`-style HTML because they
+are readable, nest, carry typed attributes, and are already familiar to agents.
 
-```mermaid
-flowchart TD
-  A[Internal IR with envelopes] --> O{envelopes option}
-  O -->|keep| K["Keep envelopes<br>(rendered idiomatically by writer)"]
-  O -->|drop| D["Drop envelopes,<br>keep visible content"]
-  O -->|keep-strict| F[Raise UnrepresentableNodeError]
-  K --> W[Markdown writer]
-  D --> W
-  F -.-> X[abort]
-```
+| Choice | Why |
+|---|---|
+| `> [!NOTE]` alerts for panels | GitHub syntax, renders on GitHub, agents know it |
+| `<https://…>` for inlineCard, `[t](u)` for link | the two Markdown link forms map to the two ADF link kinds |
+| `:status[DONE]{color=green}` etc. | short directives named after the node |
+| Generic directive = node type name | every ADF node is writable without a special case |
+| ```` ```adf ```` raw fallback | last resort for content the dialect cannot express (unknown node types) |
+| Outer containers use more colons | unambiguous nesting without indentation |
+| `adf.`-prefixed reserved attributes on macros | macro parameters keep their own names |
 
-Options are interpreted by `adflux.ir.profile_filter.apply_options`, which
-walks the AST before it is handed to the writer. The writer code itself stays
-options-agnostic.
+### Writer strategy
 
-## Pipeline
+For each node, the writer tries, in order: idiomatic Markdown, a short directive, the
+generic directive with all attributes, raw ADF. A form is used only if it loses nothing.
 
-```mermaid
-sequenceDiagram
-  participant U as Caller
-  participant API as adflux.convert
-  participant R as Reader (src)
-  participant F as apply_options
-  participant W as Writer (dst)
+Inline content is rendered with `*`/`**`/`~~` delimiters, then **re-parsed**; if the
+result differs (CommonMark flanking rules around punctuation), the paragraph is rendered
+with `<em>`/`<strong>`/`<del>` instead. Spaces at the edges of emphasis move outside
+(`**bold **` is not emphasis in CommonMark). Text is escaped only where Markdown would
+misread it: block starts at line beginnings, `:name:` only when `name` is a known emoji,
+`!` before a link, `{` after a directive, adjacent lists of one kind switch markers.
 
-  U->>API: convert(source, src="adf", dst="markdown")
-  API->>R: read(source)
-  R-->>API: pf.Doc (with envelopes)
-  API->>F: apply_options(doc, options)
-  F-->>API: pf.Doc (filtered)
-  API->>W: write(doc)
-  W-->>API: text
-  API-->>U: text
-```
+### Profiles
 
-For ADF on either side the reader and writer are pure Python; all Markdown
-reading/writing is also pure Python via markdown-it-py and our CommonMark
-writer.
+Both products store any schema-valid ADF unchanged (verified live for every node type),
+so profiles do not change the ADF model; they change what text means and what renders:
 
-## Error model
+| | generic | jira | confluence |
+|---|---|---|---|
+| Emoji | standard + Atlassian sets | + Jira wiki shortcuts (`:tick:` …) | + Confluence emoticon names |
+| Unknown directive | error | error | Confluence macro |
+| Macros | catalog known | warn (not rendered) | catalog, native mapping |
+| Layouts, decisions | ok | warn | ok |
 
-Every recoverable failure raises a typed exception from
-`adflux.errors`:
+The macro catalog comes from Confluence's macro browser (parameters, types, defaults,
+enums) plus the ADF Confluence produced for each macro through
+`/wiki/rest/api/contentbody/convert/atlas_doc_format`, which shows which macros become
+native nodes (`info`/`tip`/`note`/`warning` → panel, `code`/`noformat` → codeBlock,
+`expand`, `status`, `bgcolor` → custom panel). A macro's label fills its default
+parameter, so `:jira[PROJ-1]` and `::toc{maxLevel=3}` read naturally.
 
-| Exception                  | When                                              |
-| -------------------------- | ------------------------------------------------- |
-| `UnsupportedFormatError`   | `src` or `dst` is not in the registry.            |
-| `InvalidADFError`          | ADF JSON fails schema validation.                 |
-| `MappingError`             | `mapping.yaml` is malformed or self-inconsistent. |
-| `UnrepresentableNodeError` | `envelopes=keep-strict` or `jira-strict=true` encountered an issue. |
+## Equality
 
-All four inherit from `AdfluxError` so callers can catch the whole
-library's errors with a single `except` clause.
+`normalize()` merges adjacent text with equal marks, drops empty text and orders marks
+like the editor. `canonical()` also drops what servers add or regenerate: `localId`,
+`macroMetadata`, table/cell defaults, mention `accessLevel`, status `style`. Round-trip
+tests compare canonical forms.
 
-## Non-goals
+## Testing
 
-- **Editing ADF semantics.** `adflux` faithfully translates; it does not
-  rewrite content (e.g., it will not auto-correct an invalid panel type).
-- **Non-semantic whitespace preservation.** Round-trips preserve all
-  structural content and attributes, but non-semantic whitespace (trailing
-  newlines, blank line counts between blocks) may differ.
+| Suite | What it proves |
+|---|---|
+| `tests/unit` | attribute grammar, spec, model, validator, profiles, reader and writer per construct, CLI, every example in the syntax guide |
+| `tests/roundtrip/test_live.py` | every node as Jira and Confluence returned it, all 111 Confluence macros, Jira wiki output round-trip |
+| `tests/roundtrip/test_property.py` | random schema-valid documents round-trip in all three profiles (Hypothesis; `HYPOTHESIS_PROFILE=thorough` for 2000 cases) |
+| `tests/e2e` | real pages and issues: the product stores adflux output unchanged and its stored ADF round-trips |
+
+## Known limits
+
+* Hard-coded emoji tables reflect one site's capture; custom site emoji resolve through
+  `:emoji[name]{id=…}`.
+* Mentions written as `@Name` need a resolver (codas supply one); otherwise they stay
+  text with a warning.
+* Media nodes reference uploaded files by id; uploading is the caller's job.

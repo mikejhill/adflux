@@ -1,49 +1,22 @@
-# Panel Macro Coverage
+# Panels and expands
 
-Confluence panels are ADF-only macros. adflux renders them in Markdown
-as **GitHub-style alerts**, so the same Markdown source round-trips
-through ADF without losing the panel type.
-
-## Info panel
-
-> [!NOTE]
->
-> This is an **info** panel. It supports inline formatting like *italic*
-> and `code`.
-
-## Note panel
-
-> [!IMPORTANT]
->
-> A note panel for general advisory content.
-
-## Warning panel
+> [!INFO]
+> Information panel.
 
 > [!WARNING]
->
-> A warning panel --- use sparingly for things that need user attention.
+> Careful.
 
-## Success panel
+> [!SUCCESS]
+> Done with **style**.
 
-> [!TIP]
->
-> A success panel celebrates a positive outcome.
+:::panel{type=custom color=#e3fcef icon=":rocket:"}
+Custom panel.
+:::
 
-## Error panel
+::::expand{title="Implementation notes"}
+Hidden text.
 
-> [!CAUTION]
->
-> An error panel highlights a failure or critical issue.
-
-## Mixed content inside a panel
-
-> [!NOTE]
->
-> Panels can contain richer content:
->
-> - bullet
-> - list
->
-> ```bash
-> echo "even code blocks work"
-> ```
+:::expand{title="Nested"}
+Inner.
+:::
+::::

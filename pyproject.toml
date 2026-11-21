@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "adflux"
 version = "0.1.0"
-description = "Pure-Python Markdown ↔ Atlassian Document Format (ADF) converter with lossless round-tripping"
+description = "Lossless Markdown <-> Atlassian Document Format (ADF) conversion with Jira and Confluence profiles, macros and emoji"
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }
@@ -48,12 +48,7 @@ classifiers = [
 ]
 dependencies = [
     "markdown-it-py>=3.0",
-    "mdit-py-plugins>=0.4",
-    "panflute>=2.3.1",
-    "PyYAML>=6.0",
     "jsonschema>=4.21",
-    "typer>=0.12",
-    "structlog>=24.1",
 ]
 
 [dependency-groups]
@@ -63,7 +58,6 @@ dev = [
     "hypothesis>=6.100",
     "ruff>=0.5",
     "ty>=0.0.1a8",
-    "types-PyYAML",
     "types-jsonschema",
     "httpx>=0.27",
     "python-dotenv>=1.0",
@@ -71,7 +65,7 @@ dev = [
 ]
 
 [project.scripts]
-adflux = "adflux.cli:app"
+adflux = "adflux.cli:main"
 
 [project.urls]
 Homepage = "https://github.com/mikejhill/adflux"
@@ -86,11 +80,11 @@ packages = ["src/adflux"]
 [tool.hatch.build.targets.sdist]
 include = [
     "src/**/*.py",
-    "src/**/*.yaml",
     "src/**/*.json",
+    "src/**/*.md",
+    "scripts/*.py",
     "tests/**/*.py",
     "tests/**/*.json",
-    "examples/**/*",
     "docs/**/*",
     "README.md",
     "CHANGELOG.md",
@@ -100,7 +94,7 @@ include = [
 
 [tool.pytest.ini_options]
 minversion = "8.0"
-addopts = "-ra --strict-markers --strict-config"
+addopts = "-ra --strict-markers --strict-config -p no:cacheprovider"
 testpaths = ["tests"]
 pythonpath = ["src", "."]
 markers = [
@@ -122,9 +116,10 @@ exclude_lines = [
 ]
 
 [tool.ruff]
-line-length = 100
+line-length = 120
 target-version = "py311"
 src = ["src", "tests"]
+extend-exclude = ["src/adflux/adf/_spec.py"]
 
 [tool.ruff.lint]
 select = [

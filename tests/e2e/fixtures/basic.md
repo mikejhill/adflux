@@ -1,46 +1,28 @@
-# Basic Markdown Smoke Test
+# Basic Markdown
 
-This page exercises the core CommonMark + GFM constructs that adflux maps
-directly onto ADF: headings, paragraphs, inline marks, links, code blocks,
-lists, blockquotes, tables, and horizontal rules.
-
-## Inline formatting
-
-Plain paragraph with **bold**, *italic*, `inline code`, ~~strikethrough~~,
-and a [link to adflux](https://github.com/mikejhill/adflux).
+Plain paragraph with **bold**, *italic*, ~~strike~~, `code`, <u>underline</u>,
+H<sub>2</sub>O, x<sup>2</sup> and a [link](https://example.com "Example").
 
 ## Lists
 
-- bullet one
-- bullet two
-  - nested bullet
-- bullet three
+- one
+- two
+  - nested
 
-1. ordered one
-2. ordered two
-3. ordered three
+3. three
+4. four
 
-## Code block
+> A quote
+> over two lines.
 
 ```python
-def greet(name: str) -> str:
-    return f"hello, {name}"
+def hello():
+    return "world"
 ```
-
-## Table
-
-| Column A | Column B | Column C |
-| -------- | -------- | -------- |
-| 1        | alpha    | x        |
-| 2        | beta     | y        |
-| 3        | gamma    | z        |
-
-## Blockquote
-
-> This is a blockquote with **bold** text inside.
-
-## Horizontal rule
 
 ---
 
-End of basic fixture.
+| Name | Count |
+|:-----|------:|
+| a    | 1     |
+| b    | 2     |

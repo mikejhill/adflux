@@ -51,9 +51,7 @@ class ConfluenceClient:
         """Hit a cheap authenticated endpoint; raise on failure."""
         r = self._http.get("/wiki/api/v2/spaces", params={"limit": 1})
         if r.status_code in (401, 403):
-            raise ConfluenceAuthError(
-                f"HTTP {r.status_code} from /wiki/api/v2/spaces — body: {r.text[:200]}"
-            )
+            raise ConfluenceAuthError(f"HTTP {r.status_code} from /wiki/api/v2/spaces — body: {r.text[:200]}")
         r.raise_for_status()
         return r.json()
 

@@ -1,0 +1,618 @@
+{
+ "wiki": "h2. Head\n\n:) :( (/) (x) (!) (?) (y) (n) (i) (on) (off) (*) :D ;) :P\n\n{panel:title=T|bgColor=#FFFFCE}\npanel body\n{panel}\n\n{info}info{info}\n{note}note{note}\n{warning}warn{warning}\n{tip}tip{tip}\n\n{code:java}\nint x;\n{code}\n\n{noformat}\nnf\n{noformat}\n\n{quote}q{quote}\n\n{color:red}red{color}\n\n||h1||h2||\n|a|b|\n\n* a\n** b\n# c\n\n[link|https://example.com] [~accountid:557058:00000000-0000-0000-0000-000000000000] SAM1-6\n\n----\n\n-strike- +under+ ^sup^ ~sub~ ??cite?? {{mono}}\n\n{expand:title=Exp}\nexp body\n{expand}",
+ "put": 204,
+ "adf": {
+  "type": "doc",
+  "version": 1,
+  "content": [
+   {
+    "type": "heading",
+    "attrs": {
+     "level": 2
+    },
+    "content": [
+     {
+      "type": "text",
+      "text": "Head"
+     }
+    ]
+   },
+   {
+    "type": "paragraph",
+    "content": [
+     {
+      "type": "emoji",
+      "attrs": {
+       "shortName": ":slight_smile:",
+       "id": "1f642",
+       "text": "🙂"
+      }
+     },
+     {
+      "type": "text",
+      "text": " "
+     },
+     {
+      "type": "emoji",
+      "attrs": {
+       "shortName": ":disappointed:",
+       "id": "1f61e",
+       "text": "😞"
+      }
+     },
+     {
+      "type": "text",
+      "text": " "
+     },
+     {
+      "type": "emoji",
+      "attrs": {
+       "shortName": ":check_mark:",
+       "id": "atlassian-check_mark",
+       "text": ":check_mark:"
+      }
+     },
+     {
+      "type": "text",
+      "text": " "
+     },
+     {
+      "type": "emoji",
+      "attrs": {
+       "shortName": ":cross_mark:",
+       "id": "atlassian-cross_mark",
+       "text": ":cross_mark:"
+      }
+     },
+     {
+      "type": "text",
+      "text": " "
+     },
+     {
+      "type": "emoji",
+      "attrs": {
+       "shortName": ":warning:",
+       "id": "atlassian-warning",
+       "text": ":warning:"
+      }
+     },
+     {
+      "type": "text",
+      "text": " "
+     },
+     {
+      "type": "emoji",
+      "attrs": {
+       "shortName": ":question:",
+       "id": "atlassian-question_mark",
+       "text": ":question:"
+      }
+     },
+     {
+      "type": "text",
+      "text": " "
+     },
+     {
+      "type": "emoji",
+      "attrs": {
+       "shortName": ":thumbsup:",
+       "id": "1f44d",
+       "text": "👍"
+      }
+     },
+     {
+      "type": "text",
+      "text": " "
+     },
+     {
+      "type": "emoji",
+      "attrs": {
+       "shortName": ":thumbsdown:",
+       "id": "1f44e",
+       "text": "👎"
+      }
+     },
+     {
+      "type": "text",
+      "text": " "
+     },
+     {
+      "type": "emoji",
+      "attrs": {
+       "shortName": ":info:",
+       "id": "atlassian-info",
+       "text": ":info:"
+      }
+     },
+     {
+      "type": "text",
+      "text": " "
+     },
+     {
+      "type": "emoji",
+      "attrs": {
+       "shortName": ":light_bulb_on:",
+       "id": "atlassian-light_bulb_on",
+       "text": ":light_bulb_on:"
+      }
+     },
+     {
+      "type": "text",
+      "text": " "
+     },
+     {
+      "type": "emoji",
+      "attrs": {
+       "shortName": ":light_bulb_off:",
+       "id": "atlassian-light_bulb_off",
+       "text": ":light_bulb_off:"
+      }
+     },
+     {
+      "type": "text",
+      "text": " "
+     },
+     {
+      "type": "emoji",
+      "attrs": {
+       "shortName": ":yellow_star:",
+       "id": "atlassian-yellow_star",
+       "text": ":yellow_star:"
+      }
+     },
+     {
+      "type": "text",
+      "text": " "
+     },
+     {
+      "type": "emoji",
+      "attrs": {
+       "shortName": ":smiley:",
+       "id": "1f603",
+       "text": "😃"
+      }
+     },
+     {
+      "type": "text",
+      "text": " "
+     },
+     {
+      "type": "emoji",
+      "attrs": {
+       "shortName": ":wink:",
+       "id": "1f609",
+       "text": "😉"
+      }
+     },
+     {
+      "type": "text",
+      "text": " "
+     },
+     {
+      "type": "emoji",
+      "attrs": {
+       "shortName": ":stuck_out_tongue:",
+       "id": "1f61b",
+       "text": "😛"
+      }
+     }
+    ]
+   },
+   {
+    "type": "panel",
+    "content": [
+     {
+      "type": "paragraph",
+      "content": [
+       {
+        "type": "text",
+        "text": "T",
+        "marks": [
+         {
+          "type": "strong"
+         }
+        ]
+       }
+      ]
+     },
+     {
+      "type": "paragraph",
+      "content": [
+       {
+        "type": "text",
+        "text": "panel body"
+       }
+      ]
+     }
+    ],
+    "attrs": {
+     "panelType": "warning"
+    }
+   },
+   {
+    "type": "paragraph",
+    "content": [
+     {
+      "type": "text",
+      "text": "{info}info{info}"
+     },
+     {
+      "type": "hardBreak"
+     },
+     {
+      "type": "text",
+      "text": "{note}note{note}"
+     },
+     {
+      "type": "hardBreak"
+     },
+     {
+      "type": "text",
+      "text": "{warning}warn{warning}"
+     },
+     {
+      "type": "hardBreak"
+     },
+     {
+      "type": "text",
+      "text": "{tip}tip{tip}"
+     }
+    ]
+   },
+   {
+    "type": "codeBlock",
+    "attrs": {
+     "language": "java"
+    },
+    "content": [
+     {
+      "type": "text",
+      "text": "int x;"
+     }
+    ]
+   },
+   {
+    "type": "codeBlock",
+    "content": [
+     {
+      "type": "text",
+      "text": "nf"
+     }
+    ]
+   },
+   {
+    "type": "blockquote",
+    "content": [
+     {
+      "type": "paragraph",
+      "content": [
+       {
+        "type": "text",
+        "text": "q"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "type": "paragraph",
+    "content": [
+     {
+      "type": "text",
+      "text": "red",
+      "marks": [
+       {
+        "type": "textColor",
+        "attrs": {
+         "color": "#ff0000"
+        }
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "type": "table",
+    "attrs": {
+     "isNumberColumnEnabled": false,
+     "layout": "default"
+    },
+    "content": [
+     {
+      "type": "tableRow",
+      "content": [
+       {
+        "type": "tableHeader",
+        "attrs": {},
+        "content": [
+         {
+          "type": "paragraph",
+          "content": [
+           {
+            "type": "text",
+            "text": "h1",
+            "marks": [
+             {
+              "type": "strong"
+             }
+            ]
+           }
+          ]
+         }
+        ]
+       },
+       {
+        "type": "tableHeader",
+        "attrs": {},
+        "content": [
+         {
+          "type": "paragraph",
+          "content": [
+           {
+            "type": "text",
+            "text": "h2",
+            "marks": [
+             {
+              "type": "strong"
+             }
+            ]
+           }
+          ]
+         }
+        ]
+       }
+      ]
+     },
+     {
+      "type": "tableRow",
+      "content": [
+       {
+        "type": "tableCell",
+        "attrs": {},
+        "content": [
+         {
+          "type": "paragraph",
+          "content": [
+           {
+            "type": "text",
+            "text": "a"
+           }
+          ]
+         }
+        ]
+       },
+       {
+        "type": "tableCell",
+        "attrs": {},
+        "content": [
+         {
+          "type": "paragraph",
+          "content": [
+           {
+            "type": "text",
+            "text": "b"
+           }
+          ]
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "type": "bulletList",
+    "content": [
+     {
+      "type": "listItem",
+      "content": [
+       {
+        "type": "paragraph",
+        "content": [
+         {
+          "type": "text",
+          "text": "a"
+         }
+        ]
+       },
+       {
+        "type": "bulletList",
+        "content": [
+         {
+          "type": "listItem",
+          "content": [
+           {
+            "type": "paragraph",
+            "content": [
+             {
+              "type": "text",
+              "text": "b"
+             }
+            ]
+           }
+          ]
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "type": "orderedList",
+    "attrs": {
+     "order": 1
+    },
+    "content": [
+     {
+      "type": "listItem",
+      "content": [
+       {
+        "type": "paragraph",
+        "content": [
+         {
+          "type": "text",
+          "text": "c"
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "type": "paragraph",
+    "content": [
+     {
+      "type": "text",
+      "text": "link",
+      "marks": [
+       {
+        "type": "link",
+        "attrs": {
+         "href": "https://example.com"
+        }
+       }
+      ]
+     },
+     {
+      "type": "text",
+      "text": " "
+     },
+     {
+      "type": "mention",
+      "attrs": {
+       "id": "557058:00000000-0000-0000-0000-000000000000",
+       "text": "@Ada Lovelace",
+       "accessLevel": ""
+      }
+     },
+     {
+      "type": "text",
+      "text": " "
+     },
+     {
+      "type": "inlineCard",
+      "attrs": {
+       "url": "https://example.atlassian.net/browse/SAM1-6#icft=SAM1-6"
+      }
+     }
+    ]
+   },
+   {
+    "type": "rule"
+   },
+   {
+    "type": "paragraph",
+    "content": [
+     {
+      "type": "text",
+      "text": "strike",
+      "marks": [
+       {
+        "type": "strike"
+       }
+      ]
+     },
+     {
+      "type": "text",
+      "text": " "
+     },
+     {
+      "type": "text",
+      "text": "under",
+      "marks": [
+       {
+        "type": "underline"
+       }
+      ]
+     },
+     {
+      "type": "text",
+      "text": " "
+     },
+     {
+      "type": "text",
+      "text": "sup",
+      "marks": [
+       {
+        "type": "subsup",
+        "attrs": {
+         "type": "sup"
+        }
+       }
+      ]
+     },
+     {
+      "type": "text",
+      "text": " "
+     },
+     {
+      "type": "text",
+      "text": "sub",
+      "marks": [
+       {
+        "type": "subsup",
+        "attrs": {
+         "type": "sub"
+        }
+       }
+      ]
+     },
+     {
+      "type": "text",
+      "text": " "
+     },
+     {
+      "type": "text",
+      "text": "— cite",
+      "marks": [
+       {
+        "type": "em"
+       }
+      ]
+     },
+     {
+      "type": "text",
+      "text": " "
+     },
+     {
+      "type": "text",
+      "text": "mono",
+      "marks": [
+       {
+        "type": "code"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "type": "paragraph",
+    "content": [
+     {
+      "type": "text",
+      "text": "{expand:title=Exp}"
+     },
+     {
+      "type": "hardBreak"
+     },
+     {
+      "type": "text",
+      "text": "exp body"
+     },
+     {
+      "type": "hardBreak"
+     },
+     {
+      "type": "text",
+      "text": "{expand}"
+     }
+    ]
+   }
+  ]
+ },
+ "wikiBack": "h2. Head\n\n:) :( (/) (x) (!) (?) (y) (n) (i) (on) (off) (*) :D ;) :P\n\n{panel:title=T|bgColor=#FFFFCE}\npanel body\n{panel}\n\n{info}info{info}\n{note}note{note}\n{warning}warn{warning}\n{tip}tip{tip}\n\n{code:java}\nint x;\n{code}\n\n{noformat}\nnf\n{noformat}\n\n{quote}q{quote}\n\n{color:red}red{color}\n\n||h1||h2||\n|a|b|\n\n* a\n** b\n# c\n\n[link|https://example.com] [~accountid:557058:00000000-0000-0000-0000-000000000000] SAM1-6\n\n----\n\n-strike- +under+ ^sup^ ~sub~ ??cite?? {{mono}}\n\n{expand:title=Exp}\nexp body\n{expand}",
+ "fullPut": 204,
+ "fullWiki": "h2. Heading\n\n*b*_i_+u+-s-{{c}}~sub~{color:#ff5630}color{color}bg[link|https://example.com]\n\na\nb\n\n😀(/)\n\n[~accountid:557058:00000000-0000-0000-0000-000000000000]\n\n{color:#36B37E}*[ DONE ]*{color}\n\n{{2025-11-21}}\n\n[https://example.com|https://example.com|smart-link]\n\n* x\n\n# x\n\n{code:python}print(1){code}\n\n{quote}q{quote}\n\n----\n\n{panel:bgColor=#deebff}\np\n{panel}\n\n{panel:bgColor=}\np\n{panel}\n\n*More*\n\ne\n\n{adf:display=block}\n{\"type\":\"table\",\"attrs\":{\"isNumberColumnEnabled\":false,\"layout\":\"default\"},\"content\":[{\"type\":\"tableRow\",\"content\":[{\"type\":\"tableHeader\",\"attrs\":{},\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"text\":\"h\"}]}]},{\"type\":\"tableHeader\",\"attrs\":{},\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"text\":\"h2\"}]}]}]},{\"type\":\"tableRow\",\"content\":[{\"type\":\"tableCell\",\"attrs\":{\"colspan\":2},\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"text\":\"c\"}]}]}]}]}\n{adf}\n\n* task\n\n* <> dec\n\n{adf:display=block}\n{\"type\":\"layoutSection\",\"content\":[{\"type\":\"layoutColumn\",\"attrs\":{\"width\":50},\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"text\":\"l\"}]}]},{\"type\":\"layoutColumn\",\"attrs\":{\"width\":50},\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"text\":\"r\"}]}]}]}\n{adf}\n\n[https://example.com|https://example.com|smart-card]\n\n[https://www.youtube.com/watch?v=dQw4w9WgXcQ|https://www.youtube.com/watch?v=dQw4w9WgXcQ|smart-embed]\n\n!https://www.atlassian.com/favicon.ico|thumbnail!\n\n{adf:display=block}\n{\"type\":\"extension\",\"attrs\":{\"extensionKey\":\"toc\",\"extensionType\":\"com.atlassian.confluence.macro.core\",\"parameters\":{\"macroParams\":{\"maxLevel\":{\"value\":\"3\"}}}}}\n{adf}\n\n{adf:display=block}\n{\"type\":\"bodiedExtension\",\"attrs\":{\"extensionKey\":\"excerpt\",\"extensionType\":\"com.atlassian.confluence.macro.core\",\"parameters\":{\"macroParams\":{}}},\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"text\":\"ex\"}]}]}\n{adf}\n\n{adf:display=inline}{\"type\":\"inlineExtension\",\"attrs\":{\"extensionKey\":\"jira\",\"extensionType\":\"com.atlassian.confluence.macro.core\",\"parameters\":{\"macroParams\":{\"key\":{\"value\":\"SAM1-6\"}}}}}{adf}\n\ncentered\n\nindented\n\n|{adf:display=block}\n{\"type\":\"nestedExpand\",\"attrs\":{\"title\":\"n\"},\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"text\":\"x\"}]}]}\n{adf}|"
+}

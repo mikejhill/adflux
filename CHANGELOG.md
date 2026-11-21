@@ -10,17 +10,21 @@ Releases are produced automatically from
 
 ## [Unreleased]
 
-### Fixed
+### Changed (breaking)
 
-- ADF `mention` nodes now survive Markdown round-trips losslessly.
-  Prettified output uses an HTML comment marker (`<!--adf:mention .../-->`)
-  that the reader reconstructs on import.
-- ADF `emoji` nodes now preserve `shortName` and `id` attributes through
-  Markdown round-trips using the same comment-marker technique.
+- Rewritten from scratch. The intermediate representation is now the ADF tree itself
+  (no panflute), the ADF spec is generated from the official JSON Schema, and Markdown
+  uses the generic directive syntax instead of HTML comment envelopes.
+- New API: `to_adf`, `to_markdown`, `convert`, `validate`, `canonical`, profiles.
+- New CLI (`to-adf`, `to-md`, `validate`, `macros`, `emoji`, `syntax`); dependencies
+  reduced to markdown-it-py and jsonschema.
 
-### Security
+### Added
 
-- Refreshed `uv.lock` to patched anyio, certifi and idna releases.
+- Jira and Confluence profiles: product emoji shortcuts, the Confluence macro catalog
+  with native macro mapping, rendering warnings for Jira.
+- Lossless round trips for every ADF node, verified against live captures and
+  property-based tests.
 
 ## [0.3.0] — 2026-04-18
 

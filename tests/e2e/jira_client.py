@@ -51,9 +51,7 @@ class JiraClient:
         """Hit a cheap authenticated endpoint; raise on failure."""
         r = self._http.get("/rest/api/3/myself")
         if r.status_code in (401, 403):
-            raise JiraAuthError(
-                f"HTTP {r.status_code} from /rest/api/3/myself — body: {r.text[:200]}"
-            )
+            raise JiraAuthError(f"HTTP {r.status_code} from /rest/api/3/myself — body: {r.text[:200]}")
         r.raise_for_status()
         return r.json()
 
@@ -122,8 +120,7 @@ class JiraClient:
                     break
         if chosen is None:
             raise JiraError(
-                f"no terminal transition found for {issue_key} "
-                f"(available: {[t.get('name') for t in transitions]})"
+                f"no terminal transition found for {issue_key} (available: {[t.get('name') for t in transitions]})"
             )
 
         r = self._http.post(
