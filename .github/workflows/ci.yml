@@ -1,10 +1,17 @@
 name: CI
 on:
   pull_request:
+    # `edited` re-checks the title, which becomes the squash commit and drives releases.
+    types: [opened, synchronize, reopened, edited]
   push:
     branches: [main]
   workflow_dispatch:
   workflow_call:
+    inputs:
+      ref:
+        description: Commit to test (the release tag); defaults to the triggering commit.
+        type: string
+        default: ''
 permissions:
   contents: read
 concurrency:
@@ -35,6 +42,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+          ref: ${{ inputs.ref }}
       - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
         with:
           python-version: ${{ matrix.python }}

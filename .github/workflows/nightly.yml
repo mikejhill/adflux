@@ -30,10 +30,11 @@ jobs:
           python-version: '3.14'
           enable-cache: false
       - run: uv sync --locked
-      - name: Require credentials
-        run: |
-          test -n "$ADFLUX_E2E_ATLASSIAN_API_TOKEN" || { echo "::error::e2e secrets are missing"; exit 1; }
-      - run: uv run poe test-e2e -rs
+      - run: uv run poe test-e2e -rs --junitxml=e2e.xml
+      # The suite skips without working credentials so local runs pass; here a skip means
+      # Jira or Confluence went untested, which must fail.
+      - name: Require every live test to run
+        run: uv run python scripts/require_no_skips.py e2e.xml
   deep:
     name: Deep property-based fuzzing
     runs-on: ubuntu-latest

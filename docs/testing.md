@@ -26,7 +26,7 @@ loss, and the gates keep the suites running.
 
 Suite markers come from the directory (`tests/conftest.py`); a new file needs no marker.
 The e2e suite skips when credentials are absent, so it never fails a local run or a PR;
-the nightly job fails instead when its secrets are missing.
+the nightly job fails instead when any live test skips (`scripts/require_no_skips.py`).
 
 ## Gates
 

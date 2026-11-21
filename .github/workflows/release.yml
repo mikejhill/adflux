@@ -44,6 +44,9 @@ jobs:
     needs: version
     if: needs.version.outputs.created == 'true'
     uses: ./.github/workflows/ci.yml # zizmor: ignore[self-repository] -- portable local reuse
+    with:
+      # Test the tag that build publishes, not the commit that triggered this run.
+      ref: ${{ needs.version.outputs.tag }}
     permissions:
       contents: read
   build:
@@ -86,9 +89,12 @@ jobs:
       - uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
         with:
           subject-path: dist/*
+      # Idempotent, so a rerun after a failed attachment does not fail on PyPI duplicates.
       - uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33 # v1.14.2
+        with:
+          skip-existing: true
       - name: Attach distributions
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ needs.version.outputs.tag }}
-        run: gh release upload "$TAG" dist/* --repo "$GITHUB_REPOSITORY"
+        run: gh release upload "$TAG" dist/* --clobber --repo "$GITHUB_REPOSITORY"

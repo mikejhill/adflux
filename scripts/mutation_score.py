@@ -47,7 +47,10 @@ def evaluate(stats: dict[str, int], floor: float) -> tuple[bool, str]:
     survived = stats.get("survived", 0) + stats.get("no_tests", 0)
     timeouts = stats.get("timeout", 0)
     suspicious = stats.get("suspicious", 0)
-    unfinished = stats.get("not_checked", 0) + stats.get("segfault", 0)
+    known = {"killed", "survived", "no_tests", "timeout", "suspicious"}
+    # Anything else (not checked, segfault, interrupted, or a status this script does not
+    # know) means the run did not judge that mutant.
+    unfinished = sum(n for status, n in stats.items() if status not in known)
     judged = killed + survived + timeouts + suspicious
     if judged == 0:
         return False, "no mutants were tested"
